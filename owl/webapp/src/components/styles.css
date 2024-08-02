@@ -1,0 +1,31 @@
+.tree-item-with-menu-container .menu-icon {
+  visibility: hidden;
+}
+
+.tree-item-with-menu-container:hover .menu-icon {
+  visibility: visible;
+}
+
+.tree-node {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  transition: background-color 0.3s;
+
+  &[data-selected] {
+    background-color: var(--mantine-color-blue-0);
+  }
+}
+
+.tree-node:hover {
+  background-color: #f0f0f0; /* Pale gray background on hover */
+}
+
+.tree-node .menu-icon {
+  visibility: hidden;
+}
+
+.tree-node:hover .menu-icon {
+  visibility: visible;
+}

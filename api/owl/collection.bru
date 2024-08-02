@@ -1,0 +1,36 @@
+auth {
+  mode: bearer
+}
+
+script:pre-request {
+  const axios = require("axios");
+  
+  
+  let url = req.getUrl();
+  
+  
+  if (url.indexOf("/auth/") < 0) {
+    payload = {
+      email: bru.getEnvVar("auth_email"),
+      password: bru.getEnvVar("auth_password")
+    };
+    api_base = bru.getEnvVar("api_base")
+    console.log(payload);
+  
+    const {data} = await axios.post(`${api_base}/auth/login`, payload, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log(data)
+    const {access_token} = data 
+    req.setHeaders({
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${access_token}`,
+    });
+      
+  }
+  
+  
+  
+}

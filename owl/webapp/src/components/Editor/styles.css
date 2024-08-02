@@ -1,0 +1,21 @@
+.code-mirror {
+  height: 100% !important;
+}
+
+.cm-focused {
+  outline: none !important;
+}
+
+.panel-resize-handle {
+  background-color: var(--mantine-color-gray-2);
+  height: 1px !important;
+  width: 100%;
+}
+
+.ag-theme-balham {
+  --ag-borders: none !important;
+}
+
+.ag-cell {
+  user-select: text !important;
+}

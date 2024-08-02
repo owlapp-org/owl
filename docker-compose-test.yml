@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: pgautoupgrade/pgautoupgrade:latest
+    ports:
+      - "5432:5432"
+    command: "postgres -c fsync=off -c full_page_writes=off -c synchronous_commit=OFF"
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    volumes:
+      - ./init-test-db.sh:/docker-entrypoint-initdb.d/init-test-db.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flask:
+    build:
+      context: . # Set build context to the root of the project
+      dockerfile: Dockerfile # Ensure this path is correct
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_RUN_HOST: "0.0.0.0"
+      FLASK_ENV: development
+      SQLALCHEMY_DATABASE_URI: "postgresql://postgres:postgres@postgres:5432/test"
+      STORAGE_BASE_PATH: "/app/storage"
+      HOST_UID: "${HOST_UID:-1000}"
+      HOST_GID: "${HOST_GID:-1000}"
+    depends_on:
+      - postgres
+    volumes:
+      - .:/owl
+    # entrypoint: ["/owl/test-entrypoint.sh"]
+    command:
+      ["sh", "-c", "./wait-for-postgres.sh postgres owl runserver -h '0.0.0.0'"]
+
+  migrate:
+    build:
+      context: . # Set build context to the root of the project
+      dockerfile: Dockerfile # Ensure this path is correct
+    entrypoint: ["sh", "-c", "flask db upgrade -d owl/server/app/migrations"]
+    depends_on:
+      - postgres
+    volumes:
+      - .:/owl
+
+  test:
+    build:
+      context: . # Set build context to the root of the project
+      dockerfile: Dockerfile # Ensure this path is correct]
+    command: ["sh", "-c", "./wait-for-flask.sh flask 5000 pytest"]
+    depends_on:
+      - postgres
+      - migrate
+      - flask
+    volumes:
+      - .:/owl
+    environment:
+      FLASK_API_URL: "http://flask:5000" # Add this if your tests need to access the Flask service
+
+volumes:
+  flask_venv:

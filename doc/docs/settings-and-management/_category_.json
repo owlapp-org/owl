@@ -1,0 +1,9 @@
+{
+  "label": "Settings and Management",
+  "position": 2,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "description": "Settings and configuration information."
+  }
+}

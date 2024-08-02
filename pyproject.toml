@@ -1,0 +1,46 @@
+[tool.poetry]
+authors = ["Ceyhun Kerti <ceyhun.kerti@gmail.com>"]
+description = ""
+name = "owlapp"
+packages = [{include = "app", from = "owl/server"}]
+readme = "README.md"
+version = "0.1.4"
+
+[tool.poetry.dependencies]
+alembic = ">=1.13.1"
+authlib = ">=1.3.1"
+click = ">=8.1.7"
+duckdb = ">=1.0.0"
+flask = ">=3.0.3"
+flask-compress = ">=1.15"
+flask-cors = ">=4.0.1"
+flask-jwt-extended = {version = ">=4.6.0", extras = ["asymmetric-crypto"]}
+flask-migrate = ">=4.0.7"
+flask-sqlalchemy = ">=3.1.1"
+gunicorn = ">=22.0.0"
+polars = ">=1.2.1"
+psycopg2-binary = ">=2.9.9"
+ptpython = ">=3.0.27"
+pyarrow = "^17.0.0"
+pydantic = {version = ">=2.8.2", extras = ["email"]}
+pydantic-settings = ">=2.3.1"
+pydash = ">=8.0.1"
+pynacl = ">=1.5.0"
+pyopenssl = ">=24.1.0"
+pytest = ">=8.2.2"
+python = "^3.12"
+requests = ">=2.32.3"
+rich = ">=13.7.1"
+ruff = ">=0.5.5"
+sqlparse = ">=0.5.1"
+
+[tool.poetry.group.dev.dependencies]
+pyarrow-stubs = "^10.0.1.9"
+ruff = "^0.5.5"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
+
+[tool.poetry.scripts]
+owl = 'app.cli:cli'
