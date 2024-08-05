@@ -15,6 +15,7 @@ from app.lib.database.registry import registry
 from app.models.base import TimestampMixin, db
 from app.schemas import ExecutionResult, UpdateDatabaseInputSchema
 from app.settings import settings
+from duckdb import DuckDBPyConnection
 from flask import json
 from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
@@ -127,7 +128,7 @@ class Database(TimestampMixin, db.Model):
             raise e
 
     @classmethod
-    def execute(cls, id: int, query: str, owner_id: int) -> ExecutionResult:
+    def execute(cls, id: int, query: str, owner_id: int, **kwargs) -> ExecutionResult:
         logger.debug("Received query", extra=query)
 
         query = _.chain(query).trim().trim_end(";").value()
@@ -162,15 +163,7 @@ class Database(TimestampMixin, db.Model):
 
         with pool.acquire_connection() as conn:
             if statement_type == "SELECT":
-                query_with_hard_limit = f"""
-                    select * from ({query}) limit {settings.result_set_hard_limit}
-                """
-                df = conn.query(query_with_hard_limit).pl()
-                return ExecutionResult(
-                    statement_type=statement_type,
-                    data=df.to_dicts(),
-                    columns=df.columns,
-                )
+                return cls.execute_select(conn=conn, query=query, **kwargs)
 
             result = conn.execute(query)
             conn.commit()
@@ -181,3 +174,32 @@ class Database(TimestampMixin, db.Model):
                 )
             else:
                 return ExecutionResult(statement_type=statement_type)
+
+    @classmethod
+    def execute_select(
+        cls,
+        conn: DuckDBPyConnection,
+        query: str,
+        page: int = 1,
+        page_size: int = settings.result_set_hard_limit,
+    ) -> ExecutionResult:
+
+        offset = (page - 1) * page_size
+        query_wrapper = (
+            f"select * from ({query}) order by * LIMIT {page_size} OFFSET {offset}"
+        )
+        df = conn.execute(query_wrapper).pl()
+
+        total_count_query = f"select count(*) from ({query});"
+        total_count = conn.execute(total_count_query).fetchone()[0]
+        total_pages = (total_count + page_size - 1) // page_size
+
+        return ExecutionResult(
+            statement_type="SELECT",
+            data=df.to_dicts(),
+            columns=df.columns,
+            total_count=total_count,
+            total_pages=total_pages,
+            current_page=page,
+            page_size=page_size,
+        )

@@ -34,3 +34,7 @@ class ExecutionResult(BaseModel):
     data: Optional[list[dict[str, Any]]] = None
     columns: Optional[list[str]] = None
     affected_rows: Optional[int] = None
+    total_count: Optional[int] = None
+    total_pages: Optional[int] = None
+    current_page: Optional[int] = None
+    page_size: Optional[int] = None

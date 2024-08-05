@@ -108,5 +108,10 @@ class Settings(BaseSettings, extra="ignore"):
         default="flask",
     )
 
+    DEFAULT_SELECT_PAGE_SIZE: Optional[int] = Field(
+        description="Default page size for select queries.",
+        default=None,
+    )
+
 
 settings = Settings()

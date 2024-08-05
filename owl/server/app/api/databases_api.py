@@ -7,6 +7,7 @@ from app.schemas import (
     QueryDatabaseInputSchema,
     UpdateDatabaseInputSchema,
 )
+from app.settings import settings
 from flask import Blueprint, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity
 
@@ -70,12 +71,21 @@ def update_database(id: int):
 @bp.route("/<int:id>/execute", methods=["POST"])
 def execute(id: int):
     schema = QueryDatabaseInputSchema.model_validate(request.json)
+    page = request.args.get("page", default=1, type=int)
+    page_size = request.args.get(
+        "page_size",
+        default=settings.DEFAULT_SELECT_PAGE_SIZE or settings.result_set_hard_limit,
+        type=int,
+    )
+
     owner_id = get_jwt_identity()
     try:
         result = Database.execute(
             id=id,
             owner_id=owner_id,
             query=schema.query,
+            page=page,
+            page_size=page_size,
         )
         return result.model_dump(), 200
     except ModelNotFoundException:
