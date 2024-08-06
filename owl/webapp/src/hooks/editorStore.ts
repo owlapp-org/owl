@@ -17,7 +17,7 @@ interface EditorStore {
     query: string,
     start_row?: number,
     end_row?: number
-  ) => void;
+  ) => any;
 }
 
 const useEditorStore = create<EditorStore>((set, get) => ({
@@ -54,12 +54,14 @@ const useEditorStore = create<EditorStore>((set, get) => ({
           title: "Success",
           message: `Affected rows ${result.affected_rows}`,
         });
-      } else {
+      } else if (!start_row) {
+        // show only once not for all pagination requests
         notifications.show({
           title: "Success",
           message: `Statement executed`,
         });
       }
+      return result;
     } catch (error: any) {
       notifications.show({
         title: "Error",

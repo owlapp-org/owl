@@ -1,4 +1,5 @@
 import useEditorStore from "@hooks/editorStore";
+import { QueryResult } from "@ts/interfaces/database_interface";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-balham.css"; // Optional Theme applied to the Data Grid
 
@@ -17,46 +18,35 @@ export default function ResultSet() {
     }));
   }, [queryResult]);
 
-  const handleFetchRows = async (params: any) => {
-    console.log(data);
-    if (queryResult === undefined) {
-      return;
+  const updateGrid = (result: QueryResult, params: any) => {
+    let lastRow = -1;
+    if (result?.total_count && params.endRow >= result?.total_count) {
+      lastRow = result?.total_count;
     }
-    const { startRow, endRow } = params;
-    console.log(startRow, endRow);
-    if (queryResult?.database_id && queryResult?.query) {
-      try {
-        setLoading(true);
-        await run(
-          queryResult?.database_id,
-          queryResult?.query,
-          startRow,
-          endRow
-        );
-        params.successCallback(data, queryResult.total_count);
-      } catch (err) {
-        params.failCallback();
-      } finally {
-        setLoading(false);
-      }
-    }
+    params.successCallback(result?.data, lastRow);
   };
 
   useEffect(() => {
     if (gridRef.current && queryResult) {
-      gridRef.current.setGridOption("datasource", {
-        getRows: (params: any) => {
-          console.log(params);
-          let lastRow = -1;
-          if (
-            queryResult?.total_count &&
-            params.endRow >= queryResult?.total_count
-          ) {
-            lastRow = queryResult?.total_count;
-          }
-          params.successCallback(data, lastRow);
-        },
-      });
+      !gridRef.current.getGridOption("datasource") &&
+        gridRef.current.setGridOption("datasource", {
+          getRows: (params: any) => {
+            if (params.startRow) {
+              setLoading(true);
+              run(
+                queryResult?.database_id,
+                queryResult?.query,
+                params.startRow,
+                params.endRow
+              )
+                .then((result: QueryResult) => updateGrid(result, params))
+                .catch(params.failCallback)
+                .finally(() => setLoading(false));
+            } else {
+              updateGrid(queryResult, params);
+            }
+          },
+        });
     }
   }, [queryResult, data]);
 
