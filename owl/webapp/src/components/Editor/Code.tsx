@@ -67,7 +67,6 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, CodeProps>(function Code(
     const view = codeMirrorRef.current?.view;
     if (view) {
       const selectedLines = getSelectedLines(view);
-      console.log("Selected Lines:", selectedLines); // Log selected lines or use as needed
       onExecute(selectedLines);
     }
   };

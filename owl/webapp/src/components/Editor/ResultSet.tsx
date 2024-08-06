@@ -43,12 +43,18 @@ export default function ResultSet() {
   };
 
   useEffect(() => {
-    console.log(data);
     if (gridRef.current && queryResult) {
       gridRef.current.setGridOption("datasource", {
         getRows: (params: any) => {
-          console.log(data);
-          params.successCallback(data, queryResult.total_count);
+          console.log(params);
+          let lastRow = -1;
+          if (
+            queryResult?.total_count &&
+            params.endRow >= queryResult?.total_count
+          ) {
+            lastRow = queryResult?.total_count;
+          }
+          params.successCallback(data, lastRow);
         },
       });
     }
@@ -56,9 +62,6 @@ export default function ResultSet() {
 
   const onGridReady = (params: any) => {
     gridRef.current = params.api;
-    params.api.setGridOption("datasource", {
-      getRows: handleFetchRows,
-    });
   };
 
   return (
