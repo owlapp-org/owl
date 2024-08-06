@@ -2,7 +2,6 @@ import DatabaseService from "@services/databaseService";
 import { QueryResult } from "@ts/interfaces/database_interface";
 import { create } from "zustand";
 import { notifications } from "@mantine/notifications";
-import { v4 as uuidv4 } from "uuid";
 
 interface EditorStore {
   code: string;
