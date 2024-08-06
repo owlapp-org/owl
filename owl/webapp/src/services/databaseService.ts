@@ -3,6 +3,7 @@ import {
   DatabaseCreateOptions,
   DatabaseUpdateOptions,
   ExecuteQueryResult,
+  QueryResult,
 } from "@ts/interfaces/database_interface";
 import request from "src/lib/request";
 
@@ -34,16 +35,24 @@ namespace DatabaseService {
     return request.delete(`databases/${id}`);
   };
 
-  export const executeQuery = async (
+  export const run = async (
     id: number | string,
-    query: string
-  ): Promise<ExecuteQueryResult> => {
+    query: string,
+    start_row?: number,
+    end_row?: number
+  ): Promise<QueryResult> => {
     return request
-      .post(`databases/${id}/execute`, {
-        query: query,
-      })
+      .post(
+        `databases/${id}/run`,
+        {
+          query: query,
+        },
+        {
+          params: { start_row, end_row },
+        }
+      )
       .then((response) => {
-        return response.data as ExecuteQueryResult;
+        return response.data as QueryResult;
       });
   };
 }

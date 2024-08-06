@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-from app.const.path import STATIC_PATH
 from app.settings import settings
 from flask import Flask, jsonify, request
 
@@ -11,7 +10,7 @@ def create_app() -> Flask:
     from app.models import db
     from flask_cors import CORS
 
-    app = Flask(__name__, static_folder=STATIC_PATH)
+    app = Flask(__name__)
     app.config.from_object(settings)
 
     # todo manage this

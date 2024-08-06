@@ -68,24 +68,25 @@ def update_database(id: int):
         return make_response("Database not found"), 404
 
 
-@bp.route("/<int:id>/execute", methods=["POST"])
-def execute(id: int):
+@bp.route("/<int:id>/run", methods=["POST"])
+def run(id: int):
     schema = QueryDatabaseInputSchema.model_validate(request.json)
-    page = request.args.get("page", default=1, type=int)
-    page_size = request.args.get(
-        "page_size",
+
+    start_row = request.args.get("start_row", default=0, type=int)
+    end_row = request.args.get(
+        "end_row",
         default=settings.DEFAULT_SELECT_PAGE_SIZE or settings.result_set_hard_limit,
         type=int,
     )
 
     owner_id = get_jwt_identity()
     try:
-        result = Database.execute(
+        result = Database.run(
             id=id,
             owner_id=owner_id,
             query=schema.query,
-            page=page,
-            page_size=page_size,
+            start_row=start_row,
+            end_row=end_row,
         )
         return result.model_dump(), 200
     except ModelNotFoundException:

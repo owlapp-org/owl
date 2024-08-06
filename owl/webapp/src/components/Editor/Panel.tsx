@@ -1,11 +1,6 @@
-interface PanelProps {
-  resultSetProps?: ResultSetProps;
-}
+import ResultSet from "./ResultSet";
 
-import ResultSet, { ResultSetProps } from "./ResultSet";
-
-function Panel(props: PanelProps) {
-  const { resultSetProps } = props;
+function Panel() {
   return (
     <div
       style={{
@@ -16,7 +11,7 @@ function Panel(props: PanelProps) {
         paddingBottom: "52px",
       }}
     >
-      <ResultSet {...resultSetProps} />
+      <ResultSet />
     </div>
   );
 }

@@ -30,11 +30,12 @@ class QueryDatabaseInputSchema(BaseModel):
 
 
 class ExecutionResult(BaseModel):
+    database_id: int = None
+    query: str
     statement_type: Optional[str] = "UNKNOWN"
     data: Optional[list[dict[str, Any]]] = None
     columns: Optional[list[str]] = None
     affected_rows: Optional[int] = None
     total_count: Optional[int] = None
-    total_pages: Optional[int] = None
-    current_page: Optional[int] = None
-    page_size: Optional[int] = None
+    start_row: Optional[int] = None
+    end_row: Optional[int] = None

@@ -4,6 +4,7 @@ import uuid
 
 import pydash as _
 import sqlparse
+from app.const import StatementType
 from app.errors.errors import (
     ModelNotFoundException,
     MultipleStatementsNotAllowedError,
@@ -19,6 +20,7 @@ from duckdb import DuckDBPyConnection
 from flask import json
 from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
+from sqlparse.sql import Statement as SqlParseStatement
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +130,7 @@ class Database(TimestampMixin, db.Model):
             raise e
 
     @classmethod
-    def execute(cls, id: int, query: str, owner_id: int, **kwargs) -> ExecutionResult:
+    def run(cls, id: int, query: str, owner_id: int, **kwargs) -> ExecutionResult:
         logger.debug("Received query", extra=query)
 
         query = _.chain(query).trim().trim_end(";").value()
@@ -141,8 +143,6 @@ class Database(TimestampMixin, db.Model):
             raise MultipleStatementsNotAllowedError("Multiple statements not allowed")
 
         statement = statements[0]
-        statement_type = statement.get_type()
-
         # todo check dialect specific options
         # if statement_type == "UNKNOWN":
         #     raise QueryParseError(f"Failed to parse query {query}")
@@ -160,46 +160,63 @@ class Database(TimestampMixin, db.Model):
             raise ConnectionError(
                 f"Failed to establish connection to database, {database}"
             )
-
         with pool.acquire_connection() as conn:
-            if statement_type == "SELECT":
-                return cls.execute_select(conn=conn, query=query, **kwargs)
-
-            result = conn.execute(query)
-            conn.commit()
-            if statement_type in ["INSERT", "UPDATE", "DELETE"]:
-                return ExecutionResult(
-                    statement_type=statement_type,
-                    affected_rows=result.fetchone()[0],
-                )
+            if statement.get_type() == "SELECT":
+                return database.run_query(conn=conn, statement=statement, **kwargs)
             else:
-                return ExecutionResult(statement_type=statement_type)
+                return database.run_execute(conn=conn, statement=statement)
 
-    @classmethod
-    def execute_select(
-        cls,
+    def run_execute(
+        self, conn: DuckDBPyConnection, statement: SqlParseStatement
+    ) -> ExecutionResult:
+        statement_type = statement.get_type()
+        result = conn.execute(str(statement))
+        conn.commit()
+        if statement_type in [
+            StatementType.INSERT,
+            StatementType.UPDATE,
+            StatementType.DELETE,
+        ]:
+            return ExecutionResult(
+                database_id=self.id,
+                query=str(statement),
+                statement_type=statement_type,
+                affected_rows=result.fetchone()[0],
+            )
+        else:
+            return ExecutionResult(
+                database_id=self.id,
+                query=str(statement),
+                statement_type=statement_type,
+            )
+
+    def run_query(
+        self,
         conn: DuckDBPyConnection,
-        query: str,
-        page: int = 1,
-        page_size: int = settings.result_set_hard_limit,
+        statement: SqlParseStatement,
+        start_row: int = 0,
+        end_row: int = settings.result_set_hard_limit,
     ) -> ExecutionResult:
 
-        offset = (page - 1) * page_size
+        offset = start_row
+        limit = end_row - start_row
         query_wrapper = (
-            f"select * from ({query}) order by * LIMIT {page_size} OFFSET {offset}"
+            f"select * from ({statement}) order by * LIMIT {limit} OFFSET {offset}"
         )
         df = conn.execute(query_wrapper).pl()
 
-        total_count_query = f"select count(*) from ({query});"
+        total_count_query = f"select count(*) from ({statement})"
         total_count = conn.execute(total_count_query).fetchone()[0]
-        total_pages = (total_count + page_size - 1) // page_size
+
+        print({"count": df.height})
 
         return ExecutionResult(
-            statement_type="SELECT",
+            database_id=self.id,
+            query=str(statement),
+            statement_type=StatementType.SELECT,
             data=df.to_dicts(),
             columns=df.columns,
             total_count=total_count,
-            total_pages=total_pages,
-            current_page=page,
-            page_size=page_size,
+            start_row=start_row,
+            end_row=end_row,
         )

@@ -1,17 +1,13 @@
 import useEditorStore from "@hooks/editorStore";
 import { useDatabaseStore } from "@hooks/useDatabaseStore";
 import { ActionIcon, Divider, Flex, Select } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import DatabaseService from "@services/databaseService";
 import { IconPlayerPlay } from "@tabler/icons-react";
-import { ExecuteQueryResult } from "@ts/interfaces/database_interface";
 import { useEffect, useRef, useState } from "react";
 import {
   PanelGroup,
   PanelResizeHandle,
   Panel as ResizablePanel,
 } from "react-resizable-panels";
-import { v4 as uuidv4 } from "uuid";
 import Code, { ExtendedReactCodeMirrorRef } from "./Code";
 import Panel from "./Panel";
 import "./styles.css";
@@ -19,9 +15,7 @@ import "./styles.css";
 export default function Editor() {
   const [loading, setLoading] = useState(false);
   const { databases, fetchDatabases } = useDatabaseStore();
-  const [records, setRecords] = useState<Record<string, any>[]>([]);
-  const [columnNames, setColumnNames] = useState<string[]>([]);
-  const { code, setDatabase, selectedDatabase } = useEditorStore();
+  const { run, code, setDatabase, selectedDatabase } = useEditorStore();
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
 
   useEffect(() => {
@@ -43,38 +37,10 @@ export default function Editor() {
       query = code.trim();
     }
 
-    setLoading(true);
     try {
-      const result: ExecuteQueryResult = await DatabaseService.executeQuery(
-        selectedDatabase,
-        query
-      );
-      console.log(result);
-      if (result.statement_type == "SELECT") {
-        const recordsWithIds = (result.data || []).map((record) => ({
-          ...record,
-          ___unique_id___: record.uniqueId || uuidv4(),
-        }));
-        setRecords(recordsWithIds);
-        setColumnNames(result.columns || []);
-      } else if (result.affected_rows != null) {
-        notifications.show({
-          title: "Success",
-          message: `Affected rows ${result.affected_rows}`,
-        });
-      } else {
-        notifications.show({
-          title: "Success",
-          message: `Statement executed`,
-        });
-      }
-    } catch (error: any) {
-      console.log(error);
-      notifications.show({
-        title: "Error",
-        message: error?.response?.data as string,
-        color: "red",
-      });
+      setLoading(true);
+      // todo hardcoded values
+      await run(Number.parseInt(selectedDatabase), query, 0, 25);
     } finally {
       setLoading(false);
     }
@@ -153,12 +119,7 @@ export default function Editor() {
         </ResizablePanel>
         <PanelResizeHandle className="panel-resize-handle" />
         <ResizablePanel maxSize={90} minSize={10}>
-          <Panel
-            resultSetProps={{
-              records: records,
-              columnNames: columnNames,
-            }}
-          />
+          <Panel />
         </ResizablePanel>
       </PanelGroup>
     </div>
