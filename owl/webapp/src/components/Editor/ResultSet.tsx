@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function ResultSet() {
   const gridRef = useRef<any>(null);
-  const { run, queryResult, data } = useEditorStore();
+  const { run, queryResult } = useEditorStore();
   const [loading, setLoading] = useState(false);
 
   const columnNames = useMemo(() => {
@@ -48,7 +48,7 @@ export default function ResultSet() {
           },
         });
     }
-  }, [queryResult, data]);
+  }, [queryResult]);
 
   const onGridReady = (params: any) => {
     gridRef.current = params.api;
