@@ -87,8 +87,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <MantineProvider defaultColorScheme="light" forceColorScheme="light">
+        <Notifications position="top-right" />
         <AlertDialogProvider>
-          <Notifications />
           <RouterProvider router={router} />
         </AlertDialogProvider>
       </MantineProvider>
