@@ -1,6 +1,9 @@
+import { memo } from "react";
 import ResultSet from "./ResultSet";
 
-function Panel() {
+const Panel = memo(() => {
+  console.log("----");
+
   return (
     <div
       style={{
@@ -14,6 +17,6 @@ function Panel() {
       <ResultSet />
     </div>
   );
-}
+});
 
 export default Panel;

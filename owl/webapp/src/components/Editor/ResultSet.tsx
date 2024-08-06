@@ -8,7 +8,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function ResultSet() {
   const gridRef = useRef<any>(null);
-  const { run, queryResult } = useEditorStore();
+  const run = useEditorStore((state) => state.run);
+  const queryResult = useEditorStore((state) => state.queryResult);
+
   const [loading, setLoading] = useState(false);
 
   const columnNames = useMemo(() => {
@@ -27,7 +29,7 @@ export default function ResultSet() {
   };
 
   useEffect(() => {
-    if (gridRef.current && queryResult) {
+    if (gridRef.current?.getGridOption && queryResult) {
       !gridRef.current.getGridOption("datasource") &&
         gridRef.current.setGridOption("datasource", {
           getRows: (params: any) => {
