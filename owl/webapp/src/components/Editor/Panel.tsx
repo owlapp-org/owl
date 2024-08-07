@@ -1,9 +1,7 @@
-import { memo } from "react";
-import ResultSet from "./ResultSet";
+import { QueryResult } from "@ts/interfaces/database_interface";
+import ResultSetContainer from "./ResultSet";
 
-const Panel = memo(() => {
-  console.log("----");
-
+const Panel = ({ result }: { result?: QueryResult }) => {
   return (
     <div
       style={{
@@ -14,9 +12,9 @@ const Panel = memo(() => {
         paddingBottom: "52px",
       }}
     >
-      <ResultSet />
+      <ResultSetContainer result={result} />
     </div>
   );
-});
+};
 
 export default Panel;

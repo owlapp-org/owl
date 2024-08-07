@@ -2,6 +2,7 @@ import useEditorStore from "@hooks/editorStore";
 import { useDatabaseStore } from "@hooks/useDatabaseStore";
 import { ActionIcon, Divider, Flex, Select } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons-react";
+import { QueryResult } from "@ts/interfaces/database_interface";
 import { useEffect, useRef, useState } from "react";
 import {
   PanelGroup,
@@ -17,6 +18,7 @@ export default function Editor() {
   const { databases, fetchDatabases } = useDatabaseStore();
   const { run, code, setDatabase, selectedDatabase } = useEditorStore();
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
+  const [result, setResult] = useState<QueryResult>();
 
   useEffect(() => {
     fetchDatabases();
@@ -40,7 +42,8 @@ export default function Editor() {
     try {
       setLoading(true);
       // todo hardcoded values
-      await run(Number.parseInt(selectedDatabase), query, 0, 25);
+      const res = await run(Number.parseInt(selectedDatabase), query, 0, 25);
+      setResult(res);
     } finally {
       setLoading(false);
     }
@@ -119,7 +122,7 @@ export default function Editor() {
         </ResizablePanel>
         <PanelResizeHandle className="panel-resize-handle" />
         <ResizablePanel maxSize={90} minSize={10}>
-          <Panel />
+          <Panel result={result} />
         </ResizablePanel>
       </PanelGroup>
     </div>

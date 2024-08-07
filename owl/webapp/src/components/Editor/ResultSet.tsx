@@ -4,21 +4,17 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-balham.css"; // Optional Theme applied to the Data Grid
 
 import { AgGridReact } from "ag-grid-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export default function ResultSet() {
+function ResultSet({ result }: { result: QueryResult }) {
   const gridRef = useRef<any>(null);
   const run = useEditorStore((state) => state.run);
-  const queryResult = useEditorStore((state) => state.queryResult);
-
   const [loading, setLoading] = useState(false);
 
-  const columnNames = useMemo(() => {
-    return queryResult?.columns?.map((column) => ({
-      headerName: column,
-      field: column,
-    }));
-  }, [queryResult]);
+  const headers = result.columns?.map((column) => ({
+    headerName: column,
+    field: column,
+  }));
 
   const updateGrid = (result: QueryResult, params: any) => {
     let lastRow = -1;
@@ -28,32 +24,39 @@ export default function ResultSet() {
     params.successCallback(result?.data, lastRow);
   };
 
+  const getDatasource = (result: QueryResult) => {
+    return {
+      getRows: (params: any) => {
+        if (params.startRow > 0) {
+          setLoading(true);
+          run(result.database_id, result.query, params.startRow, params.endRow)
+            .then((result: QueryResult) => updateGrid(result, params))
+            .catch(params.failCallback)
+            .finally(() => setLoading(false));
+        } else {
+          console.log(result);
+          updateGrid(result, params);
+        }
+      },
+      destroy: () => {
+        // use to clean resources
+      },
+    };
+  };
+
   useEffect(() => {
-    if (gridRef.current?.getGridOption && queryResult) {
-      !gridRef.current.getGridOption("datasource") &&
-        gridRef.current.setGridOption("datasource", {
-          getRows: (params: any) => {
-            if (params.startRow) {
-              setLoading(true);
-              run(
-                queryResult?.database_id,
-                queryResult?.query,
-                params.startRow,
-                params.endRow
-              )
-                .then((result: QueryResult) => updateGrid(result, params))
-                .catch(params.failCallback)
-                .finally(() => setLoading(false));
-            } else {
-              updateGrid(queryResult, params);
-            }
-          },
-        });
+    if (gridRef.current.setGridOption) {
+      console.log("getDatasource 1");
+      gridRef.current.setGridOption("datasource", getDatasource(result));
     }
-  }, [queryResult]);
+  }, [result]);
 
   const onGridReady = (params: any) => {
     gridRef.current = params.api;
+    if (gridRef.current.setGridOption) {
+      gridRef.current.setGridOption("datasource", getDatasource(result));
+      console.log("getDatasource 2");
+    }
   };
 
   return (
@@ -67,7 +70,7 @@ export default function ResultSet() {
       <AgGridReact
         loading={loading}
         ref={gridRef}
-        columnDefs={columnNames}
+        columnDefs={headers}
         onGridReady={onGridReady}
         rowModelType="infinite"
         cacheBlockSize={25}
@@ -76,3 +79,17 @@ export default function ResultSet() {
     </div>
   );
 }
+
+const ResultSetContainer = ({
+  result,
+}: {
+  result?: QueryResult | undefined;
+}) => {
+  if (result == undefined) {
+    return <></>;
+  } else {
+    return <ResultSet result={result} />;
+  }
+};
+
+export default ResultSetContainer;
