@@ -45,7 +45,7 @@ export default function AccountSettings() {
         />
       </div>
       <div style={{ width: "100%", maxWidth: 400, marginTop: 24 }}>
-        <Button fullWidth onClick={handleSubmit}>
+        <Button fullWidth onClick={handleSubmit} disabled={!password}>
           Update
         </Button>
       </div>
