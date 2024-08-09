@@ -82,6 +82,7 @@ function ResultSet({ result }: { result: QueryResult }) {
         cacheBlockSize={25}
         rowSelection="single"
         defaultColDef={defaultColDef}
+        maxConcurrentDatasourceRequests={1}
       />
     </div>
   );
