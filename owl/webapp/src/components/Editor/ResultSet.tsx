@@ -4,7 +4,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-balham.css"; // Optional Theme applied to the Data Grid
 
 import { AgGridReact } from "ag-grid-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 function ResultSet({ result }: { result: QueryResult }) {
   const gridRef = useRef<any>(null);
@@ -59,6 +59,12 @@ function ResultSet({ result }: { result: QueryResult }) {
     }
   };
 
+  const defaultColDef = useMemo(() => {
+    return {
+      sortable: false,
+    };
+  }, []);
+
   return (
     <div
       className="ag-theme-balham"
@@ -75,6 +81,7 @@ function ResultSet({ result }: { result: QueryResult }) {
         rowModelType="infinite"
         cacheBlockSize={25}
         rowSelection="single"
+        defaultColDef={defaultColDef}
       />
     </div>
   );
