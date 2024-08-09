@@ -6,9 +6,6 @@ import { notifications } from "@mantine/notifications";
 interface EditorStore {
   code: string;
   selectedDatabase: string | null;
-  queryResult?: QueryResult;
-  data?: Record<string, any>[];
-  setData: (newData?: Record<string, any>[]) => void;
   setCode: (code: string) => void;
   setDatabase: (database: string | null) => void;
   run: (
@@ -24,11 +21,6 @@ const useEditorStore = create<EditorStore>((set, get) => ({
   selectedDatabase: null,
   data: [],
   queryResult: undefined,
-  setData: (newData?: Record<string, any>[]) => {
-    set((state) => ({
-      data: [...(state.data || []), ...(newData || [])],
-    }));
-  },
   setCode: (code) => set({ code }),
   setDatabase: (database) => set({ selectedDatabase: database }),
   run: async (
@@ -44,10 +36,6 @@ const useEditorStore = create<EditorStore>((set, get) => ({
         start_row,
         end_row
       );
-      set((state) => ({
-        queryResult: result,
-        data: [...(state.data || []), ...(result.data || [])],
-      }));
       if (result.affected_rows != null) {
         notifications.show({
           title: "Success",
