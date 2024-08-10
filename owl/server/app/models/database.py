@@ -4,7 +4,7 @@ import uuid
 
 import pydash as _
 import sqlparse
-from app.const import StatementType
+from app.constants import StatementType
 from app.errors.errors import (
     ModelNotFoundException,
     MultipleStatementsNotAllowedError,

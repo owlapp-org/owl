@@ -1,7 +1,7 @@
 import importlib.metadata
 
 from app.app import create_app  # noqa
-from app.const import APP_NAME
+from app.constants import APP_NAME
 from app.logging import setup_logging
 from flask_migrate import Migrate
 
