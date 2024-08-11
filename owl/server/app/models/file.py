@@ -1,5 +1,4 @@
 import os
-from typing import Any
 
 from app.models.base import TimestampMixin, db
 from app.settings import settings
@@ -13,18 +12,18 @@ class File(TimestampMixin, db.Model):
     __tablename__ = "files"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    path = Column(String(1000), nullable=False)
+    path = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     owner = relationship("User", back_populates="files")
 
     @property
-    def filename(self) -> str:
+    def name(self) -> str:
         return self.path.rsplit("/", 1)[1]
 
     @property
     def extension(self) -> str:
-        return self.filename.rsplit(".", 1)[1].lower()
+        return self.name.rsplit(".", 1)[1].lower()
 
     @classmethod
     def find_by_owner(cls, id: int) -> list["File"]:
@@ -33,12 +32,28 @@ class File(TimestampMixin, db.Model):
     @classmethod
     def save_file(cls, owner_id: int, file: FileStorage) -> "File":
         filename = secure_filename(file.filename)
-        relative_path = os.path.join("users", owner_id, "files", filename)
-        path = os.path.join(settings.STORAGE_BASE_PATH, relative_path)
+        files_folder = os.path.join(
+            settings.STORAGE_BASE_PATH,
+            "users",
+            str(owner_id),
+            "files",
+        )
+        if not os.path.exists(files_folder):
+            os.makedirs(files_folder)
+
+        path = os.path.join(files_folder, filename)
         if os.path.exists(path):
             raise FileExistsError("File already exists: %s" % filename)
-        file.save(path)
-        model = File(path=relative_path, owner_id=owner_id)
-        db.session.add(model)
-        db.session.commit()
-        return model
+        try:
+            file.save(path)
+            relative_path = os.path.join("users", str(owner_id), "files", filename)
+            model = File(path=relative_path, owner_id=owner_id)
+            db.session.add(model)
+            db.session.commit()
+            return model
+        except Exception as e:
+            db.session.rollback()
+            # todo
+            # if os.path.exists(path) and not os.path.isdir(path):
+            #     os.remove(path)
+            raise e

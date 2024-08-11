@@ -17,6 +17,7 @@
     "@iconify/react": "^5.0.0",
     "@mantine/core": "^7.11.2",
     "@mantine/dates": "^7.11.2",
+    "@mantine/dropzone": "^7.12.0",
     "@mantine/emotion": "^7.11.2",
     "@mantine/form": "^7.11.2",
     "@mantine/hooks": "^7.11.2",

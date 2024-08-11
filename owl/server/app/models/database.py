@@ -2,6 +2,7 @@ import logging
 import os
 import uuid
 
+import jinja2
 import pydash as _
 import sqlparse
 from app.constants import StatementType
@@ -130,10 +131,19 @@ class Database(TimestampMixin, db.Model):
             raise e
 
     @classmethod
+    def resolve_query_template(cls, query: str, owner_id: int) -> str:
+        files_path = os.path.join(
+            settings.STORAGE_BASE_PATH, "users", str(owner_id), "files"
+        )
+        query = jinja2.Template(query).render(files=files_path)
+        return query
+
+    @classmethod
     def run(cls, id: int, query: str, owner_id: int, **kwargs) -> ExecutionResult:
         logger.debug("Received query", extra=query)
 
         query = _.chain(query).trim().trim_end(";").value()
+        query = cls.resolve_query_template(query, owner_id)
 
         statements = sqlparse.parse(query)
         if len(statements) == 0:

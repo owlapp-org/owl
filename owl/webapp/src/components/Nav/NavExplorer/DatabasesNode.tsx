@@ -2,7 +2,7 @@ import CreateDatabaseModal from "@components/Database/CreateDatabaseModal";
 import UpdateDatabaseModal from "@components/Database/UpdateDatabaseModal";
 import DatabaseMenu from "@components/DatabaseMenu";
 import TreeNode from "@components/TreeNode";
-import { useDatabaseStore } from "@hooks/useDatabaseStore";
+import { useDatabaseStore } from "@hooks/databaseStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { IconBrandOnedrive, IconCylinder, IconPlus } from "@tabler/icons-react";
 import { Database } from "@ts/interfaces/database_interface";

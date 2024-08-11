@@ -1,5 +1,5 @@
+import { useDatabaseStore } from "@hooks/databaseStore";
 import useEditorStore from "@hooks/editorStore";
-import { useDatabaseStore } from "@hooks/useDatabaseStore";
 import { ActionIcon, Divider, Flex, Select } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons-react";
 import { QueryResult } from "@ts/interfaces/database_interface";

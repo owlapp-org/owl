@@ -1,4 +1,4 @@
-from app.api import app_api, auth_api, databases_api, ui, users_api
+from app.api import app_api, auth_api, databases_api, files_api, ui, users_api
 from flask import Blueprint, Flask, redirect, url_for
 
 api = Blueprint("/", __name__)
@@ -9,6 +9,7 @@ def init_app(app: Flask) -> None:
     api.register_blueprint(users_api.bp, url_prefix="/users")
     api.register_blueprint(databases_api.bp, url_prefix="/databases")
     api.register_blueprint(app_api.bp, url_prefix="/app")
+    api.register_blueprint(files_api.bp, url_prefix="/files")
     app.register_blueprint(api, url_prefix="/api")
 
     app.register_blueprint(ui.bp, url_prefix="/ui")

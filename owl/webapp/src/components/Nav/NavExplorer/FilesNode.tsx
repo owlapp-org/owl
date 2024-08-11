@@ -1,22 +1,24 @@
-import CreateDatabaseModal from "@components/Database/CreateDatabaseModal";
-import UpdateDatabaseModal from "@components/Database/UpdateDatabaseModal";
-import DatabaseMenu from "@components/DatabaseMenu";
+import FileMenu from "@components/FileMenu";
+import RenameFileModal from "@components/RenameFileModal";
 import TreeNode from "@components/TreeNode";
-import { useDatabaseStore } from "@hooks/useDatabaseStore";
+import { useFileStore } from "@hooks/fileStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
+import { Dropzone, FileWithPath, MIME_TYPES } from "@mantine/dropzone";
+import { notifications } from "@mantine/notifications";
+import FileService from "@services/fileService";
 import { IconFile, IconFolders, IconPlus } from "@tabler/icons-react";
-import { Database } from "@ts/interfaces/database_interface";
-import { useEffect, useState } from "react";
+import { IFile } from "@ts/interfaces/file_interface";
+import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 
-function databaseToTreeNodeData(
-  database: Database,
+function fileToTreeNodeData(
+  file: IFile,
   onDelete: (id: number) => void,
-  onUpdate: (database: Database) => void
+  onRename: (file: IFile) => void
 ): TreeNodeData {
   return {
-    label: database.name,
-    value: `${database.id}`,
+    label: file.name,
+    value: `${file.id}`,
     nodeProps: {
       icon: (
         <div>
@@ -24,10 +26,10 @@ function databaseToTreeNodeData(
         </div>
       ),
       action: (
-        <DatabaseMenu
-          database={database}
+        <FileMenu
+          file={file}
           onDelete={onDelete}
-          onUpdate={onUpdate}
+          onRename={onRename}
           className="menu-icon"
         />
       ),
@@ -36,23 +38,49 @@ function databaseToTreeNodeData(
 }
 
 export default function FilesNode() {
-  const { databases, fetchDatabases, updateDatabase, removeDatabase } =
-    useDatabaseStore();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [selectedDatabase, setSelectedDatabase] = useState<Database | null>(
-    null
-  );
+  const { files, fetchFiles, upload, removeFile } = useFileStore();
+  const [selectedFile, setSelectedFile] = useState<IFile | null>(null);
+  const openRef = useRef<() => void>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchDatabases();
-  }, [fetchDatabases]);
+    fetchFiles();
+  }, [fetchFiles]);
 
-  const handleUpdateDatabase = (database: Database) => {
-    setSelectedDatabase(database);
-    setIsUpdateModalOpen(true);
+  const handleDrop = async (files: FileWithPath[]) => {
+    if (files.length === 0) {
+      console.log("No files selected");
+      notifications.show({
+        title: "Error",
+        color: "red",
+        message: "No files selected",
+      });
+      return;
+    }
+    try {
+      const file = files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+      console.log(file);
+      await FileService.upload(formData);
+      notifications.show({
+        title: "Success",
+        message: "File uploaded successfully",
+      });
+    } catch (err: any) {
+      notifications.show({
+        title: "Error",
+        message: `Upload failed: ${err}`,
+        color: "red",
+      });
+    }
   };
 
+  const handleRenameFile = (file: IFile) => {
+    setSelectedFile(file);
+    setIsRenameModalOpen(true);
+  };
   const data: TreeNodeData[] = [
     {
       label: "Files",
@@ -65,38 +93,48 @@ export default function FilesNode() {
         ),
         action: (
           <ActionIcon
+            loading={loading}
+            disabled={loading}
             variant="transparent"
             onClick={(event) => {
               event.stopPropagation();
-              setIsCreateModalOpen(true);
+              openRef.current?.();
             }}
           >
             <IconPlus stroke={1} />
           </ActionIcon>
         ),
       },
-      children: databases.map((db) =>
-        databaseToTreeNodeData(db, removeDatabase, handleUpdateDatabase)
+      children: files.map((file) =>
+        fileToTreeNodeData(file, removeFile, handleRenameFile)
       ),
     },
   ];
 
   return (
     <>
-      <Tree
-        selectOnClick
-        clearSelectionOnOutsideClick
-        data={data}
-        renderNode={(payload) => <TreeNode {...payload} />}
-      />
-      <CreateDatabaseModal
-        open={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-      />
-      <UpdateDatabaseModal
-        open={isUpdateModalOpen}
-        onClose={() => setIsUpdateModalOpen(false)}
-        database={selectedDatabase}
+      <Dropzone
+        maxFiles={1}
+        openRef={openRef}
+        onDrop={handleDrop}
+        accept={[
+          MIME_TYPES.csv,
+          MIME_TYPES.xlsx,
+          MIME_TYPES.xls,
+          "application/vnd.apache.parquet",
+        ]}
+      >
+        <Tree
+          selectOnClick
+          clearSelectionOnOutsideClick
+          data={data}
+          renderNode={(payload) => <TreeNode {...payload} />}
+        />
+      </Dropzone>
+      <RenameFileModal
+        open={isRenameModalOpen}
+        onClose={() => setIsRenameModalOpen(false)}
+        file={selectedFile}
       />
     </>
   );
