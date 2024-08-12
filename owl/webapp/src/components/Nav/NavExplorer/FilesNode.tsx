@@ -5,7 +5,6 @@ import { useFileStore } from "@hooks/fileStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath, MIME_TYPES } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
-import FileService from "@services/fileService";
 import { IconFile, IconFolders, IconPlus } from "@tabler/icons-react";
 import { IFile } from "@ts/interfaces/file_interface";
 import { useEffect, useRef, useState } from "react";
@@ -38,7 +37,7 @@ function fileToTreeNodeData(
 }
 
 export default function FilesNode() {
-  const { files, fetchFiles, upload, removeFile } = useFileStore();
+  const { files, fetchFiles, removeFile, upload } = useFileStore();
   const [selectedFile, setSelectedFile] = useState<IFile | null>(null);
   const openRef = useRef<() => void>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -58,23 +57,12 @@ export default function FilesNode() {
       });
       return;
     }
-    try {
-      const file = files[0];
-      const formData = new FormData();
-      formData.append("file", file);
-      console.log(file);
-      await FileService.upload(formData);
-      notifications.show({
-        title: "Success",
-        message: "File uploaded successfully",
-      });
-    } catch (err: any) {
-      notifications.show({
-        title: "Error",
-        message: `Upload failed: ${err}`,
-        color: "red",
-      });
-    }
+    setLoading(true);
+    const file = files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    await upload(formData);
+    setLoading(false);
   };
 
   const handleRenameFile = (file: IFile) => {

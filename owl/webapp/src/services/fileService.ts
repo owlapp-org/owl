@@ -14,6 +14,14 @@ namespace FileService {
   export const list = async (): Promise<IFile[]> => {
     return request.get("files").then((response) => response.data as IFile[]);
   };
+  export const rename = async (id: number, name: string): Promise<IFile> => {
+    return request
+      .put(`files/${id}/rename`, { name })
+      .then((response) => response.data as IFile);
+  };
+  export const del = async (id: number): Promise<IFile> => {
+    return request.delete(`files/${id}`);
+  };
 }
 
 export default FileService;

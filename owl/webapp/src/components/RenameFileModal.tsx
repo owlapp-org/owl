@@ -35,9 +35,11 @@ const RenameFileModal: FC<RenameFileModalProps> = ({ open, onClose, file }) => {
 
     setLoading(true);
     try {
-      renameFile(file.id, name || file.name);
+      setLoading(true);
+      await renameFile(file.id, name || file.name);
     } catch (error) {
     } finally {
+      setLoading(false);
       handleClose();
     }
   };

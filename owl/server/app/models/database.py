@@ -67,14 +67,11 @@ class Database(TimestampMixin, db.Model):
 
     @classmethod
     def delete_by_id(cls, id: int, owner_id: int = None) -> "Database":
-        database = cls.find_by_id(id)
+        database = cls.query.filter(
+            cls.id == id and cls.owner_id == owner_id
+        ).one_or_none()
         if not database:
             raise ModelNotFoundException()
-
-        if owner_id is not None and database.owner_id != owner_id:
-            raise NotAuthorizedError(
-                "You are not authorized to delete database that is not owned by you!"
-            )
 
         db.session.delete(database)
         db.session.commit()
