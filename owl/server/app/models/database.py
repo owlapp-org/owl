@@ -14,6 +14,7 @@ from app.errors.errors import (
     StoragePathExists,
 )
 from app.lib.database.registry import registry
+from app.lib.database.validation import validate_query
 from app.models.base import TimestampMixin, db
 from app.schemas import ExecutionResult, UpdateDatabaseInputSchema
 from app.settings import settings
@@ -140,7 +141,7 @@ class Database(TimestampMixin, db.Model):
         logger.debug("Received query", extra=query)
 
         query = _.chain(query).trim().trim_end(";").value()
-        query = cls.resolve_query_template(query, owner_id)
+        query = cls.resolve_query_template(validate_query(query), owner_id)
 
         statements = sqlparse.parse(query)
         if len(statements) == 0:
