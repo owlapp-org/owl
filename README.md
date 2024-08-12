@@ -11,6 +11,8 @@ Currently you can use it to query:
 - You can create multiple users and each user can manage their user space (databases, connections, etc..)
 - Has builtin user authentication and google oauth support.
 
+- You can also upload files and query them.
+
 ## Installation
 
 ```sh
@@ -45,7 +47,7 @@ owl run
 owl --help
 ```
 
-![Example 1](./doc/static/img/exmaples/example-1.png)
+![Example 2](./doc/static/img/exmaples/example-2.png)
 
 
 See `.env` file for configuration options.
