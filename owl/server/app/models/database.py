@@ -2,9 +2,10 @@ import logging
 import os
 import uuid
 
+import jinja2
 import pydash as _
 import sqlparse
-from app.const import StatementType
+from app.constants import StatementType
 from app.errors.errors import (
     ModelNotFoundException,
     MultipleStatementsNotAllowedError,
@@ -66,14 +67,11 @@ class Database(TimestampMixin, db.Model):
 
     @classmethod
     def delete_by_id(cls, id: int, owner_id: int = None) -> "Database":
-        database = cls.find_by_id(id)
+        database = cls.query.filter(
+            cls.id == id and cls.owner_id == owner_id
+        ).one_or_none()
         if not database:
             raise ModelNotFoundException()
-
-        if owner_id is not None and database.owner_id != owner_id:
-            raise NotAuthorizedError(
-                "You are not authorized to delete database that is not owned by you!"
-            )
 
         db.session.delete(database)
         db.session.commit()
@@ -130,10 +128,19 @@ class Database(TimestampMixin, db.Model):
             raise e
 
     @classmethod
+    def resolve_query_template(cls, query: str, owner_id: int) -> str:
+        files_path = os.path.join(
+            settings.STORAGE_BASE_PATH, "users", str(owner_id), "files"
+        )
+        query = jinja2.Template(query).render(files=files_path)
+        return query
+
+    @classmethod
     def run(cls, id: int, query: str, owner_id: int, **kwargs) -> ExecutionResult:
         logger.debug("Received query", extra=query)
 
         query = _.chain(query).trim().trim_end(";").value()
+        query = cls.resolve_query_template(query, owner_id)
 
         statements = sqlparse.parse(query)
         if len(statements) == 0:
