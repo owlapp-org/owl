@@ -52,7 +52,7 @@ services:
     build:
       context: . # Set build context to the root of the project
       dockerfile: Dockerfile # Ensure this path is correct]
-    command: ["sh", "-c", "./wait-for-flask.sh flask 5000 pytest"]
+    command: ["sh", "-c", "./wait-for-flask.sh flask 5000 pytest -s"]
     depends_on:
       - postgres
       - migrate
@@ -60,6 +60,7 @@ services:
     volumes:
       - .:/owl
     environment:
+      STORAGE_BASE_PATH: "/app/storage"
       FLASK_API_URL: "http://flask:5000" # Add this if your tests need to access the Flask service
 
 volumes:

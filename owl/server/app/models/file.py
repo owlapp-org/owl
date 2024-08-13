@@ -2,11 +2,10 @@ import logging
 import os
 from typing import Optional
 
-from app.errors.errors import ModelNotFoundException
 from app.lib.fs import with_storage_path
 from app.models.base import TimestampMixin, db
 from app.settings import settings
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, and_
 from sqlalchemy.orm import relationship
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
@@ -40,8 +39,16 @@ class File(TimestampMixin, db.Model):
         return cls.query.filter(cls.owner_id == id).all()
 
     @classmethod
+    def find_by_id_and_owner(cls, id: int, owner_id: int) -> Optional["File"]:
+        return cls.query.filter(
+            and_(cls.id == id, cls.owner_id == owner_id)
+        ).one_or_none()
+
+    @classmethod
     def delete_by_id(cls, id: int, owner_id: int = None) -> "File":
-        file: File = cls.query.filter(cls.id == id and cls.owner_id == owner_id).one()
+        file: File = cls.query.filter(
+            and_(cls.id == id, cls.owner_id == owner_id)
+        ).one()
 
         path = os.path.join(settings.STORAGE_BASE_PATH, file.path)
         try:
@@ -77,10 +84,12 @@ class File(TimestampMixin, db.Model):
             return model
         except Exception as e:
             db.session.rollback()
-            # todo
             if os.path.exists(path) and not os.path.isdir(path):
                 os.remove(path)
             raise e
+
+    def file_exists(self) -> bool:
+        return os.path.exists(os.path.join(settings.STORAGE_BASE_PATH, self.path))
 
     def rename(self, name: str) -> "File":
         if not name:

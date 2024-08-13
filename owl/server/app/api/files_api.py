@@ -3,7 +3,6 @@ from logging import getLogger
 from app.constants import ALLOWED_FILE_EXTENSIONS
 from app.models.file import File
 from app.schemas.file_schema import FileSchema
-from app.settings import settings
 from flask import Blueprint, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity
 
@@ -16,6 +15,14 @@ bp = Blueprint("files", __name__)
 def get_files():
     files = File.find_by_owner(id=get_jwt_identity())
     return [FileSchema.model_validate(file).model_dump() for file in files]
+
+
+@bp.route("/<int:id>")
+def get_file(id: int):
+    if file := File.find_by_id_and_owner(id=id, owner_id=get_jwt_identity()):
+        return FileSchema.model_validate(file).model_dump()
+    else:
+        return make_response("File not found"), 404
 
 
 @bp.route("/upload", methods=["POST"])
@@ -63,6 +70,17 @@ def rename_file(id: int):
             return make_response("Failed to rename file"), 500
     else:
         return make_response("File not found"), 404
+
+
+@bp.route("/<int:id>/exists", methods=["GET"])
+def exists(id: int):
+    try:
+        if file := File.find_by_id_and_owner(id=id, owner_id=get_jwt_identity()):
+            return jsonify({"exists": file.file_exists()}), 200
+        else:
+            return jsonify({"exists": False}), 200
+    except Exception as e:
+        return make_response(f"Unable to check. {str(e)}"), 500
 
 
 @bp.route("/<int:id>", methods=["DELETE"])

@@ -1,7 +1,13 @@
 // src/components/DatabaseMenu.tsx
 import { useAlertDialog } from "@contexts/AlertDialogContext";
 import { ActionIcon, Menu } from "@mantine/core";
-import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
+import {
+  IconCopy,
+  IconDotsVertical,
+  IconEdit,
+  IconTrash,
+} from "@tabler/icons-react";
 import { IFile } from "@ts/interfaces/file_interface";
 
 interface FileMenuProps {
@@ -33,6 +39,14 @@ export default function FileMenu({
     onRename(file);
   };
 
+  const handleCopyPath = async () => {
+    await navigator.clipboard.writeText(`'{{files}}/${file.name}'`);
+    notifications.show({
+      title: "Success",
+      message: "Copied file path",
+    });
+  };
+
   return (
     <Menu withinPortal position="bottom-end" withArrow>
       <Menu.Target>
@@ -41,6 +55,20 @@ export default function FileMenu({
         </ActionIcon>
       </Menu.Target>
       <Menu.Dropdown miw={200}>
+        <Menu.Item onClick={handleCopyPath}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <div>
+              <IconCopy size={16} stroke={1} />
+            </div>
+            <div>Copy path</div>
+          </div>
+        </Menu.Item>
         <Menu.Item onClick={handleRename}>
           <div
             style={{
