@@ -1,7 +1,6 @@
 import os
 
 from app.auth.oauth import oauth
-from app.errors.errors import LoginError
 from app.models import db
 from app.models.user import User
 from app.schemas import LoginInputSchema, LoginOutputSchema
