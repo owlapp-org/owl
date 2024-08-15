@@ -16,10 +16,8 @@ def login():
     input_schema = LoginInputSchema(**request.json)
     try:
         user = User.find_by_email(input_schema.email)
-        if user is None:
-            raise LoginError("Failed to login.")
-        if not user.verify_password(input_schema.password):
-            raise LoginError("Failed to login.")
+        if user is None or not user.verify_password(input_schema.password):
+            return make_response("Failed to login"), 403
 
         access_token = create_access_token(identity=user)
 

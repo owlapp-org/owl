@@ -216,8 +216,6 @@ class Database(TimestampMixin, db.Model):
         total_count_query = f"select count(*) from ({statement})"
         total_count = conn.execute(total_count_query).fetchone()[0]
 
-        print(start_row, end_row, total_count)
-        print(df)
         return ExecutionResult(
             database_id=self.id,
             query=str(statement),
