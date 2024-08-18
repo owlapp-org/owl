@@ -14,8 +14,11 @@ const TopNavBar: React.FC<TopNavBarProps> = (props) => {
       align="center"
       justify="space-between"
       px="md"
-      py="xs"
-      style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}
+      mih={48}
+      style={{
+        borderBottom: "1px solid var(--mantine-color-gray-2)",
+        boxSizing: "border-box",
+      }}
       {...otherProps}
     >
       <ActionIcon variant="transparent" onClick={onMenuClick}>

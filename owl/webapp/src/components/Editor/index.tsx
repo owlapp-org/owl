@@ -1,6 +1,7 @@
 import { useDatabaseStore } from "@hooks/databaseStore";
 import useEditorStore from "@hooks/editorStore";
 import { ActionIcon, Divider, Flex, Select } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { IconPlayerPlay } from "@tabler/icons-react";
 import { QueryResult } from "@ts/interfaces/database_interface";
 import { useEffect, useRef, useState } from "react";
@@ -30,7 +31,16 @@ export default function Editor() {
   }));
 
   async function handleExecute(selectedLines: string[]) {
-    if (!selectedDatabase || code.trim() === "") {
+    if (!selectedDatabase) {
+      notifications.show({
+        title: "Warning",
+        color: "yellow",
+        message: `Select a database from the list`,
+      });
+      return;
+    }
+
+    if (code.trim() === "") {
       return;
     }
 
