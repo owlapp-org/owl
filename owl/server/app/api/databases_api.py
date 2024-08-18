@@ -78,6 +78,11 @@ def run(id: int):
         default=settings.DEFAULT_SELECT_PAGE_SIZE or settings.result_set_hard_limit,
         type=int,
     )
+    with_total_count = request.args.get(
+        "with_total_count",
+        default=True,
+        type=bool,
+    )
 
     owner_id = get_jwt_identity()
     try:
@@ -87,6 +92,7 @@ def run(id: int):
             query=schema.query,
             start_row=start_row,
             end_row=end_row,
+            with_total_count=with_total_count,
         )
         return result.model_dump(), 200
     except ModelNotFoundException:

@@ -12,7 +12,8 @@ interface EditorStore {
     databaseId: number,
     query: string,
     start_row?: number,
-    end_row?: number
+    end_row?: number,
+    with_total_count?: boolean
   ) => any;
 }
 
@@ -27,14 +28,16 @@ const useEditorStore = create<EditorStore>((set, get) => ({
     databaseId: number,
     query: string,
     start_row?: number,
-    end_row?: number
+    end_row?: number,
+    with_total_count: boolean = true
   ) => {
     try {
       const result = await DatabaseService.run(
         databaseId,
         query,
         start_row,
-        end_row
+        end_row,
+        with_total_count
       );
       if (result.affected_rows != null) {
         notifications.show({

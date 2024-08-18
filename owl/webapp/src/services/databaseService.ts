@@ -39,7 +39,8 @@ namespace DatabaseService {
     id: number | string,
     query: string,
     start_row?: number,
-    end_row?: number
+    end_row?: number,
+    with_total_count: boolean = true
   ): Promise<QueryResult> => {
     return request
       .post(
@@ -48,7 +49,7 @@ namespace DatabaseService {
           query: query,
         },
         {
-          params: { start_row, end_row },
+          params: { start_row, end_row, with_total_count },
         }
       )
       .then((response) => {

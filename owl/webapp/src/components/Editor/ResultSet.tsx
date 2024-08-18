@@ -1,89 +1,94 @@
 import useEditorStore from "@hooks/editorStore";
+import { notifications } from "@mantine/notifications";
 import { QueryResult } from "@ts/interfaces/database_interface";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-balham.css"; // Optional Theme applied to the Data Grid
 
-import { AgGridReact } from "ag-grid-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import DataGrid, { DataGridHandle } from "react-data-grid";
+import "./styles.css";
 
 function ResultSet({ result }: { result: QueryResult }) {
-  const gridRef = useRef<any>(null);
   const run = useEditorStore((state) => state.run);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [rows, setRows] = useState<Record<string, any>[]>([]);
+  const [endRow, setEndRow] = useState(result.end_row || 0);
+  const gridRef = useRef<DataGridHandle>(null);
 
   const headers = result.columns?.map((column) => ({
-    headerName: column,
-    field: column,
+    key: column,
+    name: column,
   }));
 
-  const updateGrid = (result: QueryResult, params: any) => {
-    let lastRow = -1;
-    if (result?.total_count && params.endRow >= result?.total_count) {
-      lastRow = result?.total_count;
-    }
-    params.successCallback(result?.data, lastRow);
-  };
-
-  const getDatasource = (result: QueryResult) => {
-    return {
-      getRows: (params: any) => {
-        if (params.startRow > 0) {
-          setLoading(true);
-          run(result.database_id, result.query, params.startRow, params.endRow)
-            .then((result: QueryResult) => updateGrid(result, params))
-            .catch(params.failCallback)
-            .finally(() => setLoading(false));
-        } else {
-          console.log(result);
-          updateGrid(result, params);
-        }
-      },
-      destroy: () => {
-        // use to clean resources
-      },
-    };
-  };
-
   useEffect(() => {
-    if (gridRef.current.setGridOption) {
-      console.log("getDatasource 1");
-      gridRef.current.setGridOption("datasource", getDatasource(result));
+    const idx = 0,
+      rowIdx = 0;
+    gridRef.current!.scrollToCell({ idx, rowIdx });
+    if (result.total_count) {
+      setTotalCount(result.total_count);
+      setRows(result.data || []);
+    } else {
+      setRows([]);
     }
-  }, [result]);
+    setEndRow(result.end_row || 0);
+  }, [gridRef, result, setTotalCount, setRows, setEndRow]);
 
-  const onGridReady = (params: any) => {
-    gridRef.current = params.api;
-    if (gridRef.current.setGridOption) {
-      gridRef.current.setGridOption("datasource", getDatasource(result));
-      console.log("getDatasource 2");
+  function isAtBottom({
+    currentTarget,
+  }: React.UIEvent<HTMLDivElement>): boolean {
+    return (
+      Math.ceil(currentTarget.scrollTop) >=
+      currentTarget.scrollHeight - currentTarget.clientHeight
+    );
+  }
+
+  async function handleScroll(event: React.UIEvent<HTMLDivElement>) {
+    if (isLoading || !isAtBottom(event)) return;
+
+    if (endRow >= totalCount) return;
+
+    const start_row = endRow;
+    const end_row = Math.min(totalCount, start_row + 25);
+
+    setIsLoading(true);
+    try {
+      const qr = await run(
+        result.database_id,
+        result.query,
+        start_row,
+        end_row,
+        false
+      );
+      setRows([...rows, ...(qr.data || [])]);
+      setEndRow(qr.end_row);
+    } catch (e) {
+      notifications.show({
+        title: "Error",
+        color: "red",
+        message: `Failed to get more rows`,
+      });
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const defaultColDef = useMemo(() => {
-    return {
-      sortable: false,
-    };
-  }, []);
+  }
 
   return (
     <div
-      className="ag-theme-balham"
+      className="rdg-light"
       style={{
         height: "100%",
         width: "100%",
       }}
     >
-      <AgGridReact
-        loading={loading}
+      <DataGrid
         ref={gridRef}
-        columnDefs={headers}
-        onGridReady={onGridReady}
-        rowModelType="infinite"
-        cacheBlockSize={25}
-        rowSelection="single"
-        defaultColDef={defaultColDef}
-        maxConcurrentDatasourceRequests={1}
+        columns={headers || []}
+        rows={rows}
+        style={{ height: "100%" }}
+        className="rdg-light"
+        onScroll={handleScroll}
+        onRowsChange={setRows}
       />
+      {isLoading && <div className="load-more-grid">Loading more rows...</div>}
     </div>
   );
 }
@@ -93,6 +98,7 @@ const ResultSetContainer = ({
 }: {
   result?: QueryResult | undefined;
 }) => {
+  result && console.log("result");
   if (result == undefined) {
     return <></>;
   } else {

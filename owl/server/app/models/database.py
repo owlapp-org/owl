@@ -204,6 +204,7 @@ class Database(TimestampMixin, db.Model):
         statement: SqlParseStatement,
         start_row: int = 0,
         end_row: int = settings.result_set_hard_limit,
+        with_total_count: bool = True,
     ) -> ExecutionResult:
 
         offset = start_row
@@ -213,8 +214,11 @@ class Database(TimestampMixin, db.Model):
         )
         df = conn.execute(query_wrapper).pl()
 
-        total_count_query = f"select count(*) from ({statement})"
-        total_count = conn.execute(total_count_query).fetchone()[0]
+        if with_total_count:
+            total_count_query = f"select count(*) from ({statement})"
+            total_count = conn.execute(total_count_query).fetchone()[0]
+        else:
+            total_count = None
 
         return ExecutionResult(
             database_id=self.id,

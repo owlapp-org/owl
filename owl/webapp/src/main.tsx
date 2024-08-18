@@ -25,7 +25,7 @@ import "@mantine/notifications/styles.css";
 import HandleGoogleCallbackPage from "@pages/auth/HandleGoogleCallbackPage";
 import AccountSettings from "@pages/settings/AccountSettings";
 
-import "rc-tree/assets/index.css";
+import "react-data-grid/lib/styles.css";
 
 const isAuthenticated = () => {
   return Boolean(UserStorage.get()?.access_token);
