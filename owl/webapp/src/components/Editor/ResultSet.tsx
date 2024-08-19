@@ -99,7 +99,6 @@ const ResultSetContainer = ({
 }: {
   result?: QueryResult | undefined;
 }) => {
-  result && console.log("result");
   if (result == undefined) {
     return <></>;
   } else {

@@ -9,7 +9,6 @@ const Panel = ({ result }: { result?: QueryResult }) => {
         display: "flex",
         flexDirection: "column",
         width: "100%",
-        paddingBottom: "52px",
       }}
     >
       <ResultSetContainer result={result} />

@@ -22,7 +22,7 @@ export default function EditorTabPanel() {
       <div>
         <Tabs.List
           className="editor-tab-list"
-          // style={{ display: "flex", flexWrap: "nowrap", alignItems: "center" }}
+          style={{ display: "flex", flexWrap: "nowrap", alignItems: "center" }}
         >
           {editors.map((editor) => (
             <Tabs.Tab

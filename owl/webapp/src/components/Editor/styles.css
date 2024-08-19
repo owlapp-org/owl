@@ -12,14 +12,6 @@
   width: 100%;
 }
 
-.ag-theme-balham {
-  --ag-borders: none !important;
-}
-
-.ag-cell {
-  user-select: text !important;
-}
-
 .load-more-grid {
   inline-size: 280px;
   padding-block: 8px;

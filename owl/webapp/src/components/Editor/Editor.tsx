@@ -70,7 +70,7 @@ export default function Editor({ store }: IEditorProps) {
     <div
       style={{
         width: "100%",
-        height: "calc(100vh)",
+        height: "calc(100vh - 90px)",
         display: "flex",
         flexDirection: "column",
         borderTop: "1px solid #E9ECEF",
