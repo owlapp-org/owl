@@ -1,29 +1,30 @@
 import { useDatabaseStore } from "@hooks/databaseStore";
-import useEditorStore from "@hooks/editorStore";
+import { EditorStore } from "@hooks/editorStore";
 import { ActionIcon, Divider, Flex, Select } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconPlayerPlay } from "@tabler/icons-react";
 import { QueryResult } from "@ts/interfaces/database_interface";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   PanelGroup,
   PanelResizeHandle,
   Panel as ResizablePanel,
 } from "react-resizable-panels";
+import { StoreApi, UseBoundStore, useStore } from "zustand";
 import Code, { ExtendedReactCodeMirrorRef } from "./Code";
 import Panel from "./Panel";
 import "./styles.css";
 
-export default function Editor() {
+interface IEditorProps {
+  store: UseBoundStore<StoreApi<EditorStore>>;
+}
+
+export default function Editor({ store }: IEditorProps) {
   const [loading, setLoading] = useState(false);
-  const { databases, fetchDatabases } = useDatabaseStore();
-  const { run, code, setDatabase, selectedDatabase } = useEditorStore();
+  const { databases } = useDatabaseStore();
+  const { run, code, setDatabase, selectedDatabase } = useStore(store);
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
   const [result, setResult] = useState<QueryResult>();
-
-  useEffect(() => {
-    fetchDatabases();
-  }, [fetchDatabases]);
 
   const databaseOptions = databases.map((database) => ({
     value: database.id.toString(),
@@ -39,7 +40,6 @@ export default function Editor() {
       });
       return;
     }
-
     if (code.trim() === "") {
       return;
     }
@@ -127,7 +127,7 @@ export default function Editor() {
       <PanelGroup direction="vertical">
         <ResizablePanel>
           <div style={{ flex: 1, overflow: "hidden", height: "100%" }}>
-            <Code ref={codeRef} onExecute={handleExecute} />
+            <Code ref={codeRef} store={store} onExecute={handleExecute} />
           </div>
         </ResizablePanel>
         <PanelResizeHandle className="panel-resize-handle" />

@@ -1,7 +1,7 @@
 import { sql } from "@codemirror/lang-sql";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
-import useEditorStore from "@hooks/editorStore";
+import { EditorStore } from "@hooks/editorStore";
 import CodeMirror from "@uiw/react-codemirror";
 import { debounce, trim } from "lodash";
 import {
@@ -14,10 +14,12 @@ import {
 import "./styles.css";
 
 interface CodeProps {
+  store: UseBoundStore<StoreApi<EditorStore>>;
   onExecute: (selectedLines: string[]) => void;
 }
 
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
+import { StoreApi, UseBoundStore, useStore } from "zustand";
 
 // Define a custom type that extends ReactCodeMirrorRef
 export interface ExtendedReactCodeMirrorRef extends ReactCodeMirrorRef {
@@ -28,8 +30,8 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, CodeProps>(function Code(
   props,
   ref
 ) {
-  const { onExecute, ...other } = props;
-  const { code, setCode } = useEditorStore();
+  const { onExecute, store, ...other } = props;
+  const { code, setCode } = useStore(store);
 
   const codeMirrorRef = useRef<ReactCodeMirrorRef>(null);
 

@@ -13,7 +13,7 @@ const TopNavBar: React.FC<TopNavBarProps> = (props) => {
       align={"center"}
       px="md"
       py={0}
-      h={48}
+      mih={48}
       style={{
         borderBottom: "1px solid var(--mantine-color-gray-2)",
         boxSizing: "border-box",
