@@ -31,3 +31,21 @@
   line-height: 35px;
   background: rgba(255, 255, 204, 0.6);
 }
+
+.editor-tab {
+  display: "flex" !important;
+  justify-content: space-between !important;
+  border-radius: 0 !important;
+}
+.editor-tab .editor-tab-close-icon {
+  visibility: hidden;
+  width: 1rem;
+  height: 1rem;
+}
+.editor-tab:hover .editor-tab-close-icon {
+  visibility: visible;
+}
+
+.editor-tab-list::before {
+  border-width: 0px !important;
+}

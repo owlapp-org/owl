@@ -10,11 +10,10 @@ const TopNavBar: React.FC<TopNavBarProps> = (props) => {
   const { onMenuClick, ...otherProps } = props;
   return (
     <Flex
-      direction="row"
-      align="center"
-      justify="space-between"
+      align={"center"}
       px="md"
-      mih={48}
+      py={0}
+      h={48}
       style={{
         borderBottom: "1px solid var(--mantine-color-gray-2)",
         boxSizing: "border-box",

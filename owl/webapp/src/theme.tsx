@@ -2,6 +2,9 @@ import { MantineThemeOverride } from "@mantine/core";
 
 // A custom theme for this app
 const theme: MantineThemeOverride = {
+  fontFamily: "Verdana, sans-serif",
+  fontFamilyMonospace: "Monaco, Courier, monospace",
+  headings: { fontFamily: "Greycliff CF, sans-serif" },
   colors: {
     brand: [
       "#f0f5ff",
