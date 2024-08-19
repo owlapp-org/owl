@@ -4,6 +4,7 @@ import { QueryResult } from "@ts/interfaces/database_interface";
 
 import { useEffect, useRef, useState } from "react";
 import DataGrid, { DataGridHandle } from "react-data-grid";
+import "./styles.css";
 
 function ResultSet({ result }: { result: QueryResult }) {
   const run = useEditorStore((state) => state.run);

@@ -1,6 +1,6 @@
 import { useDatabaseStore } from "@hooks/databaseStore";
 import { createEditorStore } from "@hooks/editorStore";
-import { ActionIcon, Box, Tabs } from "@mantine/core";
+import { ActionIcon, Tabs } from "@mantine/core";
 import { IconPlus, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -17,18 +17,12 @@ export default function EditorTabPanel() {
   }, [fetchDatabases]);
 
   return (
-    <Box
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-      }}
-    >
-      <Tabs defaultValue={editors[0].id}>
-        {/* <ScrollArea scrollbarSize={0} style={{ width: "100%", display: "flex" }}> */}
+    <Tabs defaultValue={editors[0].id}>
+      {/* <ScrollArea scrollbarSize={0} style={{ width: "100%", display: "flex" }}> */}
+      <div>
         <Tabs.List
           className="editor-tab-list"
-          style={{ display: "flex", flexWrap: "nowrap", alignItems: "center" }}
+          // style={{ display: "flex", flexWrap: "nowrap", alignItems: "center" }}
         >
           {editors.map((editor) => (
             <Tabs.Tab
@@ -48,15 +42,14 @@ export default function EditorTabPanel() {
             <IconPlus size={20} stroke={1} />
           </ActionIcon>
         </Tabs.List>
+      </div>
+      {/* </ScrollArea> */}
 
-        {/* </ScrollArea> */}
-
-        {editors.map((editor) => (
-          <Tabs.Panel key={editor.id} value={editor.id}>
-            <Editor store={editor.store} />
-          </Tabs.Panel>
-        ))}
-      </Tabs>
-    </Box>
+      {editors.map((editor) => (
+        <Tabs.Panel key={editor.id} value={editor.id}>
+          <Editor store={editor.store} />
+        </Tabs.Panel>
+      ))}
+    </Tabs>
   );
 }
