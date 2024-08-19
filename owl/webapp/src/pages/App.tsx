@@ -34,7 +34,9 @@ export default function App() {
         />
         <Panel id="right-panel">
           <TopNavBar onMenuClick={onNavLeftMenuClick} />
-          <Main style={{ padding: "0 1px 0", overflow: "hidden" }}>
+          <Main
+            style={{ padding: "0 1px 0", overflow: "hidden", height: "100%" }}
+          >
             <Outlet />
           </Main>
         </Panel>

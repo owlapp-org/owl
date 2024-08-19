@@ -5,13 +5,17 @@ import { IconPlus, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Editor from "./Editor";
+import ZeroTabs from "./ZeroTabs";
 
 export default function EditorTabPanel() {
   const { fetchDatabases } = useDatabaseStore();
   const [editors, setEditors] = useState([
     { id: uuidv4(), store: createEditorStore() },
   ]);
-  const [activeTab, setActiveTab] = useState(editors[0].id);
+
+  const [activeTab, setActiveTab] = useState(
+    editors.length > 0 ? editors[0].id : undefined
+  );
 
   useEffect(() => {
     fetchDatabases();
@@ -23,34 +27,27 @@ export default function EditorTabPanel() {
     setEditors([...editors, newEditor]);
   };
 
-  const handleTabChange = (tab?: string | null) => {
-    console.log(tab);
-    if (tab) setActiveTab(tab);
+  const handleCloseEditor = (editorId: string) => {
+    const updatedEditors = editors.filter((editor) => editor.id !== editorId);
+    setEditors(updatedEditors);
+    if (activeTab === editorId && updatedEditors.length > 0) {
+      setActiveTab(updatedEditors[0].id);
+    } else if (updatedEditors.length === 0) {
+      setActiveTab("");
+    }
   };
 
-  // return (
-  //   <Tabs defaultValue="first">
-  //     <Tabs.List>
-  //       <Tabs.Tab value="first">First tab</Tabs.Tab>
-  //       <Tabs.Tab value="second">Second tab</Tabs.Tab>
-  //       <ActionIcon variant="transparent" onClick={handleAddEditor}>
-  //         <IconPlus size={20} stroke={1} />
-  //       </ActionIcon>
-  //     </Tabs.List>
-
-  //     <Tabs.Panel value="first">First panel</Tabs.Panel>
-  //     <Tabs.Panel value="second">Second panel</Tabs.Panel>
-  //   </Tabs>
-  // );
-
+  if (editors.length == 0) {
+    return <ZeroTabs onNewTab={handleAddEditor} />;
+  }
   return (
-    <Tabs value={activeTab} onChange={(t) => handleTabChange(t)}>
+    <Tabs value={activeTab} onChange={(t) => t && setActiveTab(t)}>
       {/* <ScrollArea scrollbarSize={0} style={{ width: "100%", display: "flex" }}> */}
       <Tabs.List
         className="editor-tab-list"
         style={{ display: "flex", flexWrap: "nowrap", alignItems: "center" }}
       >
-        {editors.map((editor) => (
+        {editors.map((editor, index) => (
           <Tabs.Tab
             key={editor.id}
             w={140}
@@ -58,10 +55,17 @@ export default function EditorTabPanel() {
             value={editor.id}
             className="editor-tab"
             rightSection={
-              <IconX stroke={1} className="editor-tab-close-icon" />
+              <IconX
+                stroke={1}
+                className="editor-tab-close-icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCloseEditor(editor.id);
+                }}
+              />
             }
           >
-            Query 1
+            Query {index + 1}
           </Tabs.Tab>
         ))}
         <ActionIcon variant="transparent" onClick={handleAddEditor}>
