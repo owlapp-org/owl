@@ -74,6 +74,7 @@ function ResultSet({ result }: { result: QueryResult }) {
     <div
       className="rdg-light"
       style={{
+        display: "flex",
         height: "100%",
         width: "100%",
       }}

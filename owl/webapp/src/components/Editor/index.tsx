@@ -1,6 +1,6 @@
 import { useDatabaseStore } from "@hooks/databaseStore";
 import { createEditorStore } from "@hooks/editorStore";
-import { ActionIcon, Tabs } from "@mantine/core";
+import { ActionIcon, Box, Tabs } from "@mantine/core";
 import { IconPlus, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -17,38 +17,46 @@ export default function EditorTabPanel() {
   }, [fetchDatabases]);
 
   return (
-    <Tabs defaultValue={editors[0].id}>
-      {/* <ScrollArea scrollbarSize={0} style={{ width: "100%", display: "flex" }}> */}
-      <Tabs.List
-        className="editor-tab-list"
-        style={{ display: "flex", flexWrap: "nowrap", alignItems: "center" }}
-      >
+    <Box
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+      }}
+    >
+      <Tabs defaultValue={editors[0].id}>
+        {/* <ScrollArea scrollbarSize={0} style={{ width: "100%", display: "flex" }}> */}
+        <Tabs.List
+          className="editor-tab-list"
+          style={{ display: "flex", flexWrap: "nowrap", alignItems: "center" }}
+        >
+          {editors.map((editor) => (
+            <Tabs.Tab
+              key={editor.id}
+              w={140}
+              px={4}
+              value={editor.id}
+              className="editor-tab"
+              rightSection={
+                <IconX stroke={1} className="editor-tab-close-icon" />
+              }
+            >
+              Query 1
+            </Tabs.Tab>
+          ))}
+          <ActionIcon variant="transparent">
+            <IconPlus size={20} stroke={1} />
+          </ActionIcon>
+        </Tabs.List>
+
+        {/* </ScrollArea> */}
+
         {editors.map((editor) => (
-          <Tabs.Tab
-            key={editor.id}
-            w={140}
-            px={4}
-            value={editor.id}
-            className="editor-tab"
-            rightSection={
-              <IconX stroke={1} className="editor-tab-close-icon" />
-            }
-          >
-            Query 1
-          </Tabs.Tab>
+          <Tabs.Panel key={editor.id} value={editor.id}>
+            <Editor store={editor.store} />
+          </Tabs.Panel>
         ))}
-        <ActionIcon variant="transparent">
-          <IconPlus size={20} stroke={1} />
-        </ActionIcon>
-      </Tabs.List>
-
-      {/* </ScrollArea> */}
-
-      {editors.map((editor) => (
-        <Tabs.Panel key={editor.id} value={editor.id}>
-          <Editor store={editor.store} />
-        </Tabs.Panel>
-      ))}
-    </Tabs>
+      </Tabs>
+    </Box>
   );
 }
