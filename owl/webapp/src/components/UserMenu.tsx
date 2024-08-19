@@ -38,7 +38,7 @@ const UserButton = forwardRef<HTMLDivElement, UserButtonProps>(
         <ActionIcon size="sm" variant="transparent">
           <IconUser stroke={1} />
         </ActionIcon>
-        <Text size="md" style={{ flex: 1, textAlign: "left" }}>
+        <Text size="md" style={{ flex: 1, textAlign: "left", fontWeight: 300 }}>
           {userName}
         </Text>
         <ActionIcon variant="transparent">
@@ -71,6 +71,10 @@ const UserMenu: React.FC<UserMenuProps> = ({
     onLogoutClick();
   };
 
+  const menuTextStyle = {
+    fontWeight: 300,
+  };
+
   return (
     <Menu position="bottom-start" width={300}>
       <Menu.Target>
@@ -89,7 +93,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
         >
           <Group>
             <IconSettings size={18} stroke={1} />
-            <Text>Settings</Text>
+            <Text style={menuTextStyle}>Settings</Text>
           </Group>
         </Menu.Item>
         <Menu.Item
@@ -100,7 +104,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
         >
           <Group>
             <IconHelp size={18} stroke={1} />
-            <Text>Help</Text>
+            <Text style={menuTextStyle}>Help</Text>
           </Group>
         </Menu.Item>
         <Menu.Item
@@ -111,7 +115,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
         >
           <Group>
             <IconLogout size={18} stroke={1} />
-            <Text>Log Out</Text>
+            <Text style={menuTextStyle}>Log Out</Text>
           </Group>
         </Menu.Item>
       </Menu.Dropdown>
