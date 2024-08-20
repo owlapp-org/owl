@@ -3,7 +3,7 @@ import ScriptMenu from "@components/ScriptMenu";
 import TreeNode from "@components/TreeNode";
 import { useScriptStore } from "@hooks/scriptStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
-import { Dropzone, FileWithPath, MIME_TYPES } from "@mantine/dropzone";
+import { Dropzone, FileWithPath } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
 import {
   IconCodeDots,
@@ -67,6 +67,7 @@ export default function ScriptsNode() {
       });
       return;
     }
+    console.log("uploading file...");
     setLoading(true);
     const file = files[0];
     const formData = new FormData();
@@ -131,17 +132,7 @@ export default function ScriptsNode() {
 
   return (
     <>
-      <Dropzone
-        maxFiles={1}
-        openRef={openRef}
-        onDrop={handleDrop}
-        accept={[
-          MIME_TYPES.csv,
-          MIME_TYPES.xlsx,
-          MIME_TYPES.xls,
-          "application/vnd.apache.parquet",
-        ]}
-      >
+      <Dropzone maxFiles={1} openRef={openRef} onDrop={handleDrop}>
         <Tree
           className="nav-tree"
           selectOnClick

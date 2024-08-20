@@ -6,6 +6,6 @@
   visibility: hidden;
 }
 
-.nav-tree:hover .root-node-action-icon {
+.tree-node:hover .root-node-action-icon {
   visibility: visible !important;
 }

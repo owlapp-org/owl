@@ -28,7 +28,7 @@ def get_script(id: int):
 @bp.route("/upload", methods=["POST"])
 def upload_script():
     try:
-        if "script" not in request.files:
+        if "file" not in request.files:
             message = "No script to upload"
             logger.error(message)
             return make_response(message), 500
