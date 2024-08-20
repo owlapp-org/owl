@@ -13,14 +13,14 @@ from werkzeug.utils import secure_filename
 logger = logging.getLogger(__name__)
 
 
-class File(TimestampMixin, db.Model):
-    __tablename__ = "files"
+class Script(TimestampMixin, db.Model):
+    __tablename__ = "scripts"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     path = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    owner = relationship("User", back_populates="files")
+    owner = relationship("User", back_populates="scripts")
 
     @property
     def name(self) -> str:
@@ -31,52 +31,52 @@ class File(TimestampMixin, db.Model):
         return self.name.rsplit(".", 1)[1].lower()
 
     @classmethod
-    def find_by_id(cls, id: int) -> Optional["File"]:
+    def find_by_id(cls, id: int) -> Optional["Script"]:
         return cls.query.filter_by(id=id).one_or_none()
 
     @classmethod
-    def find_by_owner(cls, id: int) -> list["File"]:
+    def find_by_owner(cls, id: int) -> list["Script"]:
         return cls.query.filter(cls.owner_id == id).all()
 
     @classmethod
-    def find_by_id_and_owner(cls, id: int, owner_id: int) -> Optional["File"]:
+    def find_by_id_and_owner(cls, id: int, owner_id: int) -> Optional["Script"]:
         return cls.query.filter(
             and_(cls.id == id, cls.owner_id == owner_id)
         ).one_or_none()
 
     @classmethod
-    def delete_by_id(cls, id: int, owner_id: int = None) -> "File":
-        file: File = cls.query.filter(
+    def delete_by_id(cls, id: int, owner_id: int = None) -> "Script":
+        script: Script = cls.query.filter(
             and_(cls.id == id, cls.owner_id == owner_id)
         ).one()
 
-        path = os.path.join(settings.STORAGE_BASE_PATH, file.path)
+        path = os.path.join(settings.STORAGE_BASE_PATH, script.path)
         try:
-            db.session.delete(file)
+            db.session.delete(script)
             db.session.commit()
             os.remove(path)
         except FileNotFoundError:
-            logger.warning("File not found: %s" % path)
+            logger.warning("Script not found: %s" % path)
 
     @classmethod
-    def save_file(cls, owner_id: int, file: FileStorage) -> "File":
-        filename = secure_filename(file.filename)
-        files_folder = os.path.join(
+    def save_script(cls, owner_id: int, script: FileStorage) -> "Script":
+        script_name = secure_filename(script.filename)
+        scripts_folder = os.path.join(
             settings.STORAGE_BASE_PATH,
             "users",
             str(owner_id),
-            "files",
+            "scripts",
         )
-        if not os.path.exists(files_folder):
-            os.makedirs(files_folder)
+        if not os.path.exists(scripts_folder):
+            os.makedirs(scripts_folder)
 
-        path = os.path.join(files_folder, filename)
+        path = os.path.join(scripts_folder, script_name)
         if os.path.exists(path):
-            raise FileExistsError("File already exists: %s" % filename)
+            raise FileExistsError("Script already exists: %s" % script_name)
         try:
-            file.save(path)
-            relative_path = os.path.join("users", str(owner_id), "files", filename)
-            model = File(path=relative_path, owner_id=owner_id)
+            script.save(path)
+            relative_path = os.path.join("users", str(owner_id), "scripts", script_name)
+            model = Script(path=relative_path, owner_id=owner_id)
             db.session.add(model)
             db.session.commit()
             return model
@@ -86,10 +86,10 @@ class File(TimestampMixin, db.Model):
                 os.remove(path)
             raise e
 
-    def file_exists(self) -> bool:
+    def script_exists(self) -> bool:
         return os.path.exists(os.path.join(settings.STORAGE_BASE_PATH, self.path))
 
-    def rename(self, name: str) -> "File":
+    def rename(self, name: str) -> "Script":
         if not name:
             raise Exception("Name can't be empty")
         path: str = self.path

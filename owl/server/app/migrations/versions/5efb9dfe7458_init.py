@@ -1,4 +1,4 @@
-"""empty message
+"""Initial script to manage tables, before 1.0 release.
 
 Revision ID: 5efb9dfe7458
 Revises:
@@ -79,7 +79,7 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(["owner_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name", "owner_id", name="_name_owner_uc"),
+        sa.UniqueConstraint("name", "owner_id", name="_files_name_owner_uc"),
     )
 
     # Create the files table
@@ -105,8 +105,32 @@ def upgrade() -> None:
         sa.UniqueConstraint("path", "owner_id", name="_path_owner_uc"),
     )
 
+    # Create the scripts table
+    op.create_table(
+        "scripts",
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("path", sa.String(), nullable=False),
+        sa.Column("owner_id", sa.Integer(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(),
+            server_default=created_at_default,
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(),
+            server_default=updated_at_default,
+            nullable=True,
+        ),
+        sa.ForeignKeyConstraint(["owner_id"], ["users.id"]),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("path", "owner_id", name="_scripts_path_owner_uc"),
+    )
+
 
 def downgrade() -> None:
     op.drop_table("databases")
     op.drop_table("users")
     op.drop_table("files")
+    op.drop_table("scripts")

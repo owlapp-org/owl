@@ -12,6 +12,14 @@ class User(TimestampMixin, db.Model):
     name = Column(String)
     password_hash = Column(String, nullable=True)
 
+    scripts = relationship(
+        "Script",
+        back_populates="owner",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        single_parent=True,
+    )
+
     files = relationship(
         "File",
         back_populates="owner",

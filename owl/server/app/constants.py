@@ -10,3 +10,4 @@ class StatementType:
 
 
 ALLOWED_FILE_EXTENSIONS = {"csv", "xls", "xlsx", "json", "parquet"}
+ALLOWED_SCRIPT_EXTENSIONS = {"sql"}

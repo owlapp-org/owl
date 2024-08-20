@@ -24,6 +24,7 @@ services:
     ports:
       - "5000:5000"
     environment:
+      OWL_ENV_FILE: ".env.test"
       FLASK_RUN_HOST: "0.0.0.0"
       FLASK_ENV: development
       SQLALCHEMY_DATABASE_URI: "postgresql://postgres:postgres@postgres:5432/test"
@@ -42,6 +43,9 @@ services:
     build:
       context: . # Set build context to the root of the project
       dockerfile: Dockerfile # Ensure this path is correct
+    environment:
+      SQLALCHEMY_DATABASE_URI: "postgresql://postgres:postgres@postgres:5432/test"
+      OWL_ENV_FILE: ".env.test"
     entrypoint: ["sh", "-c", "flask db upgrade -d owl/server/app/migrations"]
     depends_on:
       - postgres
@@ -60,6 +64,7 @@ services:
     volumes:
       - .:/owl
     environment:
+      OWL_ENV_FILE: ".env.test"
       STORAGE_BASE_PATH: "/app/storage"
       FLASK_API_URL: "http://flask:5000" # Add this if your tests need to access the Flask service
 
