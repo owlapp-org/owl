@@ -25,7 +25,6 @@ const ZeroTabs = ({ onNewTab }: IZeroTabsProps) => {
       >
         <Button
           onClick={onNewTab}
-          style={{ fontWeight: 400 }}
           fullWidth
           variant="outline"
           rightSection={<IconPlus size={24} stroke={1} />}

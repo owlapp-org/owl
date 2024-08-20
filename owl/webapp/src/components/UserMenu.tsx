@@ -71,10 +71,6 @@ const UserMenu: React.FC<UserMenuProps> = ({
     onLogoutClick();
   };
 
-  const menuTextStyle = {
-    fontWeight: 300,
-  };
-
   return (
     <Menu position="bottom-start" width={300}>
       <Menu.Target>
@@ -93,7 +89,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
         >
           <Group>
             <IconSettings size={18} stroke={1} />
-            <Text style={menuTextStyle}>Settings</Text>
+            <Text fw={300}>Settings</Text>
           </Group>
         </Menu.Item>
         <Menu.Item
@@ -104,7 +100,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
         >
           <Group>
             <IconHelp size={18} stroke={1} />
-            <Text style={menuTextStyle}>Help</Text>
+            <Text fw={300}>Help</Text>
           </Group>
         </Menu.Item>
         <Menu.Item
@@ -115,7 +111,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
         >
           <Group>
             <IconLogout size={18} stroke={1} />
-            <Text style={menuTextStyle}>Log Out</Text>
+            <Text fw={300}>Log Out</Text>
           </Group>
         </Menu.Item>
       </Menu.Dropdown>

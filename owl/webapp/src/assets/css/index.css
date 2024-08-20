@@ -16,3 +16,12 @@ body,
   width: 1px !important;
   height: 100%;
 }
+
+.mantine-Button-label {
+  font-weight: 400;
+}
+
+.mantine-InputWrapper-label,
+.mantine-TextInput-label {
+  font-weight: 400 !important;
+}
