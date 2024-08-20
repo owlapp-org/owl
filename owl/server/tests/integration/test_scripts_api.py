@@ -19,7 +19,7 @@ def test_upload_script(use_access_token: str, db: Session) -> None:
     with open(temp_file_name, "rb") as f:
         response = requests.post(
             api_url("scripts/upload"),
-            files={"script": f},
+            files={"file": f},
             headers={"Authorization": f"Bearer {use_access_token}"},
         )
         assert response.status_code == 200, response.text
@@ -49,7 +49,7 @@ def test_delete_script(use_access_token: str, db: Session):
     with open(temp_file_name, "rb") as f:
         response = requests.post(
             api_url("scripts/upload"),
-            files={"script": f},
+            files={"file": f},
             headers={"Authorization": f"Bearer {use_access_token}"},
         )
         assert response.status_code == 200, response.text
@@ -85,7 +85,7 @@ def test_rename_script(use_access_token: str, db: Session) -> None:
     with open(temp_file_name, "rb") as f:
         response = requests.post(
             api_url("scripts/upload"),
-            files={"script": f},
+            files={"file": f},
             headers={"Authorization": f"Bearer {use_access_token}"},
         )
         assert response.status_code == 200, response.text

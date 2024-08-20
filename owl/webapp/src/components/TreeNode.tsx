@@ -47,7 +47,7 @@ const TreeNode: React.FC<RenderTreeNodePayload> = (props) => {
           }}
         >
           <div>{node.label}</div>
-          {node.nodeProps?.action && node.nodeProps?.action}
+          {node.nodeProps?.actions && node.nodeProps?.actions}
         </div>
       </div>
     </Group>

@@ -1,32 +1,42 @@
-import FileMenu from "@components/FileMenu";
 import RenameFileModal from "@components/RenameFileModal";
+import ScriptMenu from "@components/ScriptMenu";
 import TreeNode from "@components/TreeNode";
-import { useFileStore } from "@hooks/fileStore";
+import { useScriptStore } from "@hooks/scriptStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath, MIME_TYPES } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
-import { IconFile, IconFolders, IconUpload } from "@tabler/icons-react";
+import {
+  IconCodeDots,
+  IconFileTypeSql,
+  IconPlus,
+  IconUpload,
+} from "@tabler/icons-react";
 import { IFile } from "@ts/interfaces/file_interface";
+import { IScript } from "@ts/interfaces/script_interface";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 
-function fileToTreeNodeData(
-  file: IFile,
+function scriptToTreeNodeData(
+  script: IScript,
   onDelete: (id: number) => void,
   onRename: (file: IFile) => void
 ): TreeNodeData {
   return {
-    label: file.name,
-    value: `${file.id}`,
+    label: script.name,
+    value: `${script.id}`,
     nodeProps: {
       icon: (
         <div>
-          <IconFile stroke={1} size={18} color="var(--mantine-color-gray-8)" />
+          <IconFileTypeSql
+            stroke={1}
+            size={18}
+            color="var(--mantine-color-gray-8)"
+          />
         </div>
       ),
       actions: (
-        <FileMenu
-          file={file}
+        <ScriptMenu
+          script={script}
           onDelete={onDelete}
           onRename={onRename}
           className="menu-icon"
@@ -36,16 +46,16 @@ function fileToTreeNodeData(
   };
 }
 
-export default function FilesNode() {
-  const { files, fetchFiles, removeFile, upload } = useFileStore();
-  const [selectedFile, setSelectedFile] = useState<IFile | null>(null);
+export default function ScriptsNode() {
+  const { scripts, fetchScripts, removeScript, upload } = useScriptStore();
+  const [selectedScript, setSelectedScript] = useState<IScript | null>(null);
   const openRef = useRef<() => void>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
+    fetchScripts();
+  }, [fetchScripts]);
 
   const handleDrop = async (files: FileWithPath[]) => {
     if (files.length === 0) {
@@ -53,7 +63,7 @@ export default function FilesNode() {
       notifications.show({
         title: "Error",
         color: "red",
-        message: "No files selected",
+        message: "No script file selected",
       });
       return;
     }
@@ -65,37 +75,56 @@ export default function FilesNode() {
     setLoading(false);
   };
 
-  const handleRenameFile = (file: IFile) => {
-    setSelectedFile(file);
+  const handleRenameScript = (file: IFile) => {
+    setSelectedScript(file);
     setIsRenameModalOpen(true);
   };
   const data: TreeNodeData[] = [
     {
-      label: "Files",
-      value: "files",
+      label: "Scripts",
+      value: "scripts",
       nodeProps: {
         icon: (
           <div>
-            <IconFolders stroke={1} color="var(--mantine-color-blue-8)" />
+            <IconCodeDots stroke={1} color="var(--mantine-color-blue-8)" />
           </div>
         ),
         actions: (
-          <ActionIcon
-            className="root-node-action-icon"
-            loading={loading}
-            disabled={loading}
-            variant="transparent"
-            onClick={(event) => {
-              event.stopPropagation();
-              openRef.current?.();
+          <div
+            style={{
+              display: "flex",
+              gap: "5px",
             }}
           >
-            <IconUpload stroke={1} />
-          </ActionIcon>
+            <ActionIcon
+              className="root-node-action-icon"
+              loading={loading}
+              disabled={loading}
+              variant="transparent"
+              onClick={(event) => {
+                event.stopPropagation();
+                openRef.current?.();
+              }}
+            >
+              <IconPlus stroke={1} />
+            </ActionIcon>
+            <ActionIcon
+              className="root-node-action-icon"
+              loading={loading}
+              disabled={loading}
+              variant="transparent"
+              onClick={(event) => {
+                event.stopPropagation();
+                openRef.current?.();
+              }}
+            >
+              <IconUpload stroke={1} />
+            </ActionIcon>
+          </div>
         ),
       },
-      children: files.map((file) =>
-        fileToTreeNodeData(file, removeFile, handleRenameFile)
+      children: scripts.map((file) =>
+        scriptToTreeNodeData(file, removeScript, handleRenameScript)
       ),
     },
   ];
@@ -124,7 +153,7 @@ export default function FilesNode() {
       <RenameFileModal
         open={isRenameModalOpen}
         onClose={() => setIsRenameModalOpen(false)}
-        file={selectedFile}
+        file={selectedScript}
       />
     </>
   );

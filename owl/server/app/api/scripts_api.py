@@ -33,7 +33,7 @@ def upload_script():
             logger.error(message)
             return make_response(message), 500
 
-        script = request.files["script"]
+        script = request.files["file"]
         if script.filename == "":
             message = "No selected script"
             logger.error(message)

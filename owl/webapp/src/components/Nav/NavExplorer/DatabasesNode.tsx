@@ -27,7 +27,7 @@ function databaseToTreeNodeData(
           />
         </div>
       ),
-      action: (
+      actions: (
         <DatabaseMenu
           database={database}
           onDelete={onDelete}
@@ -67,8 +67,9 @@ export default function DatabasesNode() {
             <IconBrandOnedrive stroke={1} color="var(--mantine-color-blue-8)" />
           </div>
         ),
-        action: (
+        actions: (
           <ActionIcon
+            className="root-node-action-icon"
             variant="transparent"
             onClick={(event) => {
               event.stopPropagation();
@@ -88,6 +89,7 @@ export default function DatabasesNode() {
   return (
     <>
       <Tree
+        className="nav-tree"
         selectOnClick
         clearSelectionOnOutsideClick
         data={data}

@@ -1,3 +1,11 @@
 .MuiTreeItem-content {
   border-radius: 0px !important;
 }
+
+.root-node-action-icon {
+  visibility: hidden;
+}
+
+.nav-tree:hover .root-node-action-icon {
+  visibility: visible !important;
+}

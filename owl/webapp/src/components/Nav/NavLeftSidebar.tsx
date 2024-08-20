@@ -38,7 +38,7 @@ const NavLeftSidebar: FC<NavLeftSidebarProps> = ({}) => {
   };
 
   return (
-    <div>
+    <div style={{ height: "100%" }}>
       <Flex
         direction="row"
         align="center"
