@@ -22,7 +22,15 @@ def get_script(id: int):
     if script := Script.find_by_id_and_owner(id=id, owner_id=get_jwt_identity()):
         return ScriptSchema.model_validate(script).model_dump()
     else:
-        return make_response("Script not found"), 404
+        return make_response("Script file not found"), 404
+
+
+@bp.route("/<int:id>/content", methods=["GET"])
+def get_script_content(id: int):
+    if script := Script.find_by_id_and_owner(id=id, owner_id=get_jwt_identity()):
+        return jsonify({"content": script.content()})
+    else:
+        return make_response("Script file not found"), 404
 
 
 @bp.route("/upload", methods=["POST"])

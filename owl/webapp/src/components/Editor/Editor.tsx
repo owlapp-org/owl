@@ -97,7 +97,7 @@ export default function Editor({ store }: IEditorProps) {
           }}
         >
           <Select
-            placeholder="Database"
+            placeholder="Select database"
             data={databaseOptions}
             value={selectedDatabase}
             onChange={setDatabase}

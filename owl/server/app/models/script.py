@@ -101,3 +101,8 @@ class Script(TimestampMixin, db.Model):
         db.session.commit()
 
         return self
+
+    def content(self) -> str:
+        path = os.path.join(settings.STORAGE_BASE_PATH, self.path)
+        with open(path, "r") as f:
+            return f.read()
