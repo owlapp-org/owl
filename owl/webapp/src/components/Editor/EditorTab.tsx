@@ -1,5 +1,5 @@
 import { useDatabaseStore } from "@hooks/databaseStore";
-import { EditorStore } from "@hooks/editorStore";
+import { IEditorTabStore } from "@hooks/editorStore";
 import { ActionIcon, Divider, Flex, Select } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconPlayerPlay } from "@tabler/icons-react";
@@ -15,11 +15,11 @@ import Code, { ExtendedReactCodeMirrorRef } from "./Code";
 import Panel from "./Panel";
 import "./styles.css";
 
-interface IEditorProps {
-  store: UseBoundStore<StoreApi<EditorStore>>;
+interface IEditorTabProps {
+  store: UseBoundStore<StoreApi<IEditorTabStore>>;
 }
 
-export default function Editor({ store }: IEditorProps) {
+export default function EditorTab({ store }: IEditorTabProps) {
   const [loading, setLoading] = useState(false);
   const { databases } = useDatabaseStore();
   const { run, code, setDatabase, selectedDatabase } = useStore(store);

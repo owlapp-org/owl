@@ -25,6 +25,7 @@ function scriptToTreeNodeData(
     label: script.name,
     value: `${script.id}`,
     nodeProps: {
+      onClick: () => {},
       icon: (
         <div>
           <IconFileTypeSql

@@ -1,44 +1,31 @@
 import { useDatabaseStore } from "@hooks/databaseStore";
-import { createEditorStore } from "@hooks/editorStore";
+import useEditorStore from "@hooks/editorStore";
 import { ActionIcon, Tabs } from "@mantine/core";
 import { IconPlus, IconX } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import Editor from "./Editor";
+import { useEffect } from "react";
+import EditorTab from "./EditorTab";
 import ZeroTabs from "./ZeroTabs";
 
 export default function EditorTabPanel() {
   const { fetchDatabases } = useDatabaseStore();
-  const [editors, setEditors] = useState([
-    { id: uuidv4(), store: createEditorStore() },
-  ]);
 
-  const [activeTab, setActiveTab] = useState(
-    editors.length > 0 ? editors[0].id : undefined
-  );
+  const { addTab, closeTab, tabs, getTabCount, activeTab, setActiveTab } =
+    useEditorStore();
 
   useEffect(() => {
     fetchDatabases();
   }, [fetchDatabases]);
 
-  const handleAddEditor = () => {
-    const newEditor = { id: uuidv4(), store: createEditorStore() };
-    setActiveTab(newEditor.id);
-    setEditors([...editors, newEditor]);
+  const handleAddTab = () => {
+    addTab();
   };
 
-  const handleCloseEditor = (editorId: string) => {
-    const updatedEditors = editors.filter((editor) => editor.id !== editorId);
-    setEditors(updatedEditors);
-    if (activeTab === editorId && updatedEditors.length > 0) {
-      setActiveTab(updatedEditors[0].id);
-    } else if (updatedEditors.length === 0) {
-      setActiveTab("");
-    }
+  const handleCloseTab = (id: string) => {
+    closeTab(id);
   };
 
-  if (editors.length == 0) {
-    return <ZeroTabs onNewTab={handleAddEditor} />;
+  if (getTabCount() == 0) {
+    return <ZeroTabs onNewTab={handleAddTab} />;
   }
   return (
     <Tabs value={activeTab} onChange={(t) => t && setActiveTab(t)}>
@@ -47,12 +34,12 @@ export default function EditorTabPanel() {
         className="editor-tab-list"
         style={{ display: "flex", flexWrap: "nowrap", alignItems: "center" }}
       >
-        {editors.map((editor, index) => (
+        {Object.keys(tabs).map((id, index) => (
           <Tabs.Tab
-            key={editor.id}
+            key={id}
             w={140}
             px={4}
-            value={editor.id}
+            value={id}
             className="editor-tab"
             rightSection={
               <IconX
@@ -60,7 +47,7 @@ export default function EditorTabPanel() {
                 className="editor-tab-close-icon"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleCloseEditor(editor.id);
+                  handleCloseTab(id);
                 }}
               />
             }
@@ -68,15 +55,15 @@ export default function EditorTabPanel() {
             Query {index + 1}
           </Tabs.Tab>
         ))}
-        <ActionIcon variant="transparent" onClick={handleAddEditor}>
+        <ActionIcon variant="transparent" onClick={handleAddTab}>
           <IconPlus size={20} stroke={1} />
         </ActionIcon>
       </Tabs.List>
       {/* </ScrollArea> */}
 
-      {editors.map((editor) => (
-        <Tabs.Panel key={editor.id} value={editor.id}>
-          <Editor store={editor.store} />
+      {Object.entries(tabs).map(([id, store]) => (
+        <Tabs.Panel key={id} value={id}>
+          <EditorTab store={store} />
         </Tabs.Panel>
       ))}
     </Tabs>
