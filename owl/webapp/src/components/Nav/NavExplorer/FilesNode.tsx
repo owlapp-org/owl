@@ -37,7 +37,7 @@ function fileToTreeNodeData(
 }
 
 export default function FilesNode() {
-  const { files, fetchFiles, removeFile, upload } = useFileStore();
+  const { files, fetchFiles, removeFile, upload, renameFile } = useFileStore();
   const [selectedFile, setSelectedFile] = useState<IFile | null>(null);
   const openRef = useRef<() => void>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -124,7 +124,8 @@ export default function FilesNode() {
       <RenameFileModal
         open={isRenameModalOpen}
         onClose={() => setIsRenameModalOpen(false)}
-        file={selectedFile}
+        file={selectedFile!}
+        onRename={renameFile}
       />
     </>
   );

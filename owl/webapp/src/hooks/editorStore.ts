@@ -6,7 +6,7 @@ import { IScript } from "@ts/interfaces/script_interface";
 
 export interface IEditorTabStore {
   id: string;
-  script?: IScript;
+  scriptId?: number;
   code: string;
   selectedDatabase: string | null;
   isBusy: boolean;
@@ -26,7 +26,7 @@ const createTabStore = () =>
   create<IEditorTabStore>((set, get) => ({
     id: uuidv4(),
     isBusy: false,
-    script: undefined,
+    scriptId: undefined,
     code: "",
     selectedDatabase: null,
     data: [],
@@ -81,7 +81,7 @@ export interface IEditorStore {
   tabs: Record<string, UseBoundStore<StoreApi<IEditorTabStore>>>;
   setActiveTab(id: string | null): void;
   getTabCount(): number;
-  addTab: (scrip?: IScript) => void;
+  addTab: (scriptId?: number) => void;
   closeTab: (id: string) => void;
 }
 
@@ -96,11 +96,11 @@ const useEditorStore = create<IEditorStore>((set, get) => ({
   getTabCount: () => {
     return Object.keys(get().tabs).length;
   },
-  addTab: (script?: IScript) => {
+  addTab: (scriptId?: number) => {
     let isExistingTab = false;
-    if (script) {
+    if (scriptId) {
       Object.entries(get().tabs).forEach(([id, store]) => {
-        if (store.getState().script?.id == script.id) {
+        if (store.getState().scriptId == scriptId) {
           set({ activeTab: id });
           isExistingTab = true;
         }
@@ -111,7 +111,7 @@ const useEditorStore = create<IEditorStore>((set, get) => ({
     }
     const id = uuidv4();
     const store = createTabStore();
-    store.setState({ script: script });
+    store.setState({ scriptId });
     set((state) => ({
       activeTab: id,
       tabs: {

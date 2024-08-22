@@ -50,7 +50,8 @@ function scriptToTreeNodeData(
 }
 
 export default function ScriptsNode() {
-  const { scripts, fetchScripts, removeScript, upload } = useScriptStore();
+  const { scripts, fetchScripts, removeScript, upload, renameScript } =
+    useScriptStore();
   const [selectedScript, setSelectedScript] = useState<IScript | null>(null);
   const openRef = useRef<() => void>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -133,7 +134,7 @@ export default function ScriptsNode() {
           handleRenameScript,
           (e: any) => {
             e.stopPropagation();
-            addTab(scriptFile);
+            addTab(scriptFile.id);
           }
         )
       ),
@@ -154,7 +155,8 @@ export default function ScriptsNode() {
       <RenameFileModal
         open={isRenameModalOpen}
         onClose={() => setIsRenameModalOpen(false)}
-        file={selectedScript}
+        file={selectedScript!}
+        onRename={renameScript}
       />
     </>
   );

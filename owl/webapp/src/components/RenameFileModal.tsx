@@ -1,18 +1,23 @@
-import { useFileStore } from "@hooks/fileStore";
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { IFile } from "@ts/interfaces/file_interface";
+import { IScript } from "@ts/interfaces/script_interface";
 import { FC, useEffect, useState } from "react";
 
 interface RenameFileModalProps {
   open: boolean;
   onClose: () => void;
-  file: IFile | null;
+  file: IFile | IScript;
+  onRename: (id: number, newName: string) => void;
 }
 
-const RenameFileModal: FC<RenameFileModalProps> = ({ open, onClose, file }) => {
+const RenameFileModal: FC<RenameFileModalProps> = ({
+  open,
+  onClose,
+  file,
+  onRename,
+}) => {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
-  const { renameFile } = useFileStore();
 
   useEffect(() => {
     if (open && file) {
@@ -36,7 +41,7 @@ const RenameFileModal: FC<RenameFileModalProps> = ({ open, onClose, file }) => {
     setLoading(true);
     try {
       setLoading(true);
-      await renameFile(file.id, name || file.name);
+      await onRename(file.id, name || file.name);
     } catch (error) {
     } finally {
       setLoading(false);
