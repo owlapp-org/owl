@@ -1,7 +1,15 @@
+import { IEditorTabStore } from "@hooks/editorStore";
 import { QueryResult } from "@ts/interfaces/database_interface";
+import { StoreApi, UseBoundStore } from "zustand";
 import ResultSetContainer from "./ResultSet";
 
-const Panel = ({ result }: { result?: QueryResult }) => {
+const Panel = ({
+  result,
+  store,
+}: {
+  result?: QueryResult;
+  store: UseBoundStore<StoreApi<IEditorTabStore>>;
+}) => {
   return (
     <div
       style={{
@@ -11,7 +19,7 @@ const Panel = ({ result }: { result?: QueryResult }) => {
         width: "100%",
       }}
     >
-      <ResultSetContainer result={result} />
+      <ResultSetContainer result={result} store={store} />
     </div>
   );
 };

@@ -34,7 +34,7 @@ export default function EditorTabPanel() {
         className="editor-tab-list"
         style={{ display: "flex", flexWrap: "nowrap", alignItems: "center" }}
       >
-        {Object.keys(tabs).map((id, index) => (
+        {Object.entries(tabs).map(([id, store], index) => (
           <Tabs.Tab
             key={id}
             w={140}
@@ -52,7 +52,7 @@ export default function EditorTabPanel() {
               />
             }
           >
-            Query {index + 1}
+            {store.getState().script?.name || "Query " + (index + 1)}
           </Tabs.Tab>
         ))}
         <ActionIcon variant="transparent" onClick={handleAddTab}>

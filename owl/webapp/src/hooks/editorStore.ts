@@ -74,7 +74,7 @@ export interface IEditorStore {
   tabs: Record<string, UseBoundStore<StoreApi<IEditorTabStore>>>;
   setActiveTab(id: string | null): void;
   getTabCount(): number;
-  addTab: (scrip?: IScript) => UseBoundStore<StoreApi<IEditorTabStore>>;
+  addTab: (scrip?: IScript) => void;
   closeTab: (id: string) => void;
 }
 
@@ -90,6 +90,18 @@ const useEditorStore = create<IEditorStore>((set, get) => ({
     return Object.keys(get().tabs).length;
   },
   addTab: (script?: IScript) => {
+    let isExistingTab = false;
+    if (script) {
+      Object.entries(get().tabs).forEach(([id, store]) => {
+        if (store.getState().script?.id == script.id) {
+          set({ activeTab: id });
+          isExistingTab = true;
+        }
+      });
+    }
+    if (isExistingTab) {
+      return;
+    }
     const id = uuidv4();
     const store = createTabStore();
     store.setState({ script: script });
@@ -100,7 +112,6 @@ const useEditorStore = create<IEditorStore>((set, get) => ({
         [id]: store,
       },
     }));
-    return store;
   },
   closeTab: (id: string) => {
     set((state) => {
@@ -120,70 +131,3 @@ const useEditorStore = create<IEditorStore>((set, get) => ({
 }));
 
 export default useEditorStore;
-
-// export interface EditorStore {
-//   id: string;
-//   code: string;
-//   selectedDatabase: string | null;
-//   setCode: (code: string) => void;
-//   setDatabase: (database: string | null) => void;
-//   run: (
-//     databaseId: number,
-//     query: string,
-//     start_row?: number,
-//     end_row?: number,
-//     with_total_count?: boolean
-//   ) => any;
-// }
-
-// const useEditorStore = create<EditorStore>((set, get) => ({
-//   id: uuidv4(),
-//   code: "",
-//   selectedDatabase: null,
-//   data: [],
-//   queryResult: undefined,
-//   setCode: (code) => set({ code }),
-//   setDatabase: (database) => set({ selectedDatabase: database }),
-//   run: async (
-//     databaseId: number,
-//     query: string,
-//     start_row?: number,
-//     end_row?: number,
-//     with_total_count: boolean = true
-//   ) => {
-//     try {
-//       const result = await DatabaseService.run(
-//         databaseId,
-//         query,
-//         start_row,
-//         end_row,
-//         with_total_count
-//       );
-//       if (result.affected_rows != null) {
-//         notifications.show({
-//           title: "Success",
-//           message: `Affected rows ${result.affected_rows}`,
-//         });
-//       } else if (!start_row) {
-//         // show only once not for all pagination requests
-//         notifications.show({
-//           title: "Success",
-//           message: `Statement executed`,
-//         });
-//       }
-//       return result;
-//     } catch (error: any) {
-//       notifications.show({
-//         title: "Error",
-//         message: error?.response?.data as string,
-//         color: "red",
-//       });
-//       throw error;
-//     }
-//   },
-// }));
-
-// const createEditorStore = () => useEditorStore;
-
-// export default useEditorStore;
-// export { createEditorStore };

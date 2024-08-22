@@ -30,6 +30,7 @@ const TreeNode: React.FC<RenderTreeNodePayload> = (props) => {
         />
       )}
       <div
+        onClick={node.nodeProps?.onClick}
         style={{
           display: "flex",
           gap: 10,

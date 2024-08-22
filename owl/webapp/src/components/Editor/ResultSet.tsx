@@ -1,13 +1,20 @@
-import useEditorStore from "@hooks/editorStore";
+import { IEditorTabStore } from "@hooks/editorStore";
 import { notifications } from "@mantine/notifications";
 import { QueryResult } from "@ts/interfaces/database_interface";
 
 import { useEffect, useRef, useState } from "react";
 import DataGrid, { DataGridHandle } from "react-data-grid";
+import { StoreApi, UseBoundStore, useStore } from "zustand";
 import "./styles.css";
 
-function ResultSet({ result }: { result: QueryResult }) {
-  const run = useEditorStore((state) => state.run);
+function ResultSet({
+  result,
+  store,
+}: {
+  result: QueryResult;
+  store: UseBoundStore<StoreApi<IEditorTabStore>>;
+}) {
+  const { run } = useStore(store);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [rows, setRows] = useState<Record<string, any>[]>([]);
@@ -96,13 +103,15 @@ function ResultSet({ result }: { result: QueryResult }) {
 
 const ResultSetContainer = ({
   result,
+  store,
 }: {
   result?: QueryResult | undefined;
+  store: UseBoundStore<StoreApi<IEditorTabStore>>;
 }) => {
   if (result == undefined) {
     return <></>;
   } else {
-    return <ResultSet result={result} />;
+    return <ResultSet result={result} store={store} />;
   }
 };
 

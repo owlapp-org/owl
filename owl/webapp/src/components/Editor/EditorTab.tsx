@@ -1,10 +1,11 @@
 import { useDatabaseStore } from "@hooks/databaseStore";
 import { IEditorTabStore } from "@hooks/editorStore";
-import { ActionIcon, Divider, Flex, Select } from "@mantine/core";
+import { useScriptStore } from "@hooks/scriptStore";
+import { ActionIcon, Divider, Flex, Loader, Select } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconPlayerPlay } from "@tabler/icons-react";
 import { QueryResult } from "@ts/interfaces/database_interface";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PanelGroup,
   PanelResizeHandle,
@@ -22,9 +23,25 @@ interface IEditorTabProps {
 export default function EditorTab({ store }: IEditorTabProps) {
   const [loading, setLoading] = useState(false);
   const { databases } = useDatabaseStore();
-  const { run, code, setDatabase, selectedDatabase } = useStore(store);
+  const { script, run, code, setDatabase, selectedDatabase, setCode } =
+    useStore(store);
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
   const [result, setResult] = useState<QueryResult>();
+  const [isScriptLoading, setIsScriptLoading] = useState(false);
+  const { getScriptContent } = useScriptStore();
+
+  useEffect(() => {
+    if (script?.id) {
+      setIsScriptLoading(true);
+      getScriptContent(script.id)
+        .then((content) => {
+          content && setCode(content);
+        })
+        .finally(() => {
+          setIsScriptLoading(false);
+        });
+    }
+  }, [script?.id]);
 
   const databaseOptions = databases.map((database) => ({
     value: database.id.toString(),
@@ -65,6 +82,23 @@ export default function EditorTab({ store }: IEditorTabProps) {
       handleExecute(selectedLines);
     }
   };
+
+  if (isScriptLoading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "calc(100vh - 90px)",
+          width: "100%",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Loader type="bars" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -132,7 +166,7 @@ export default function EditorTab({ store }: IEditorTabProps) {
         </ResizablePanel>
         <PanelResizeHandle className="panel-resize-handle" />
         <ResizablePanel maxSize={90} minSize={10}>
-          <Panel result={result} />
+          <Panel result={result} store={store} />
         </ResizablePanel>
       </PanelGroup>
     </div>

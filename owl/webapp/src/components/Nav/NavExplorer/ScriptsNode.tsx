@@ -1,6 +1,7 @@
 import RenameFileModal from "@components/RenameFileModal";
 import ScriptMenu from "@components/ScriptMenu";
 import TreeNode from "@components/TreeNode";
+import useEditorStore from "@hooks/editorStore";
 import { useScriptStore } from "@hooks/scriptStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath } from "@mantine/dropzone";
@@ -19,13 +20,14 @@ import "./styles.css";
 function scriptToTreeNodeData(
   script: IScript,
   onDelete: (id: number) => void,
-  onRename: (file: IFile) => void
+  onRename: (file: IFile) => void,
+  onClick: (e: any) => void
 ): TreeNodeData {
   return {
     label: script.name,
     value: `${script.id}`,
     nodeProps: {
-      onClick: () => {},
+      onClick,
       icon: (
         <div>
           <IconFileTypeSql
@@ -53,6 +55,7 @@ export default function ScriptsNode() {
   const openRef = useRef<() => void>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const { addTab } = useEditorStore();
 
   useEffect(() => {
     fetchScripts();
@@ -60,7 +63,6 @@ export default function ScriptsNode() {
 
   const handleDrop = async (files: FileWithPath[]) => {
     if (files.length === 0) {
-      console.log("No files selected");
       notifications.show({
         title: "Error",
         color: "red",
@@ -68,7 +70,6 @@ export default function ScriptsNode() {
       });
       return;
     }
-    console.log("uploading file...");
     setLoading(true);
     const file = files[0];
     const formData = new FormData();
@@ -125,8 +126,16 @@ export default function ScriptsNode() {
           </div>
         ),
       },
-      children: scripts.map((file) =>
-        scriptToTreeNodeData(file, removeScript, handleRenameScript)
+      children: scripts.map((scriptFile) =>
+        scriptToTreeNodeData(
+          scriptFile,
+          removeScript,
+          handleRenameScript,
+          (e: any) => {
+            e.stopPropagation();
+            addTab(scriptFile);
+          }
+        )
       ),
     },
   ];

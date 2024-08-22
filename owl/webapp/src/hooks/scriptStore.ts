@@ -6,6 +6,7 @@ import ScriptService from "@services/scriptService";
 
 interface IScriptState {
   scripts: IScript[];
+  getScriptContent: (id: number) => Promise<string>;
   fetchScripts: () => void;
   upload: (data: FormData) => void;
   removeScript: (id: number) => void;
@@ -14,6 +15,19 @@ interface IScriptState {
 
 export const useScriptStore = create<IScriptState>((set) => ({
   scripts: [],
+  getScriptContent: async (id: number) => {
+    try {
+      const content = await ScriptService.getScriptContent(id);
+      return content;
+    } catch (e) {
+      notifications.show({
+        title: "Error",
+        color: "red",
+        message: "Failed to get script content",
+      });
+      throw e;
+    }
+  },
   fetchScripts: async () => {
     try {
       const files = await ScriptService.list();

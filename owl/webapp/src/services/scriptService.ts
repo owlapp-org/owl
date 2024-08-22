@@ -3,6 +3,11 @@ import { IScript } from "@ts/interfaces/script_interface";
 import request from "src/lib/request";
 
 namespace ScriptService {
+  export const getScriptContent = async (id: number): Promise<string> => {
+    return request.get(`scripts/${id}/content`).then((response) => {
+      return response.data["content"];
+    });
+  };
   export const upload = async (data: FormData): Promise<IScript> => {
     return request
       .post("scripts/upload", data, {
