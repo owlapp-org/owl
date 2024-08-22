@@ -30,7 +30,11 @@ const TreeNode: React.FC<RenderTreeNodePayload> = (props) => {
         />
       )}
       <div
-        onClick={node.nodeProps?.onClick}
+        onClick={(e: any) => {
+          if (e.target.dataset?.section == "label") {
+            node.nodeProps?.onClick(e);
+          }
+        }}
         style={{
           display: "flex",
           gap: 10,
@@ -47,7 +51,13 @@ const TreeNode: React.FC<RenderTreeNodePayload> = (props) => {
             alignItems: "center",
           }}
         >
-          <div>{node.label}</div>
+          <div
+            className="tree-node-label"
+            data-section="label"
+            style={{ flexGrow: 1 }}
+          >
+            {node.label}
+          </div>
           {node.nodeProps?.actions && node.nodeProps?.actions}
         </div>
       </div>

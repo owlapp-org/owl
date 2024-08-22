@@ -19,7 +19,8 @@ export default function ScriptMenu({
 }: ScriptMenuProps) {
   const { showDialog } = useAlertDialog();
 
-  const handleDelete = () => {
+  const handleDelete = (e: any) => {
+    e.stopPropagation();
     showDialog({
       title: "Confirm Delete",
       body: `Are you sure you want to delete the script ${script.name}?`,
@@ -29,7 +30,8 @@ export default function ScriptMenu({
     });
   };
 
-  const handleRename = () => {
+  const handleRename = (e: any) => {
+    e.stopPropagation();
     onRename(script);
   };
 

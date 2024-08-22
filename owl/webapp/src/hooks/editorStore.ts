@@ -9,6 +9,8 @@ export interface IEditorTabStore {
   script?: IScript;
   code: string;
   selectedDatabase: string | null;
+  isBusy: boolean;
+  setIsBusy: (value: boolean) => void;
   setCode: (code: string) => void;
   setDatabase: (database: string | null) => void;
   run: (
@@ -23,11 +25,13 @@ export interface IEditorTabStore {
 const createTabStore = () =>
   create<IEditorTabStore>((set, get) => ({
     id: uuidv4(),
+    isBusy: false,
     script: undefined,
     code: "",
     selectedDatabase: null,
     data: [],
     queryResult: undefined,
+    setIsBusy: (value: boolean) => set({ isBusy: value }),
     setCode: (code) => set({ code }),
     setDatabase: (database) => set({ selectedDatabase: database }),
     run: async (
@@ -38,6 +42,7 @@ const createTabStore = () =>
       with_total_count: boolean = true
     ) => {
       try {
+        set({ isBusy: true });
         const result = await DatabaseService.run(
           databaseId,
           query,
@@ -65,6 +70,8 @@ const createTabStore = () =>
           color: "red",
         });
         throw error;
+      } finally {
+        set({ isBusy: false });
       }
     },
   }));

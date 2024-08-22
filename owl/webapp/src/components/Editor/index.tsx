@@ -1,6 +1,6 @@
 import { useDatabaseStore } from "@hooks/databaseStore";
 import useEditorStore from "@hooks/editorStore";
-import { ActionIcon, Tabs } from "@mantine/core";
+import { ActionIcon, Loader, Tabs } from "@mantine/core";
 import { IconPlus, IconX } from "@tabler/icons-react";
 import { useEffect } from "react";
 import EditorTab from "./EditorTab";
@@ -42,14 +42,18 @@ export default function EditorTabPanel() {
             value={id}
             className="editor-tab"
             rightSection={
-              <IconX
-                stroke={1}
-                className="editor-tab-close-icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCloseTab(id);
-                }}
-              />
+              store.getState().isBusy ? (
+                <Loader size="1rem" />
+              ) : (
+                <IconX
+                  stroke={1}
+                  className="editor-tab-close-icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCloseTab(id);
+                  }}
+                />
+              )
             }
           >
             {store.getState().script?.name || "Query " + (index + 1)}
