@@ -29,15 +29,22 @@
   justify-content: space-between !important;
   border-radius: 0 !important;
 }
+
 .editor-tab .editor-tab-close-icon {
   visibility: hidden;
   width: 1rem;
   height: 1rem;
 }
+
 .editor-tab:hover .editor-tab-close-icon {
   visibility: visible;
 }
 
 .editor-tab-list::before {
   border-width: 0px !important;
+}
+
+.editor-data-grid [role="columnheader"] {
+  font-weight: 400 !important;
+  font-size: 1rem;
 }
