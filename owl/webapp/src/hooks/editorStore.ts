@@ -2,8 +2,6 @@ import DatabaseService from "@services/databaseService";
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { notifications } from "@mantine/notifications";
 import { v4 as uuidv4 } from "uuid";
-import { IScript } from "@ts/interfaces/script_interface";
-import { useScriptStore } from "./scriptStore";
 
 export interface IEditorTabStore {
   id: string;

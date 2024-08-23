@@ -2,7 +2,14 @@ import CreateDatabaseModal from "@components/Database/CreateDatabaseModal";
 import { useDatabaseStore } from "@hooks/databaseStore";
 import { IEditorTabStore } from "@hooks/editorStore";
 import { useScriptStore } from "@hooks/scriptStore";
-import { ActionIcon, Divider, Flex, Loader, Select } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Divider,
+  Flex,
+  Loader,
+  Select,
+} from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons-react";
 import { QueryResult } from "@ts/interfaces/database_interface";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -144,20 +151,28 @@ export default function EditorTabBody({ store }: EditorTabBodyProps) {
             borderBottom: "1px solid var(--mantine-color-gray-2)",
           }}
         >
-          <Select
-            onClick={handleDatabaseSelectClick}
-            placeholder={
-              databases.length == 0 ? "Add new database" : "Select database"
-            }
-            data={databaseOptions}
-            value={selectedDatabase}
-            onChange={setDatabase}
-            styles={(theme) => ({
-              input: {
-                border: "none",
-              },
-            })}
-          />
+          {databases.length == 0 ? (
+            <Button
+              miw={200}
+              variant="transparent"
+              onClick={handleDatabaseSelectClick}
+            >
+              Add database
+            </Button>
+          ) : (
+            <Select
+              miw={200}
+              placeholder={"Select database"}
+              data={databaseOptions}
+              value={selectedDatabase}
+              onChange={setDatabase}
+              styles={(theme) => ({
+                input: {
+                  border: "none",
+                },
+              })}
+            />
+          )}
           <Divider orientation="vertical" />
           <ActionIcon
             h="100%"
