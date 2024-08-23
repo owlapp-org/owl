@@ -33,6 +33,17 @@ def get_script_content(id: int):
         return make_response("Script file not found"), 404
 
 
+@bp.route("/<int:id>/content", methods=["PUT"])
+def update_script_content(id: int):
+    if script := Script.find_by_id_and_owner(id, get_jwt_identity()):
+        # todo validate
+        content = request.json["content"]
+        script.update_content(content)
+        return jsonify({}), 200
+    else:
+        return make_response("Script file not found"), 404
+
+
 @bp.route("/upload", methods=["POST"])
 def upload_script():
     try:

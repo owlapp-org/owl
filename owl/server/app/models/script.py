@@ -106,3 +106,15 @@ class Script(TimestampMixin, db.Model):
         path = os.path.join(settings.STORAGE_BASE_PATH, self.path)
         with open(path, "r") as f:
             return f.read()
+
+    def write_to_script_file(self, content: str) -> "Script":
+        path = os.path.join(settings.STORAGE_BASE_PATH, self.path)
+        with open(path, "w") as f:
+            f.write(content)
+        return self
+
+    def update_content(self, content: str) -> "Script":
+        self.write_to_script_file(content)
+        db.session.add(self)
+        db.session.commit()
+        return self

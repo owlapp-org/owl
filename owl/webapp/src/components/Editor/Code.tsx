@@ -81,6 +81,13 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, CodeProps>(function Code(
         return true;
       },
     },
+    {
+      key: "Mod-s",
+      run: () => {
+        console.log("save");
+        return true;
+      },
+    },
   ];
 
   useImperativeHandle(ref, () => ({

@@ -7,6 +7,7 @@ import useEditorStore from "./editorStore";
 
 interface IScriptState {
   scripts: IScript[];
+  updateScriptContent: (id: number, content: string) => void;
   getScriptContent: (id: number) => Promise<string>;
   fetchScripts: () => void;
   upload: (data: FormData) => void;
@@ -16,6 +17,7 @@ interface IScriptState {
 
 export const useScriptStore = create<IScriptState>((set) => ({
   scripts: [],
+  updateScriptContent: (id: number, content: string) => {},
   getScriptContent: async (id: number) => {
     try {
       const content = await ScriptService.getScriptContent(id);
