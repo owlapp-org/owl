@@ -1,3 +1,5 @@
+from typing import Optional
+
 from app.errors.errors import ModelNotFoundException, NotAuthorizedError
 from app.models import db
 from app.models.database import Database
@@ -68,8 +70,9 @@ def update_database(id: int):
         return make_response("Database not found"), 404
 
 
+@bp.route("/run", methods=["POST"])
 @bp.route("/<int:id>/run", methods=["POST"])
-def run(id: int):
+def run(id: Optional[int] = None):
     schema = QueryDatabaseInputSchema.model_validate(request.json)
 
     start_row = request.args.get("start_row", default=0, type=int)

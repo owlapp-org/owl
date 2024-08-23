@@ -1,11 +1,11 @@
+import CreateDatabaseModal from "@components/Database/CreateDatabaseModal";
 import { useDatabaseStore } from "@hooks/databaseStore";
 import { IEditorTabStore } from "@hooks/editorStore";
 import { useScriptStore } from "@hooks/scriptStore";
 import { ActionIcon, Divider, Flex, Loader, Select } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { IconPlayerPlay } from "@tabler/icons-react";
 import { QueryResult } from "@ts/interfaces/database_interface";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   PanelGroup,
   PanelResizeHandle,
@@ -29,6 +29,12 @@ export default function EditorTabBody({ store }: EditorTabBodyProps) {
   const [result, setResult] = useState<QueryResult>();
   const [isScriptLoading, setIsScriptLoading] = useState(false);
   const { getScriptContent } = useScriptStore();
+  const [isCreateDatabaseModalOpen, setIsCreateDatabaseModalOpen] =
+    useState(false);
+
+  useCallback(() => {
+    console.log(code);
+  }, [code]);
 
   useEffect(() => {
     if (scriptId) {
@@ -49,14 +55,14 @@ export default function EditorTabBody({ store }: EditorTabBodyProps) {
   }));
 
   async function handleExecute(selectedLines: string[]) {
-    if (!selectedDatabase) {
-      notifications.show({
-        title: "Warning",
-        color: "yellow",
-        message: `Select a database from the list`,
-      });
-      return;
-    }
+    // if (!selectedDatabase) {
+    //   notifications.show({
+    //     title: "Warning",
+    //     color: "yellow",
+    //     message: `Select a database from the list`,
+    //   });
+    //   return;
+    // }
     if (code.trim() === "") {
       return;
     }
@@ -68,18 +74,26 @@ export default function EditorTabBody({ store }: EditorTabBodyProps) {
 
     try {
       setLoading(true);
-      // todo hardcoded values
-      const res = await run(Number.parseInt(selectedDatabase), query, 0, 25);
+      const databaseId = !selectedDatabase
+        ? null
+        : Number.parseInt(selectedDatabase);
+      const res = await run(databaseId, query, 0, 25); // todo hardcoded values
       setResult(res);
     } finally {
       setLoading(false);
     }
   }
 
-  const handleButtonClick = () => {
+  const handleExecuteButtonClick = () => {
     if (codeRef.current) {
       const selectedLines = codeRef.current?.getSelectedLines?.() ?? [];
       handleExecute(selectedLines);
+    }
+  };
+
+  const handleDatabaseSelectClick = () => {
+    if ((!databases || databases.length === 0) && !isCreateDatabaseModalOpen) {
+      setIsCreateDatabaseModalOpen(true);
     }
   };
 
@@ -131,7 +145,10 @@ export default function EditorTabBody({ store }: EditorTabBodyProps) {
           }}
         >
           <Select
-            placeholder="Select database"
+            onClick={handleDatabaseSelectClick}
+            placeholder={
+              databases.length == 0 ? "Add new database" : "Select database"
+            }
             data={databaseOptions}
             value={selectedDatabase}
             onChange={setDatabase}
@@ -146,11 +163,11 @@ export default function EditorTabBody({ store }: EditorTabBodyProps) {
             h="100%"
             radius={0}
             p={0}
-            disabled={code.trim() === "" || !selectedDatabase}
+            disabled={code.trim() === ""}
             aria-label="Run"
             variant="transparent"
             miw={40}
-            onClick={handleButtonClick}
+            onClick={handleExecuteButtonClick}
             loading={loading}
           >
             <IconPlayerPlay stroke={1} />
@@ -169,6 +186,10 @@ export default function EditorTabBody({ store }: EditorTabBodyProps) {
           <Panel result={result} store={store} />
         </ResizablePanel>
       </PanelGroup>
+      <CreateDatabaseModal
+        open={isCreateDatabaseModalOpen}
+        onClose={() => setIsCreateDatabaseModalOpen(false)}
+      />
     </div>
   );
 }

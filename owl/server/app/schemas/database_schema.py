@@ -30,7 +30,7 @@ class QueryDatabaseInputSchema(BaseModel):
 
 
 class ExecutionResult(BaseModel):
-    database_id: int = None
+    database_id: Optional[int] = None
     query: str
     statement_type: Optional[str] = "UNKNOWN"
     data: Optional[list[dict[str, Any]]] = None

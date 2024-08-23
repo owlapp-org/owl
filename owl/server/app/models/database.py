@@ -2,6 +2,7 @@ import logging
 import os
 import uuid
 
+import duckdb
 import jinja2
 import pydash as _
 import sqlparse
@@ -137,7 +138,9 @@ class Database(TimestampMixin, db.Model):
         return query
 
     @classmethod
-    def run(cls, id: int, query: str, owner_id: int, **kwargs) -> ExecutionResult:
+    def run(
+        cls, id: int | None, query: str, owner_id: int, **kwargs
+    ) -> ExecutionResult:
         logger.debug("Received query", extra=query)
 
         query = _.chain(query).trim().trim_end(";").value()
@@ -155,13 +158,24 @@ class Database(TimestampMixin, db.Model):
         # if statement_type == "UNKNOWN":
         #     raise QueryParseError(f"Failed to parse query {query}")
 
-        database = cls.find_by_id(id)
-        if not database:
+        if id is not None:
+            database = cls.find_by_id(id)
+        else:
+            # run select only in-memory queries
+            database = cls(id=None)
+
+        if id is not None and not database:
             raise ModelNotFoundException()
-        if owner_id is not None and database.owner_id != owner_id:
+        if id is not None and owner_id is not None and database.owner_id != owner_id:
             raise NotAuthorizedError(
                 "You are not authorized to delete database that is not owned by you!"
             )
+        if id is not None and statement.get_type() != "SELECT":
+            raise Exception(
+                "Only select statement is supported for in memory database."
+            )
+        if id is None:
+            return database.run_query(conn=duckdb, statement=statement, **kwargs)
 
         pool = registry.get(database.id, database)
         if not pool:

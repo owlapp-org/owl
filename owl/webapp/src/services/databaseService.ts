@@ -36,17 +36,18 @@ namespace DatabaseService {
   };
 
   export const run = async (
-    id: number | string,
+    id: number | string | null,
     query: string,
     start_row?: number,
     end_row?: number,
     with_total_count: boolean = true
   ): Promise<QueryResult> => {
+    const url = id == null ? "databases/run" : `databases/${id}/run`;
     return request
       .post(
-        `databases/${id}/run`,
+        url,
         {
-          query: query,
+          query,
         },
         {
           params: { start_row, end_row, with_total_count },

@@ -15,7 +15,7 @@ export interface IEditorTabStore {
   setCode: (code: string) => void;
   setDatabase: (database: string | null) => void;
   run: (
-    databaseId: number,
+    databaseId: number | string | null,
     query: string,
     start_row?: number,
     end_row?: number,
@@ -36,7 +36,7 @@ const createTabStore = () =>
     setCode: (code) => set({ code }),
     setDatabase: (database) => set({ selectedDatabase: database }),
     run: async (
-      databaseId: number,
+      databaseId: number | string | null,
       query: string,
       start_row?: number,
       end_row?: number,

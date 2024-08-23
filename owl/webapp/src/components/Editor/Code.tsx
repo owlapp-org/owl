@@ -62,7 +62,7 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, CodeProps>(function Code(
         setCode(newCode);
       }
     }, 200),
-    [setCode]
+    [setCode, code]
   );
 
   const handleExecute = () => {
