@@ -1,7 +1,6 @@
 import { sql } from "@codemirror/lang-sql";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
-import { EditorStore } from "@hooks/editorStore";
 import CodeMirror from "@uiw/react-codemirror";
 import { debounce, trim } from "lodash";
 import {
@@ -14,10 +13,11 @@ import {
 import "./styles.css";
 
 interface CodeProps {
-  store: UseBoundStore<StoreApi<EditorStore>>;
+  store: UseBoundStore<StoreApi<IEditorTabStore>>;
   onExecute: (selectedLines: string[]) => void;
 }
 
+import { IEditorTabStore } from "@hooks/editorStore";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 
