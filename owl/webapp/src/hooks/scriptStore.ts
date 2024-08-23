@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { notifications } from "@mantine/notifications";
 import { IScript } from "@ts/interfaces/script_interface";
 import ScriptService from "@services/scriptService";
+import useEditorStore from "./editorStore";
 
 interface IScriptState {
   scripts: IScript[];
@@ -59,12 +60,22 @@ export const useScriptStore = create<IScriptState>((set) => ({
       set((state) => ({
         scripts: state.scripts.filter((s) => s.id !== id),
       }));
+
+      // if the script is open, close it
+      const editorTab = Object.entries(useEditorStore.getState().tabs).find(
+        ([_, tab]) => tab.getState().scriptId == id
+      );
+      if (editorTab) {
+        const [tabId, _] = editorTab;
+        useEditorStore.getState().closeTab(tabId);
+      }
+
       notifications.show({
         title: "Success",
         message: `Script file deleted successfully`,
       });
     } catch (error) {
-      console.error("Failed to create database", error);
+      console.error("Failed to delete script", error);
       notifications.show({
         color: "red",
         title: "Error",

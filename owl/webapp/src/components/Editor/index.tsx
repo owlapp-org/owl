@@ -28,6 +28,7 @@ export default function Editor() {
   if (getTabCount() == 0) {
     return <ZeroTabs onNewTab={handleAddTab} />;
   }
+
   return (
     <Tabs value={activeTab} onChange={(t) => t && setActiveTab(t)}>
       {/* <ScrollArea scrollbarSize={0} style={{ width: "100%", display: "flex" }}> */}
@@ -43,30 +44,6 @@ export default function Editor() {
             id={id}
             handleCloseTab={handleCloseTab}
           />
-
-          // <Tabs.Tab
-          //   key={id}
-          //   w={140}
-          //   px={4}
-          //   value={id}
-          //   className="editor-tab"
-          //   rightSection={
-          //     store.getState().isBusy ? (
-          //       <Loader size="1rem" />
-          //     ) : (
-          //       <IconX
-          //         stroke={1}
-          //         className="editor-tab-close-icon"
-          //         onClick={(e) => {
-          //           e.stopPropagation();
-          //           handleCloseTab(id);
-          //         }}
-          //       />
-          //     )
-          //   }
-          // >
-          //   {store.getState().script?.name || "Query " + (index + 1)}
-          // </Tabs.Tab>
         ))}
         <ActionIcon variant="transparent" onClick={handleAddTab}>
           <IconPlus size={20} stroke={1} />

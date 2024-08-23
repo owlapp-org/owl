@@ -27,6 +27,7 @@ export default function EditorTab({
     for (let i = 0; i < scripts.length; i++) {
       if (scripts[i].id === scriptId) {
         setTitle(scripts[i].name);
+        return;
       }
     }
   }, [scripts]);
