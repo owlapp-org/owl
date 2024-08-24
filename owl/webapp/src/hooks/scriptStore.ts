@@ -7,6 +7,7 @@ import useEditorStore from "./editorStore";
 
 interface IScriptState {
   scripts: IScript[];
+  create: (name: string) => void;
   updateScriptContent: (id: number, content: string) => void;
   getScriptContent: (id: number) => Promise<string>;
   fetchScripts: () => void;
@@ -39,6 +40,23 @@ export const useScriptStore = create<IScriptState>((set) => ({
       console.error("Failed to fetch script files", error);
     }
   },
+  create: async (name: string) => {
+    try {
+      const script = await ScriptService.create(name);
+      set((state) => ({ scripts: [...state.scripts, script] }));
+      notifications.show({
+        title: "Success",
+        message: `Script file created successfully`,
+      });
+    } catch (error) {
+      console.error("Failed to create file", error);
+      notifications.show({
+        title: "Error",
+        color: "red",
+        message: `Failed to create file ${error}`,
+      });
+    }
+  },
   upload: async (data: FormData) => {
     try {
       const file = await ScriptService.upload(data);
@@ -52,7 +70,7 @@ export const useScriptStore = create<IScriptState>((set) => ({
       notifications.show({
         title: "Error",
         color: "red",
-        message: `File upload script file ${error}`,
+        message: `Failed to upload script file ${error}`,
       });
     }
   },

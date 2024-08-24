@@ -6,6 +6,22 @@ from pytest import Session
 from tests.conftest import api_url
 
 
+def test_create_script(use_access_token: str, db: Session):
+    response = requests.post(
+        api_url("scripts"),
+        json={"name": "test_file.sql"},
+        headers={"Authorization": f"Bearer {use_access_token}"},
+    )
+    assert response.status_code == 200, response.text
+    id = response.json()["id"]
+    response = requests.get(
+        api_url(f"scripts/{id}/exists"),
+        headers={"Authorization": f"Bearer {use_access_token}"},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["exists"]
+
+
 def test_update_script_content(use_access_token: str, db: Session):
     content = """select * from test"""
 

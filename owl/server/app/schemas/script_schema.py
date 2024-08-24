@@ -7,3 +7,7 @@ class ScriptSchema(BaseModel, extra="ignore"):
     path: str
     name: str
     extension: str
+
+
+class ScriptInputSchema(BaseModel, extra="ignore"):
+    name: str

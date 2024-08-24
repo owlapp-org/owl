@@ -2,7 +2,7 @@ from logging import getLogger
 
 from app.constants import ALLOWED_SCRIPT_EXTENSIONS
 from app.models.script import Script
-from app.schemas.script_schema import ScriptSchema
+from app.schemas.script_schema import ScriptInputSchema, ScriptSchema
 from flask import Blueprint, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity
 
@@ -15,6 +15,18 @@ bp = Blueprint("scripts", __name__)
 def get_scripts():
     scripts = Script.find_by_owner(id=get_jwt_identity())
     return [ScriptSchema.model_validate(script).model_dump() for script in scripts]
+
+
+@bp.route("/", methods=["POST"])
+def create_script():
+    input_schema = ScriptInputSchema.model_validate(request.json)
+    try:
+        model = Script.create_script(
+            owner_id=get_jwt_identity(), filename=input_schema.name
+        )
+        return ScriptSchema.model_validate(model).model_dump()
+    except Exception as e:
+        return make_response(str(e)), 500
 
 
 @bp.route("/<int:id>")
@@ -62,7 +74,7 @@ def upload_script():
             message = f"Script extension ('{script_extension}') not allowed"
             logger.error(message)
             return make_response(message), 500
-        f = Script.save_script(get_jwt_identity(), script)
+        f = Script.upload_script(get_jwt_identity(), script)
 
         return ScriptSchema.model_validate(f).model_dump()
     except Exception as e:

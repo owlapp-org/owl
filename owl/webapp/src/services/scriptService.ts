@@ -25,10 +25,13 @@ namespace ScriptService {
   export const rename = async (id: number, name: string): Promise<IScript> => {
     return request
       .put(`scripts/${id}/rename`, { name })
-      .then((response) => response.data as IScript);
+      .then((response) => response.data);
   };
   export const del = async (id: number): Promise<IScript> => {
     return request.delete(`scripts/${id}`);
+  };
+  export const create = async (name: string): Promise<IScript> => {
+    return request.post("scripts", { name }).then((response) => response.data);
   };
 }
 
