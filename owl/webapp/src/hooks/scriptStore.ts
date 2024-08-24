@@ -7,8 +7,8 @@ import useEditorStore from "./editorStore";
 
 interface IScriptState {
   scripts: IScript[];
-  create: (name: string) => void;
-  updateScriptContent: (id: number, content: string) => void;
+  create: (name: string, content?: string) => Promise<IScript>;
+  saveScriptContent: (id: number, content: string) => void;
   getScriptContent: (id: number) => Promise<string>;
   fetchScripts: () => void;
   upload: (data: FormData) => void;
@@ -18,7 +18,9 @@ interface IScriptState {
 
 export const useScriptStore = create<IScriptState>((set) => ({
   scripts: [],
-  updateScriptContent: (id: number, content: string) => {},
+  saveScriptContent: async (id: number, content: string) => {
+    return ScriptService.saveScriptContent(id, content);
+  },
   getScriptContent: async (id: number) => {
     try {
       const content = await ScriptService.getScriptContent(id);
@@ -40,14 +42,15 @@ export const useScriptStore = create<IScriptState>((set) => ({
       console.error("Failed to fetch script files", error);
     }
   },
-  create: async (name: string) => {
+  create: async (name: string, content?: string) => {
     try {
-      const script = await ScriptService.create(name);
+      const script = await ScriptService.create(name, content);
       set((state) => ({ scripts: [...state.scripts, script] }));
       notifications.show({
         title: "Success",
         message: `Script file created successfully`,
       });
+      return script;
     } catch (error) {
       console.error("Failed to create file", error);
       notifications.show({
@@ -55,6 +58,7 @@ export const useScriptStore = create<IScriptState>((set) => ({
         color: "red",
         message: `Failed to create file ${error}`,
       });
+      throw error;
     }
   },
   upload: async (data: FormData) => {

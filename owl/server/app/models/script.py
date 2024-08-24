@@ -120,7 +120,9 @@ class Script(TimestampMixin, db.Model):
         return self
 
     @classmethod
-    def create_script(cls, owner_id: int, filename: str) -> "Script":
+    def create_script(
+        cls, owner_id: int, filename: str, content: Optional[str] = None
+    ) -> "Script":
         script_name = secure_filename(filename)
         scripts_folder = os.path.join(
             settings.STORAGE_BASE_PATH,
@@ -136,8 +138,9 @@ class Script(TimestampMixin, db.Model):
             raise FileExistsError("Script file already exists: %s" % script_name)
         try:
 
-            with open(path, "w"):
-                pass
+            with open(path, "w") as f:
+                if content is not None:
+                    f.write(content)
             relative_path = os.path.join("users", str(owner_id), "scripts", script_name)
             model = Script(path=relative_path, owner_id=owner_id)
             db.session.add(model)

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -11,3 +13,4 @@ class ScriptSchema(BaseModel, extra="ignore"):
 
 class ScriptInputSchema(BaseModel, extra="ignore"):
     name: str
+    content: Optional[str] = None

@@ -1,4 +1,5 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { FC, useState } from "react";
 
 interface CreateScriptModalProps {
@@ -26,6 +27,15 @@ const CreateScriptModal: FC<CreateScriptModalProps> = ({
   };
 
   const handleSubmit = async () => {
+    if (!name.endsWith(".sql")) {
+      notifications.show({
+        title: "Warning",
+        message: "Only 'sql' file extension is allowed.",
+        color: "yellow",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       setLoading(true);

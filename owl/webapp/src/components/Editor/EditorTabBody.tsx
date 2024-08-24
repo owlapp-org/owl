@@ -162,7 +162,7 @@ export default function EditorTabBody({ store }: EditorTabBodyProps) {
           ) : (
             <Select
               miw={200}
-              placeholder={"Select database"}
+              placeholder={"Using in-memory database"}
               data={databaseOptions}
               value={selectedDatabase}
               onChange={setDatabase}
