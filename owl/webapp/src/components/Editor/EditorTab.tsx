@@ -52,6 +52,11 @@ export default function EditorTab({
           />
         )
       }
+      style={{
+        overflow: "hidden",
+        whiteSpace: "nowrap",
+        textOverflow: "ellipsis",
+      }}
     >
       {title}
     </Tabs.Tab>
