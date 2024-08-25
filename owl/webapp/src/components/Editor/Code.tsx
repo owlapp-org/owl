@@ -38,6 +38,7 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, CodeProps>(function Code(
     useStore(store);
   const codeMirrorRef = useRef<ReactCodeMirrorRef>(null);
   const [isCreateScriptModalOpen, setIsCreateScriptModalOpen] = useState(false);
+  const [oldCode, setOldCode] = useState("");
 
   const getSelectedLines = (view: EditorView): string[] => {
     const state = view.state;
@@ -79,7 +80,10 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, CodeProps>(function Code(
 
   const handleSave = async () => {
     if (scriptId) {
-      await saveScriptContent(code);
+      if (code != oldCode) {
+        await saveScriptContent(code);
+        setOldCode(code);
+      }
     } else {
       setIsCreateScriptModalOpen(true);
     }
@@ -119,7 +123,10 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, CodeProps>(function Code(
   useEffect(() => {
     if (scriptId) {
       const debouncedSave = debounce(() => {
-        saveScriptContent(code);
+        if (oldCode != code) {
+          saveScriptContent(code);
+          setOldCode(code);
+        }
       }, 500);
 
       const intervalId = setInterval(() => {
