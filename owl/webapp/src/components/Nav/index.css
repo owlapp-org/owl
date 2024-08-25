@@ -1,11 +1,10 @@
-.nav-settings-list {
-}
 .nav-settings-list .mantine-List-item {
   line-height: 2em;
   padding-left: 44px;
   margin: 0;
   cursor: pointer;
 }
+
 .nav-settings-list .mantine-List-item:hover {
   background-color: var(--mantine-color-gray-2);
 }

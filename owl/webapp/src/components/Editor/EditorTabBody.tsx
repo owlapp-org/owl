@@ -110,7 +110,7 @@ export default function EditorTabBody({ store }: EditorTabBodyProps) {
         style={{
           display: "flex",
           flexDirection: "column",
-          height: "calc(100vh - 90px)",
+          height: "calc(100vh - 84px)",
           width: "100%",
           alignItems: "center",
           justifyContent: "center",
@@ -125,7 +125,7 @@ export default function EditorTabBody({ store }: EditorTabBodyProps) {
     <div
       style={{
         width: "100%",
-        height: "calc(100vh - 90px)",
+        height: "calc(100vh - 84px)",
         display: "flex",
         flexDirection: "column",
         borderTop: "1px solid #E9ECEF",

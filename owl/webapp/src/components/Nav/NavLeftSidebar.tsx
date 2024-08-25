@@ -43,7 +43,7 @@ const NavLeftSidebar: FC<NavLeftSidebarProps> = ({}) => {
         direction="row"
         align="center"
         justify="space-between"
-        mih={48}
+        mih={42}
         style={{
           borderBottom: "1px solid var(--mantine-color-gray-2)",
           padding: 0,
