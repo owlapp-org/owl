@@ -35,7 +35,6 @@ const CreateScriptModal: FC<CreateScriptModalProps> = ({
       });
       return;
     }
-
     setLoading(true);
     try {
       setLoading(true);
