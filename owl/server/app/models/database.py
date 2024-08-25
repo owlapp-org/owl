@@ -170,7 +170,7 @@ class Database(TimestampMixin, db.Model):
             raise NotAuthorizedError(
                 "You are not authorized to delete database that is not owned by you!"
             )
-        if id is not None and statement.get_type() != "SELECT":
+        if id is None and statement.get_type() != "SELECT":
             raise Exception(
                 "Only select statement is supported for in memory database."
             )

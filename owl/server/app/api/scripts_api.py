@@ -2,7 +2,7 @@ from logging import getLogger
 
 from app.constants import ALLOWED_SCRIPT_EXTENSIONS
 from app.models.script import Script
-from app.schemas.script_schema import ScriptSchema
+from app.schemas.script_schema import ScriptInputSchema, ScriptSchema
 from flask import Blueprint, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity
 
@@ -17,6 +17,18 @@ def get_scripts():
     return [ScriptSchema.model_validate(script).model_dump() for script in scripts]
 
 
+@bp.route("/", methods=["POST"])
+def create_script():
+    input_schema = ScriptInputSchema.model_validate(request.json)
+    try:
+        model = Script.create_script(
+            owner_id=get_jwt_identity(), filename=input_schema.name
+        )
+        return ScriptSchema.model_validate(model).model_dump()
+    except Exception as e:
+        return make_response(str(e)), 500
+
+
 @bp.route("/<int:id>")
 def get_script(id: int):
     if script := Script.find_by_id_and_owner(id=id, owner_id=get_jwt_identity()):
@@ -29,6 +41,17 @@ def get_script(id: int):
 def get_script_content(id: int):
     if script := Script.find_by_id_and_owner(id=id, owner_id=get_jwt_identity()):
         return jsonify({"content": script.content()})
+    else:
+        return make_response("Script file not found"), 404
+
+
+@bp.route("/<int:id>/content", methods=["PUT"])
+def update_script_content(id: int):
+    if script := Script.find_by_id_and_owner(id, get_jwt_identity()):
+        # todo validate
+        content = request.json["content"]
+        script.update_content(content)
+        return jsonify({}), 200
     else:
         return make_response("Script file not found"), 404
 
@@ -51,7 +74,7 @@ def upload_script():
             message = f"Script extension ('{script_extension}') not allowed"
             logger.error(message)
             return make_response(message), 500
-        f = Script.save_script(get_jwt_identity(), script)
+        f = Script.upload_script(get_jwt_identity(), script)
 
         return ScriptSchema.model_validate(f).model_dump()
     except Exception as e:

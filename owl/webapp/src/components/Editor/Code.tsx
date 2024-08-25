@@ -7,8 +7,10 @@ import {
   forwardRef,
   memo,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useRef,
+  useState,
 } from "react";
 import "./styles.css";
 
@@ -17,6 +19,7 @@ interface CodeProps {
   onExecute: (selectedLines: string[]) => void;
 }
 
+import CreateScriptModal from "@components/CreateScriptModal";
 import { IEditorTabStore } from "@hooks/editorStore";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
@@ -31,9 +34,10 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, CodeProps>(function Code(
   ref
 ) {
   const { onExecute, store, ...other } = props;
-  const { code, setCode } = useStore(store);
-
+  const { code, setCode, scriptId, saveScriptContent, createScript } =
+    useStore(store);
   const codeMirrorRef = useRef<ReactCodeMirrorRef>(null);
+  const [isCreateScriptModalOpen, setIsCreateScriptModalOpen] = useState(false);
 
   const getSelectedLines = (view: EditorView): string[] => {
     const state = view.state;
@@ -73,11 +77,30 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, CodeProps>(function Code(
     }
   };
 
+  const handleSave = async () => {
+    if (scriptId) {
+      await saveScriptContent(code);
+    } else {
+      setIsCreateScriptModalOpen(true);
+    }
+  };
+
+  const handleCreateScript = async (name: string) => {
+    await createScript(name, code);
+  };
+
   const customKeymap = [
     {
       key: "Mod-Enter",
       run: () => {
         handleExecute();
+        return true;
+      },
+    },
+    {
+      key: "Mod-s",
+      run: () => {
+        handleSave();
         return true;
       },
     },
@@ -93,6 +116,22 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, CodeProps>(function Code(
     },
   }));
 
+  useEffect(() => {
+    if (scriptId) {
+      const debouncedSave = debounce(() => {
+        saveScriptContent(code);
+      }, 500);
+
+      const intervalId = setInterval(() => {
+        debouncedSave();
+      }, 500);
+
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [code, scriptId, saveScriptContent]);
+
   return (
     <div id="code" style={{ height: "100%" }} {...other}>
       <CodeMirror
@@ -103,6 +142,11 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, CodeProps>(function Code(
         extensions={[sql({}), Prec.highest(keymap.of(customKeymap))]}
         onChange={onChange}
         style={{ flex: 1 }}
+      />
+      <CreateScriptModal
+        open={isCreateScriptModalOpen}
+        onClose={() => setIsCreateScriptModalOpen(false)}
+        onCreate={handleCreateScript}
       />
     </div>
   );

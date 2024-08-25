@@ -3,6 +3,14 @@ import { IScript } from "@ts/interfaces/script_interface";
 import request from "src/lib/request";
 
 namespace ScriptService {
+  export const saveScriptContent = async (
+    id: number,
+    content: string
+  ): Promise<any> => {
+    return request.put(`scripts/${id}/content`, {
+      content,
+    });
+  };
   export const getScriptContent = async (id: number): Promise<string> => {
     return request.get(`scripts/${id}/content`).then((response) => {
       return response.data["content"];
@@ -25,10 +33,18 @@ namespace ScriptService {
   export const rename = async (id: number, name: string): Promise<IScript> => {
     return request
       .put(`scripts/${id}/rename`, { name })
-      .then((response) => response.data as IScript);
+      .then((response) => response.data);
   };
   export const del = async (id: number): Promise<IScript> => {
     return request.delete(`scripts/${id}`);
+  };
+  export const create = async (
+    name: string,
+    content?: string
+  ): Promise<IScript> => {
+    return request
+      .post("scripts", { name, content })
+      .then((response) => response.data);
   };
 }
 

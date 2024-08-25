@@ -30,7 +30,7 @@ export default function EditorTab({
         return;
       }
     }
-  }, [scripts]);
+  }, [scripts, scriptId]);
 
   return (
     <Tabs.Tab

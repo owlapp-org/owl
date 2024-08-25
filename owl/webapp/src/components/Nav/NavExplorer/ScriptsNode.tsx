@@ -1,3 +1,4 @@
+import CreateScriptModal from "@components/CreateScriptModal";
 import RenameFileModal from "@components/RenameFileModal";
 import ScriptMenu from "@components/ScriptMenu";
 import TreeNode from "@components/TreeNode";
@@ -50,12 +51,14 @@ function scriptToTreeNodeData(
 }
 
 export default function ScriptsNode() {
-  const { scripts, fetchScripts, removeScript, upload, renameScript } =
+  const { scripts, create, fetchScripts, removeScript, upload, renameScript } =
     useScriptStore();
   const [selectedScript, setSelectedScript] = useState<IScript | null>(null);
   const openRef = useRef<() => void>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isCreateScriptModalOpen, setIsCreateScriptModalOpen] = useState(false);
+
   const { addTab } = useEditorStore();
 
   useEffect(() => {
@@ -78,10 +81,12 @@ export default function ScriptsNode() {
     await upload(formData);
     setLoading(false);
   };
-
   const handleRenameScript = (file: IFile) => {
     setSelectedScript(file);
     setIsRenameModalOpen(true);
+  };
+  const handleCreateScript = async (name: string) => {
+    await create(name);
   };
   const data: TreeNodeData[] = [
     {
@@ -107,7 +112,7 @@ export default function ScriptsNode() {
               variant="transparent"
               onClick={(event) => {
                 event.stopPropagation();
-                openRef.current?.();
+                setIsCreateScriptModalOpen(true);
               }}
             >
               <IconPlus stroke={1} />
@@ -157,6 +162,11 @@ export default function ScriptsNode() {
         onClose={() => setIsRenameModalOpen(false)}
         file={selectedScript!}
         onRename={renameScript}
+      />
+      <CreateScriptModal
+        open={isCreateScriptModalOpen}
+        onClose={() => setIsCreateScriptModalOpen(false)}
+        onCreate={handleCreateScript}
       />
     </>
   );

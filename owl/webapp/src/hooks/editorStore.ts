@@ -2,6 +2,8 @@ import DatabaseService from "@services/databaseService";
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { notifications } from "@mantine/notifications";
 import { v4 as uuidv4 } from "uuid";
+import ScriptService from "@services/scriptService";
+import { useScriptStore } from "./scriptStore";
 
 export interface IEditorTabStore {
   id: string;
@@ -9,6 +11,8 @@ export interface IEditorTabStore {
   code: string;
   selectedDatabase: string | null;
   isBusy: boolean;
+  createScript: (name: string, content: string) => void;
+  saveScriptContent: (content: string) => void;
   setIsBusy: (value: boolean) => void;
   setCode: (code: string) => void;
   setDatabase: (database: string | null) => void;
@@ -30,6 +34,16 @@ const createTabStore = () =>
     selectedDatabase: null,
     data: [],
     queryResult: undefined,
+    createScript: async (name: string, content: string) => {
+      const script = await useScriptStore.getState().create(name, content);
+      set({ scriptId: script.id });
+    },
+    saveScriptContent: async (content: string) => {
+      const scriptId = get().scriptId;
+      if (scriptId) {
+        return ScriptService.saveScriptContent(scriptId, content);
+      }
+    },
     setIsBusy: (value: boolean) => set({ isBusy: value }),
     setCode: (code) => set({ code }),
     setDatabase: (database) => set({ selectedDatabase: database }),
