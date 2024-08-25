@@ -91,7 +91,7 @@ function ResultSet({
         ref={gridRef}
         columns={headers || []}
         rows={rows}
-        style={{ height: "100%" }}
+        style={{ height: "100%", width: "100%" }}
         className="rdg-light editor-data-grid"
         onScroll={handleScroll}
         onRowsChange={setRows}
