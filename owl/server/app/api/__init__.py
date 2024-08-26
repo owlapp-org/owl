@@ -2,7 +2,7 @@ from app.api import (
     app_api,
     auth_api,
     databases_api,
-    files_api,
+    datafiles_api,
     scripts_api,
     ui,
     users_api,
@@ -17,7 +17,7 @@ def init_app(app: Flask) -> None:
     api.register_blueprint(users_api.bp, url_prefix="/users")
     api.register_blueprint(databases_api.bp, url_prefix="/databases")
     api.register_blueprint(app_api.bp, url_prefix="/app")
-    api.register_blueprint(files_api.bp, url_prefix="/files")
+    api.register_blueprint(datafiles_api.bp, url_prefix="/files")
     api.register_blueprint(scripts_api.bp, url_prefix="/scripts")
     app.register_blueprint(api, url_prefix="/api")
 

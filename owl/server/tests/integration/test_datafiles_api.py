@@ -2,12 +2,12 @@ import csv
 import tempfile
 
 import requests
-from app.models.file import File
+from app.models.datafile import DataFile
 from pytest import Session
 from tests.conftest import api_url
 
 
-def test_upload_file(use_access_token: str, db: Session) -> None:
+def test_upload_datafile(use_access_token: str, db: Session) -> None:
     data = [
         ["Name", "Age", "City"],
         ["Alice", 30, "New York"],
@@ -31,7 +31,7 @@ def test_upload_file(use_access_token: str, db: Session) -> None:
         assert response.status_code == 200, response.text
         id = response.json()["id"]
         with db() as session:
-            uploaded_file = session.query(File).filter(File.id == id).first()
+            uploaded_file = session.query(DataFile).filter(DataFile.id == id).first()
             assert uploaded_file is not None, "File not found in database"
 
         response = requests.get(
@@ -42,7 +42,7 @@ def test_upload_file(use_access_token: str, db: Session) -> None:
         assert response.json()["exists"]
 
 
-def test_delete_file(use_access_token: str, db: Session):
+def test_delete_datafile(use_access_token: str, db: Session):
     data = [
         ["Name", "Age", "City"],
         ["Alice", 30, "New York"],
@@ -79,11 +79,11 @@ def test_delete_file(use_access_token: str, db: Session):
         assert not response.json()["exists"]
 
         with db() as session:
-            uploaded_file = session.query(File).filter(File.id == id).first()
+            uploaded_file = session.query(DataFile).filter(DataFile.id == id).first()
             assert uploaded_file is None, "File is not removed from database"
 
 
-def test_rename_file(use_access_token: str, db: Session) -> None:
+def test_rename_datafile(use_access_token: str, db: Session) -> None:
     data = [
         ["Name", "Age", "City"],
         ["Alice", 30, "New York"],
@@ -107,7 +107,7 @@ def test_rename_file(use_access_token: str, db: Session) -> None:
         assert response.status_code == 200, response.text
         id = response.json()["id"]
         with db() as session:
-            uploaded_file = session.query(File).filter(File.id == id).first()
+            uploaded_file = session.query(DataFile).filter(DataFile.id == id).first()
             assert uploaded_file is not None, "File not found in database"
 
         response = requests.put(

@@ -9,5 +9,5 @@ class StatementType:
     UNKNOWN: str = "UNKNOWN"
 
 
-ALLOWED_FILE_EXTENSIONS = {"csv", "xls", "xlsx", "json", "parquet"}
+ALLOWED_DATAFILE_EXTENSIONS = {"csv", "xls", "xlsx", "json", "parquet"}
 ALLOWED_SCRIPT_EXTENSIONS = {"sql"}

@@ -11,6 +11,7 @@ export interface IEditorTabStore {
   code: string;
   selectedDatabase: string | null;
   isBusy: boolean;
+  saveCode: (name?: string) => void;
   createScript: (name: string, content: string) => void;
   saveScriptContent: (content: string) => void;
   setIsBusy: (value: boolean) => void;
@@ -34,6 +35,25 @@ const createTabStore = () =>
     selectedDatabase: null,
     data: [],
     queryResult: undefined,
+    saveCode: async (name?: string) => {
+      const scriptId = get().scriptId;
+      const code = get().code;
+      if (scriptId) {
+        return ScriptService.saveScriptContent(scriptId, code);
+      } else {
+        if (name) {
+          const script = await useScriptStore.getState().create(name, code);
+          set({ scriptId: script.id });
+          return script;
+        } else {
+          notifications.show({
+            title: "Error",
+            message: "Missing file name",
+            color: "red",
+          });
+        }
+      }
+    },
     createScript: async (name: string, content: string) => {
       const script = await useScriptStore.getState().create(name, content);
       set({ scriptId: script.id });

@@ -79,12 +79,12 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(["owner_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name", "owner_id", name="_files_name_owner_uc"),
+        sa.UniqueConstraint("name", "owner_id", name="_database_name_owner_uc"),
     )
 
     # Create the files table
     op.create_table(
-        "files",
+        "data_files",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("path", sa.String(), nullable=False),
         sa.Column("owner_id", sa.Integer(), nullable=False),
@@ -102,7 +102,7 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(["owner_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("path", "owner_id", name="_path_owner_uc"),
+        sa.UniqueConstraint("path", "owner_id", name="_data_files_path_owner_uc"),
     )
 
     # Create the scripts table
@@ -132,5 +132,5 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table("databases")
     op.drop_table("users")
-    op.drop_table("files")
+    op.drop_table("data_files")
     op.drop_table("scripts")
