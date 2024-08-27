@@ -3,22 +3,24 @@ import { create, StoreApi, UseBoundStore } from "zustand";
 import { notifications } from "@mantine/notifications";
 import { v4 as uuidv4 } from "uuid";
 import ScriptService from "@services/scriptService";
-import { useScriptStore } from "./scriptStore";
+import useScriptStore from "./scriptStore";
+import IFile from "@ts/interfaces/file_interface";
+import { FileType } from "@ts/enums/filetype_enum";
 
-export interface IEditorTabStore {
+export interface IEditorTabOptions {
+  databaseId: string | null;
+}
+
+export interface IEditorTabState {
   id: string;
-  scriptId?: number;
-  code: string;
-  selectedDatabase: string | null;
+  file: IFile;
+  options: IEditorTabOptions | null;
   isBusy: boolean;
-  saveCode: (name?: string) => void;
-  createScript: (name: string, content: string) => void;
-  saveScriptContent: (content: string) => void;
+  save: (name?: string) => void;
   setIsBusy: (value: boolean) => void;
-  setCode: (code: string) => void;
+  setContent: (content: string) => void;
   setDatabase: (database: string | null) => void;
-  run: (
-    databaseId: number | string | null,
+  runQuery: (
     query: string,
     start_row?: number,
     end_row?: number,
@@ -27,53 +29,98 @@ export interface IEditorTabStore {
 }
 
 const createTabStore = () =>
-  create<IEditorTabStore>((set, get) => ({
+  create<IEditorTabState>((set, get) => ({
     id: uuidv4(),
+    file: {},
+    options: null,
     isBusy: false,
-    scriptId: undefined,
-    code: "",
-    selectedDatabase: null,
-    data: [],
-    queryResult: undefined,
-    saveCode: async (name?: string) => {
-      const scriptId = get().scriptId;
-      const code = get().code;
-      if (scriptId) {
-        return ScriptService.saveScriptContent(scriptId, code);
+    save: async (name?: string) => {
+      const file = get().file;
+      if (file.fileType != FileType.ScriptFile) {
+        notifications.show({
+          color: "yellow",
+          title: "Warning",
+          message: "Currently only script files are supported.",
+        });
+        return;
+      } else if (!file.fileType) {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: "Unknown file type",
+        });
+        return;
+      }
+
+      if (file.id) {
+        switch (file.fileType) {
+          case FileType.ScriptFile:
+            await ScriptService.updateContent(file.id, file.content || "");
+            return;
+        }
+      } else if (!name && !file.name) {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: "Unknown file name",
+        });
+        return;
       } else {
-        if (name) {
-          const script = await useScriptStore.getState().create(name, code);
-          set({ scriptId: script.id });
-          return script;
-        } else {
-          notifications.show({
-            title: "Error",
-            message: "Missing file name",
-            color: "red",
-          });
+        const filename = name || file.name || "New file";
+        switch (file.fileType) {
+          case FileType.ScriptFile:
+            const script = await useScriptStore
+              .getState()
+              .create(filename, file.content || "");
+            set((state) => ({
+              file: {
+                ...state.file,
+                name: filename,
+                id: script.id,
+              },
+            }));
+            return;
         }
       }
     },
-    createScript: async (name: string, content: string) => {
-      const script = await useScriptStore.getState().create(name, content);
-      set({ scriptId: script.id });
+    setIsBusy: (isBusy: boolean) => set({ isBusy }),
+    setContent: (content: string) =>
+      set((state) => ({
+        file: {
+          ...state.file,
+          content,
+        },
+      })),
+    setDatabase: (databaseId: string | null) => {
+      const options = { ...get().options, databaseId };
+      set({ options });
     },
-    saveScriptContent: async (content: string) => {
-      const scriptId = get().scriptId;
-      if (scriptId) {
-        return ScriptService.saveScriptContent(scriptId, content);
-      }
-    },
-    setIsBusy: (value: boolean) => set({ isBusy: value }),
-    setCode: (code) => set({ code }),
-    setDatabase: (database) => set({ selectedDatabase: database }),
-    run: async (
-      databaseId: number | string | null,
+    runQuery: async (
       query: string,
       start_row?: number,
       end_row?: number,
-      with_total_count: boolean = true
+      with_total_count?: boolean
     ) => {
+      const { file, options } = get();
+
+      if (file.fileType != FileType.ScriptFile) {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: "File type is not supported",
+        });
+        return;
+      }
+      if (!query) {
+        notifications.show({
+          color: "yellow",
+          title: "Warning",
+          message: "Nothing to run",
+        });
+        return;
+      }
+
+      const { databaseId } = options || {};
       try {
         set({ isBusy: true });
         const result = await DatabaseService.run(
@@ -98,9 +145,9 @@ const createTabStore = () =>
         return result;
       } catch (error: any) {
         notifications.show({
+          color: "red",
           title: "Error",
           message: error?.response?.data as string,
-          color: "red",
         });
         throw error;
       } finally {
@@ -109,63 +156,51 @@ const createTabStore = () =>
     },
   }));
 
-export interface IEditorStore {
+export interface IEditorState {
   activeTab: string | null;
-  tabs: Record<string, UseBoundStore<StoreApi<IEditorTabStore>>>;
+  tabs: Record<string, UseBoundStore<StoreApi<IEditorTabState>>>;
   setActiveTab(id: string | null): void;
   getTabCount(): number;
-  addTab: (scriptId?: number) => void;
+  addTab: (fileId?: number, fileType?: FileType) => void;
   closeTab: (id: string) => void;
 }
 
-const useEditorStore = create<IEditorStore>((set, get) => ({
+const useEditorStore = create<IEditorState>((set, get) => ({
   activeTab: null,
   tabs: {},
-  setActiveTab: (id: string) => {
-    set({
-      activeTab: id,
-    });
-  },
-  getTabCount: () => {
-    return Object.keys(get().tabs).length;
-  },
-  addTab: (scriptId?: number) => {
-    let isExistingTab = false;
-    if (scriptId) {
-      Object.entries(get().tabs).forEach(([id, store]) => {
-        if (store.getState().scriptId == scriptId) {
+  setActiveTab: (activeTab: string) => set({ activeTab }),
+  getTabCount: () => Object.keys(get().tabs).length,
+  addTab: (fileId?: number, fileType: FileType = FileType.ScriptFile) => {
+    if (fileId) {
+      for (const [id, store] of Object.entries(get().tabs)) {
+        if (store.getState().file.id === fileId) {
           set({ activeTab: id });
-          isExistingTab = true;
+          return;
         }
-      });
+      }
     }
-    if (isExistingTab) {
-      return;
-    }
-    const id = uuidv4();
-    const store = createTabStore();
-    store.setState({ scriptId });
+    const activeTab = uuidv4();
+    const newTabStore = createTabStore();
+    newTabStore.setState({ file: { fileType } });
     set((state) => ({
-      activeTab: id,
+      activeTab,
       tabs: {
         ...state.tabs,
-        [id]: store,
+        [activeTab]: newTabStore,
       },
     }));
   },
   closeTab: (id: string) => {
     set((state) => {
-      const newTabs = { ...state.tabs };
-      delete newTabs[id];
+      const tabs = { ...state.tabs };
+      delete tabs[id];
       // If the closed tab was the active tab, set a new active tab
       let newActiveTab = state.activeTab === id ? null : state.activeTab;
-
       // If there are still tabs left, set the first tab as the active tab
-      if (newActiveTab === null && Object.keys(newTabs).length > 0) {
-        newActiveTab = Object.keys(newTabs)[0];
+      if (newActiveTab === null && Object.keys(tabs).length > 0) {
+        newActiveTab = Object.keys(tabs)[0];
       }
-
-      return { tabs: newTabs, activeTab: newActiveTab };
+      return { tabs, activeTab: newActiveTab };
     });
   },
 }));

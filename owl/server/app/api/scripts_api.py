@@ -3,11 +3,9 @@ from logging import getLogger
 from app.constants import ALLOWED_SCRIPT_EXTENSIONS
 from app.lib.fs import is_extension_valid
 from app.models.script import Script
-from app.schemas.script_schema import (
-    CreateScriptInputSchema,
-    ScriptOutputSchema,
-    UpdateScriptInputSchema,
-)
+from app.schemas.script_schema import (CreateScriptInputSchema,
+                                       ScriptOutputSchema,
+                                       UpdateScriptInputSchema)
 from flask import Blueprint, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity
 

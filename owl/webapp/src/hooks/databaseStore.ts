@@ -1,40 +1,41 @@
 import { create } from "zustand";
 import {
-  Database,
-  DatabaseCreateOptions,
-  DatabaseUpdateOptions,
+  IDatabase,
+  IDatabaseCreateOptions,
+  IDatabaseUpdateOptions,
 } from "@ts/interfaces/database_interface";
 import DatabaseService from "@services/databaseService";
 import { notifications } from "@mantine/notifications";
 
-interface DatabaseState {
-  databases: Database[];
+interface IDatabaseState {
+  databases: IDatabase[];
   fetched: boolean;
-  fetchDatabases: (force?: boolean) => void;
-  createDatabase: (database: DatabaseCreateOptions) => void;
-  removeDatabase: (id: number) => void;
-  updateDatabase: (id: number, database: DatabaseUpdateOptions) => void;
+  fetchAll: (force?: boolean) => void;
+  create: (database: IDatabaseCreateOptions) => void;
+  remove: (id: number) => void;
+  update: (id: number, database: IDatabaseUpdateOptions) => void;
 }
 
-export const useDatabaseStore = create<DatabaseState>((set, get) => ({
+const useDatabaseStore = create<IDatabaseState>((set, get) => ({
   databases: [],
   fetched: false,
-  fetchDatabases: async (force = false) => {
+  fetchAll: async (force = false) => {
     if (force || !get().fetched) {
       try {
-        const data = await DatabaseService.list();
-        set({ databases: data, fetched: true });
+        const databases = await DatabaseService.fetchAll();
+        set({ databases, fetched: true });
       } catch (error) {
         console.error("Failed to fetch databases", error);
       }
     }
   },
-  createDatabase: async (database: DatabaseCreateOptions) => {
+  create: async (database: IDatabaseCreateOptions) => {
     try {
+      const { name, pool_size, description } = database;
       const result = await DatabaseService.create({
-        name: database.name,
-        pool_size: database.pool_size,
-        description: database.description,
+        name,
+        pool_size,
+        description,
       });
       notifications.show({
         title: "Success",
@@ -50,9 +51,9 @@ export const useDatabaseStore = create<DatabaseState>((set, get) => ({
       });
     }
   },
-  removeDatabase: async (id: number) => {
+  remove: async (id: number) => {
     try {
-      await DatabaseService.del(id);
+      await DatabaseService.remove(id);
       set((state) => ({
         databases: state.databases.filter((db) => db.id !== id),
       }));
@@ -60,7 +61,7 @@ export const useDatabaseStore = create<DatabaseState>((set, get) => ({
       console.error("Failed to create database", error);
     }
   },
-  updateDatabase: async (id: number, database: DatabaseUpdateOptions) => {
+  update: async (id: number, database: IDatabaseUpdateOptions) => {
     try {
       const updatedDatabase = await DatabaseService.update(id, database);
       set((state) => ({
@@ -75,10 +76,12 @@ export const useDatabaseStore = create<DatabaseState>((set, get) => ({
     } catch (err) {
       console.error("Failed to update database.", err);
       notifications.show({
-        title: "Error",
         color: "red",
+        title: "Error",
         message: `Failed to update database: ${err}`,
       });
     }
   },
 }));
+
+export default useDatabaseStore;

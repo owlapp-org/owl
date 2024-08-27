@@ -1,18 +1,13 @@
 import { API_URL } from "src/lib/constants";
 import request from "src/lib/request";
-
-interface LoginResponse {
-  name: string;
-  email: string;
-  access_token: string;
-}
+import { ILoginResponse } from "@ts/interfaces/auth_interface";
 
 export const login = async (
   email: string,
   password: string
-): Promise<LoginResponse> => {
+): Promise<ILoginResponse> => {
   try {
-    const response = await request.post<LoginResponse>("auth/login", {
+    const response = await request.post("auth/login", {
       email,
       password,
     });

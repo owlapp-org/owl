@@ -1,12 +1,12 @@
 import FileMenu from "@components/FileMenu";
 import RenameFileModal from "@components/RenameFileModal";
 import TreeNode from "@components/TreeNode";
-import { useFileStore } from "@hooks/fileStore";
+import { useFileStore } from "@hooks/datafileStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath, MIME_TYPES } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
 import { IconFile, IconFolders, IconUpload } from "@tabler/icons-react";
-import { IFile } from "@ts/interfaces/file_interface";
+import { IFile } from "@ts/interfaces/datafile_interface";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 

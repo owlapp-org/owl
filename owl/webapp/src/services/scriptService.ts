@@ -1,17 +1,16 @@
-import { IFile } from "@ts/interfaces/file_interface";
 import { IScript } from "@ts/interfaces/script_interface";
 import request from "src/lib/request";
 
 namespace ScriptService {
-  export const saveScriptContent = async (
+  export const updateContent = async (
     id: number,
     content: string
-  ): Promise<any> => {
+  ): Promise<IScript> => {
     return request.put(`scripts/${id}/content`, {
       content,
     });
   };
-  export const getScriptContent = async (id: number): Promise<string> => {
+  export const getContent = async (id: number): Promise<string> => {
     return request.get(`scripts/${id}/content`).then((response) => {
       return response.data["content"];
     });
@@ -23,19 +22,17 @@ namespace ScriptService {
           "Content-Type": "multipart/form-data",
         },
       })
-      .then((response) => response.data as IScript);
+      .then((response) => response.data);
   };
-  export const list = async (): Promise<IScript[]> => {
-    return request
-      .get("scripts")
-      .then((response) => response.data as IScript[]);
+  export const fetchAll = async (): Promise<IScript[]> => {
+    return request.get("scripts").then((response) => response.data);
   };
   export const rename = async (id: number, name: string): Promise<IScript> => {
     return request
       .put(`scripts/${id}/rename`, { name })
       .then((response) => response.data);
   };
-  export const del = async (id: number): Promise<IScript> => {
+  export const remove = async (id: number): Promise<IScript> => {
     return request.delete(`scripts/${id}`);
   };
   export const create = async (

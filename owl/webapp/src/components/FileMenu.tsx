@@ -8,7 +8,7 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { IFile } from "@ts/interfaces/file_interface";
+import { IFile } from "@ts/interfaces/datafile_interface";
 
 interface FileMenuProps {
   file: IFile;

@@ -1,5 +1,5 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
-import { IFile } from "@ts/interfaces/file_interface";
+import { IFile } from "@ts/interfaces/datafile_interface";
 import { IScript } from "@ts/interfaces/script_interface";
 import { FC, useEffect, useState } from "react";
 

@@ -8,22 +8,22 @@ import useEditorStore from "./editorStore";
 interface IScriptState {
   scripts: IScript[];
   create: (name: string, content?: string) => Promise<IScript>;
-  saveScriptContent: (id: number, content: string) => void;
-  getScriptContent: (id: number) => Promise<string>;
-  fetchScripts: () => void;
+  updateContent: (id: number, content: string) => void;
+  getContent: (id: number) => Promise<string>;
+  fetchAll: () => void;
   upload: (data: FormData) => void;
-  removeScript: (id: number) => void;
-  renameScript: (id: number, name: string) => void;
+  remove: (id: number) => void;
+  rename: (id: number, name: string) => void;
 }
 
-export const useScriptStore = create<IScriptState>((set) => ({
+const useScriptStore = create<IScriptState>((set) => ({
   scripts: [],
-  saveScriptContent: async (id: number, content: string) => {
-    return ScriptService.saveScriptContent(id, content);
+  updateContent: async (id: number, content: string) => {
+    return ScriptService.updateContent(id, content);
   },
-  getScriptContent: async (id: number) => {
+  getContent: async (id: number) => {
     try {
-      const content = await ScriptService.getScriptContent(id);
+      const content = await ScriptService.getContent(id);
       return content;
     } catch (e) {
       notifications.show({
@@ -34,12 +34,13 @@ export const useScriptStore = create<IScriptState>((set) => ({
       throw e;
     }
   },
-  fetchScripts: async () => {
+  fetchAll: async () => {
     try {
-      const files = await ScriptService.list();
+      const files = await ScriptService.fetchAll();
       set({ scripts: files });
     } catch (error) {
       console.error("Failed to fetch script files", error);
+      throw error;
     }
   },
   create: async (name: string, content?: string) => {
@@ -78,22 +79,20 @@ export const useScriptStore = create<IScriptState>((set) => ({
       });
     }
   },
-  removeScript: async (id: number) => {
+  remove: async (id: number) => {
     try {
-      await ScriptService.del(id);
+      await ScriptService.remove(id);
       set((state) => ({
         scripts: state.scripts.filter((s) => s.id !== id),
       }));
-
       // if the script is open, close it
       const editorTab = Object.entries(useEditorStore.getState().tabs).find(
-        ([_, tab]) => tab.getState().scriptId == id
+        ([_, tab]) => tab.getState().file.id === id
       );
       if (editorTab) {
         const [tabId, _] = editorTab;
         useEditorStore.getState().closeTab(tabId);
       }
-
       notifications.show({
         title: "Success",
         message: `Script file deleted successfully`,
@@ -107,7 +106,7 @@ export const useScriptStore = create<IScriptState>((set) => ({
       });
     }
   },
-  renameScript: async (id: number, name: string) => {
+  rename: async (id: number, name: string) => {
     try {
       const file = await ScriptService.rename(id, name);
       set((state) => ({
@@ -127,3 +126,5 @@ export const useScriptStore = create<IScriptState>((set) => ({
     }
   },
 }));
+
+export default useScriptStore;

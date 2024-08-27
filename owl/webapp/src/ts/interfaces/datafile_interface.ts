@@ -1,6 +1,6 @@
 import { IUser } from "./user_interface";
 
-export interface IScript {
+export interface IDataFile {
   id: number;
   path: string;
   owner: IUser;
