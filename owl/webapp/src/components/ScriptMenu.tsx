@@ -4,19 +4,19 @@ import { ActionIcon, Menu } from "@mantine/core";
 import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
 import { IScript } from "@ts/interfaces/script_interface";
 
-interface ScriptMenuProps {
+interface IScriptMenuProps {
   script: IScript;
+  className?: string;
   onDelete: (id: number) => void;
   onRename: (script: IScript) => void;
-  className?: string;
 }
 
 export default function ScriptMenu({
   script,
+  className,
   onDelete,
   onRename,
-  className,
-}: ScriptMenuProps) {
+}: IScriptMenuProps) {
   const { showDialog } = useAlertDialog();
 
   const handleDelete = (e: any) => {

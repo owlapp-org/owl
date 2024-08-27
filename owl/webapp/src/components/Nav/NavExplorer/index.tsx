@@ -1,5 +1,5 @@
 import DatabasesNode from "./DatabasesNode";
-import FilesNode from "./FilesNode";
+import DataFilesNode from "./DataFilesNode";
 import ScriptsNode from "./ScriptsNode";
 import "./styles.css";
 
@@ -15,7 +15,7 @@ export default function NavExplorer() {
       }}
     >
       <DatabasesNode />
-      <FilesNode />
+      <DataFilesNode />
       <ScriptsNode />
     </div>
   );

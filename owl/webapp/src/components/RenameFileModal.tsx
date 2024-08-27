@@ -1,22 +1,22 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
-import { IFile } from "@ts/interfaces/datafile_interface";
+import { IDataFile } from "@ts/interfaces/datafile_interface";
 import { IScript } from "@ts/interfaces/script_interface";
 import { FC, useEffect, useState } from "react";
 
-interface RenameFileModalProps {
+interface IRenameFileModalProps {
   open: boolean;
+  file: IDataFile | IScript;
   onClose: () => void;
-  file: IFile | IScript;
   onRename: (id: number, newName: string) => void;
 }
 
-const RenameFileModal: FC<RenameFileModalProps> = ({
+const RenameFileModal: FC<IRenameFileModalProps> = ({
   open,
   onClose,
   file,
   onRename,
 }) => {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
 
   useEffect(() => {
@@ -27,7 +27,7 @@ const RenameFileModal: FC<RenameFileModalProps> = ({
 
   const resetState = () => {
     setName("");
-    setLoading(false);
+    setIsLoading(false);
   };
 
   const handleClose = () => {
@@ -38,13 +38,12 @@ const RenameFileModal: FC<RenameFileModalProps> = ({
   const handleSubmit = async () => {
     if (!file) return;
 
-    setLoading(true);
+    setIsLoading(true);
     try {
-      setLoading(true);
+      setIsLoading(true);
       await onRename(file.id, name || file.name);
-    } catch (error) {
     } finally {
-      setLoading(false);
+      setIsLoading(false);
       handleClose();
     }
   };
@@ -63,7 +62,7 @@ const RenameFileModal: FC<RenameFileModalProps> = ({
           <Button variant="default" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="button" onClick={handleSubmit} loading={loading}>
+          <Button type="button" onClick={handleSubmit} loading={isLoading}>
             Update
           </Button>
         </Group>

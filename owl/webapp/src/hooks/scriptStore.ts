@@ -14,9 +14,10 @@ interface IScriptState {
   upload: (data: FormData) => void;
   remove: (id: number) => void;
   rename: (id: number, name: string) => void;
+  findById: (id: number) => IScript | undefined;
 }
 
-const useScriptStore = create<IScriptState>((set) => ({
+const useScriptStore = create<IScriptState>((set, get) => ({
   scripts: [],
   updateContent: async (id: number, content: string) => {
     return ScriptService.updateContent(id, content);
@@ -123,6 +124,14 @@ const useScriptStore = create<IScriptState>((set) => ({
         color: "red",
         message: `Failed to rename script file: ${err}`,
       });
+    }
+  },
+  findById: (id: number) => {
+    const scripts = get().scripts;
+    for (let i = 0; i < scripts.length; i++) {
+      if (scripts[i].id === id) {
+        return scripts[i];
+      }
     }
   },
 }));

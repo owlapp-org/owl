@@ -8,13 +8,13 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { IFile } from "@ts/interfaces/datafile_interface";
+import { IDataFile } from "@ts/interfaces/datafile_interface";
 
-interface FileMenuProps {
-  file: IFile;
-  onDelete: (id: number) => void;
-  onRename: (file: IFile) => void;
+interface IDataFileMenuProps {
+  file: IDataFile;
   className?: string;
+  onDelete: (id: number) => void;
+  onRename: (file: IDataFile) => void;
 }
 
 export default function FileMenu({
@@ -22,9 +22,8 @@ export default function FileMenu({
   onDelete,
   onRename,
   className,
-}: FileMenuProps) {
+}: IDataFileMenuProps) {
   const { showDialog } = useAlertDialog();
-
   const handleDelete = () => {
     showDialog({
       title: "Confirm Delete",

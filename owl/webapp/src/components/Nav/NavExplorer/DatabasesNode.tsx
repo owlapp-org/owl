@@ -2,17 +2,17 @@ import CreateDatabaseModal from "@components/Database/CreateDatabaseModal";
 import UpdateDatabaseModal from "@components/Database/UpdateDatabaseModal";
 import DatabaseMenu from "@components/DatabaseMenu";
 import TreeNode from "@components/TreeNode";
-import { useDatabaseStore } from "@hooks/databaseStore";
+import useDatabaseStore from "@hooks/databaseStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { IconBrandOnedrive, IconCylinder, IconPlus } from "@tabler/icons-react";
-import { Database } from "@ts/interfaces/database_interface";
+import { IDatabase } from "@ts/interfaces/database_interface";
 import { useEffect, useState } from "react";
 import "./styles.css";
 
 function databaseToTreeNodeData(
-  database: Database,
+  database: IDatabase,
   onDelete: (id: number) => void,
-  onUpdate: (database: Database) => void
+  onUpdate: (database: IDatabase) => void
 ): TreeNodeData {
   return {
     label: database.name,
@@ -40,19 +40,16 @@ function databaseToTreeNodeData(
 }
 
 export default function DatabasesNode() {
-  const { databases, fetchDatabases, updateDatabase, removeDatabase } =
-    useDatabaseStore();
+  const { databases, fetchAll, update, remove } = useDatabaseStore();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [selectedDatabase, setSelectedDatabase] = useState<Database | null>(
+  const [selectedDatabase, setSelectedDatabase] = useState<IDatabase | null>(
     null
   );
 
-  useEffect(() => {
-    fetchDatabases();
-  }, [fetchDatabases]);
+  useEffect(() => fetchAll(), [fetchAll]);
 
-  const handleUpdateDatabase = (database: Database) => {
+  const handleUpdateDatabase = (database: IDatabase) => {
     setSelectedDatabase(database);
     setIsUpdateModalOpen(true);
   };
@@ -81,7 +78,7 @@ export default function DatabasesNode() {
         ),
       },
       children: databases.map((db) =>
-        databaseToTreeNodeData(db, removeDatabase, handleUpdateDatabase)
+        databaseToTreeNodeData(db, remove, handleUpdateDatabase)
       ),
     },
   ];

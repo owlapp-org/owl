@@ -1,4 +1,4 @@
-import { useDatabaseStore } from "@hooks/databaseStore";
+import useDatabaseStore from "@hooks/databaseStore";
 import {
   Button,
   Group,
@@ -7,13 +7,13 @@ import {
   TextInput,
   Textarea,
 } from "@mantine/core";
-import { Database } from "@ts/interfaces/database_interface";
+import { IDatabase } from "@ts/interfaces/database_interface";
 import { FC, useEffect, useState } from "react";
 
 interface UpdateDatabaseModalProps {
   open: boolean;
   onClose: () => void;
-  database: Database | null;
+  database: IDatabase | null;
 }
 
 const UpdateDatabaseModal: FC<UpdateDatabaseModalProps> = ({
@@ -21,11 +21,11 @@ const UpdateDatabaseModal: FC<UpdateDatabaseModalProps> = ({
   onClose,
   database,
 }) => {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [poolSize, setPoolSize] = useState(1);
-  const { updateDatabase } = useDatabaseStore();
+  const { update } = useDatabaseStore();
 
   useEffect(() => {
     if (open && database) {
@@ -39,7 +39,7 @@ const UpdateDatabaseModal: FC<UpdateDatabaseModalProps> = ({
     setName("");
     setDescription("");
     setPoolSize(1);
-    setLoading(false);
+    setIsLoading(false);
   };
 
   const handleClose = () => {
@@ -50,16 +50,16 @@ const UpdateDatabaseModal: FC<UpdateDatabaseModalProps> = ({
   const handleSubmit = async () => {
     if (!database) return;
 
-    setLoading(true);
+    setIsLoading(true);
     try {
-      updateDatabase(database.id, {
+      await update(database.id, {
         ...database,
         name: name,
         description: description,
         pool_size: poolSize,
       });
-    } catch (error) {
     } finally {
+      setIsLoading(false);
       handleClose();
     }
   };
@@ -96,7 +96,7 @@ const UpdateDatabaseModal: FC<UpdateDatabaseModalProps> = ({
           <Button variant="default" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="button" onClick={handleSubmit} loading={loading}>
+          <Button type="button" onClick={handleSubmit} loading={isLoading}>
             Update
           </Button>
         </Group>

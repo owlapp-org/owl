@@ -6,6 +6,7 @@ import ScriptService from "@services/scriptService";
 import useScriptStore from "./scriptStore";
 import IFile from "@ts/interfaces/file_interface";
 import { FileType } from "@ts/enums/filetype_enum";
+import useDataFileStore from "./datafileStore";
 
 export interface IEditorTabOptions {
   databaseId: string | null;
@@ -26,6 +27,7 @@ export interface IEditorTabState {
     end_row?: number,
     with_total_count?: boolean
   ) => any;
+  findFileName: () => string | undefined;
 }
 
 const createTabStore = () =>
@@ -153,6 +155,29 @@ const createTabStore = () =>
       } finally {
         set({ isBusy: false });
       }
+    },
+    findFileName: () => {
+      const file = get().file;
+      if (!file.id || !file.fileType) {
+        return undefined;
+      }
+      switch (file.fileType) {
+        case FileType.ScriptFile: {
+          const { findById: findScriptById } = useScriptStore();
+          const script = findScriptById(file.id);
+          if (script) {
+            return script.name;
+          }
+        }
+        case FileType.DataFile: {
+          const { findById: findDataFileById } = useDataFileStore();
+          const dataFile = findDataFileById(file.id);
+          if (dataFile) {
+            return dataFile.name;
+          }
+        }
+      }
+      return undefined;
     },
   }));
 

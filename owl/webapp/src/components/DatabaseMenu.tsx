@@ -2,21 +2,21 @@
 import { useAlertDialog } from "@contexts/AlertDialogContext";
 import { ActionIcon, Menu } from "@mantine/core";
 import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
-import { Database } from "@ts/interfaces/database_interface";
+import { IDatabase } from "@ts/interfaces/database_interface";
 
-interface DatabaseMenuProps {
-  database: Database;
-  onDelete: (id: number) => void;
-  onUpdate: (database: Database) => void;
+interface IDatabaseMenuProps {
+  database: IDatabase;
   className?: string;
+  onDelete: (id: number) => void;
+  onUpdate: (database: IDatabase) => void;
 }
 
 export default function DatabaseMenu({
   database,
+  className,
   onDelete,
   onUpdate,
-  className,
-}: DatabaseMenuProps) {
+}: IDatabaseMenuProps) {
   const { showDialog } = useAlertDialog();
 
   const handleDelete = () => {

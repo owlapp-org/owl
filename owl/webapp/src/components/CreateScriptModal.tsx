@@ -2,23 +2,23 @@ import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { FC, useState } from "react";
 
-interface CreateScriptModalProps {
+interface ICreateScriptModalProps {
   open: boolean;
   onClose: () => void;
   onCreate: (name: string) => void;
 }
 
-const CreateScriptModal: FC<CreateScriptModalProps> = ({
+const CreateScriptModal: FC<ICreateScriptModalProps> = ({
   open,
   onClose,
   onCreate,
 }) => {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
 
   const resetState = () => {
     setName("");
-    setLoading(false);
+    setIsLoading(false);
   };
 
   const handleClose = () => {
@@ -35,13 +35,13 @@ const CreateScriptModal: FC<CreateScriptModalProps> = ({
       });
       return;
     }
-    setLoading(true);
+    setIsLoading(true);
     try {
-      setLoading(true);
+      setIsLoading(true);
       await onCreate(name);
     } catch (error) {
     } finally {
-      setLoading(false);
+      setIsLoading(false);
       handleClose();
     }
   };
@@ -64,7 +64,7 @@ const CreateScriptModal: FC<CreateScriptModalProps> = ({
             type="button"
             disabled={!name}
             onClick={handleSubmit}
-            loading={loading}
+            loading={isLoading}
           >
             Create
           </Button>

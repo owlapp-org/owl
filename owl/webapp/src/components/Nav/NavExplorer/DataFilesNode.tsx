@@ -1,19 +1,19 @@
-import FileMenu from "@components/FileMenu";
+import FileMenu from "@components/DataFileMenu";
 import RenameFileModal from "@components/RenameFileModal";
 import TreeNode from "@components/TreeNode";
-import { useFileStore } from "@hooks/datafileStore";
+import useDataFileStore from "@hooks/datafileStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath, MIME_TYPES } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
 import { IconFile, IconFolders, IconUpload } from "@tabler/icons-react";
-import { IFile } from "@ts/interfaces/datafile_interface";
+import { IDataFile } from "@ts/interfaces/datafile_interface";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 
-function fileToTreeNodeData(
-  file: IFile,
+function toNode(
+  file: IDataFile,
   onDelete: (id: number) => void,
-  onRename: (file: IFile) => void
+  onRename: (file: IDataFile) => void
 ): TreeNodeData {
   return {
     label: file.name,
@@ -37,15 +37,13 @@ function fileToTreeNodeData(
 }
 
 export default function FilesNode() {
-  const { files, fetchFiles, removeFile, upload, renameFile } = useFileStore();
-  const [selectedFile, setSelectedFile] = useState<IFile | null>(null);
+  const { datafiles, fetchAll, remove, upload, rename } = useDataFileStore();
+  const [selectedFile, setSelectedFile] = useState<IDataFile | null>(null);
   const openRef = useRef<() => void>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
+  useEffect(() => fetchAll(), [fetchAll]);
 
   const handleDrop = async (files: FileWithPath[]) => {
     if (files.length === 0) {
@@ -57,15 +55,18 @@ export default function FilesNode() {
       });
       return;
     }
-    setLoading(true);
+    setIsLoading(true);
     const file = files[0];
     const formData = new FormData();
     formData.append("file", file);
-    await upload(formData);
-    setLoading(false);
+    try {
+      await upload(formData);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleRenameFile = (file: IFile) => {
+  const handleRename = (file: IDataFile) => {
     setSelectedFile(file);
     setIsRenameModalOpen(true);
   };
@@ -82,8 +83,8 @@ export default function FilesNode() {
         actions: (
           <ActionIcon
             className="root-node-action-icon"
-            loading={loading}
-            disabled={loading}
+            loading={isLoading}
+            disabled={isLoading}
             variant="transparent"
             onClick={(event) => {
               event.stopPropagation();
@@ -94,9 +95,7 @@ export default function FilesNode() {
           </ActionIcon>
         ),
       },
-      children: files.map((file) =>
-        fileToTreeNodeData(file, removeFile, handleRenameFile)
-      ),
+      children: datafiles.map((file) => toNode(file, remove, handleRename)),
     },
   ];
 
@@ -125,7 +124,7 @@ export default function FilesNode() {
         open={isRenameModalOpen}
         onClose={() => setIsRenameModalOpen(false)}
         file={selectedFile!}
-        onRename={renameFile}
+        onRename={rename}
       />
     </>
   );

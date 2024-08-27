@@ -10,9 +10,10 @@ interface IDataFileState {
   upload: (data: FormData) => void;
   remove: (id: number) => void;
   rename: (id: number, name: string) => void;
+  findById: (id: number) => IDataFile | undefined;
 }
 
-const useFileStore = create<IDataFileState>((set) => ({
+const useDataFileStore = create<IDataFileState>((set, get) => ({
   datafiles: [],
   fetchAll: async () => {
     try {
@@ -78,6 +79,14 @@ const useFileStore = create<IDataFileState>((set) => ({
       });
     }
   },
+  findById: (id: number) => {
+    const datafiles = get().datafiles;
+    for (let i = 0; i < datafiles.length; i++) {
+      if (datafiles[i].id === id) {
+        return datafiles[i];
+      }
+    }
+  },
 }));
 
-export default useFileStore;
+export default useDataFileStore;

@@ -1,14 +1,14 @@
-import { IEditorTabStore } from "@hooks/editorStore";
-import { useScriptStore } from "@hooks/scriptStore";
+import { IEditorTabState } from "@hooks/editorStore";
+import useScriptStore from "@hooks/scriptStore";
 import { Divider, Loader, Menu, Tabs } from "@mantine/core";
 import { IconDeviceFloppy, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { StoreApi, UseBoundStore } from "zustand";
 
-interface EditorTabProps {
+interface IEditorTabProps {
   id: string;
   index: number;
-  store: UseBoundStore<StoreApi<IEditorTabStore>>;
+  store: UseBoundStore<StoreApi<IEditorTabState>>;
   handleCloseTab: (id: string) => void;
 }
 
@@ -17,12 +17,15 @@ export default function EditorTab({
   store,
   index,
   handleCloseTab,
-}: EditorTabProps) {
+}: IEditorTabProps) {
   const isBusy = store((state) => state.isBusy);
-  const scriptId = store((state) => state.scriptId);
-  const createScript = store((state) => state.createScript);
-  const saveScriptContent = store((state) => state.saveScriptContent);
-  const { scripts } = useScriptStore();
+  const file = store((state) => state.file);
+  const findFileName = store((state) => state.findFileName);
+
+  // const scriptId = store((state) => state.scriptId);
+  // const createScript = store((state) => state.createScript);
+  // const saveScriptContent = store((state) => state.saveScriptContent);
+  const { findById: findScriptById } = useScriptStore();
   const [title, setTitle] = useState(`Query ${index + 1}`);
 
   const [opened, setOpened] = useState(false);
@@ -32,17 +35,13 @@ export default function EditorTab({
   };
 
   useEffect(() => {
-    for (let i = 0; i < scripts.length; i++) {
-      if (scripts[i].id === scriptId) {
-        setTitle(scripts[i].name);
-        return;
-      }
-    }
-  }, [scripts, scriptId]);
+    const filename = findFileName();
+    filename && setTitle(filename);
+  }, [file, setTitle]);
 
   const handleSave = () => {
-    if (scriptId) {
-    }
+    // todo
+    console.log("Save clicked");
   };
 
   return (
