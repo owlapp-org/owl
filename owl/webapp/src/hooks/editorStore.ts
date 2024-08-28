@@ -17,6 +17,7 @@ export interface IEditorTabState {
   file: IFile;
   options: IEditorTabOptions | null;
   isBusy: boolean;
+  fetchContent: () => Promise<void>;
   save: (name?: string) => void;
   setIsBusy: (value: boolean) => void;
   setContent: (content: string) => void;
@@ -28,6 +29,7 @@ export interface IEditorTabState {
     with_total_count?: boolean
   ) => any;
   findFileName: () => string | undefined;
+  getDatabaseIdOption: () => string | null;
 }
 
 const createTabStore = () =>
@@ -36,6 +38,30 @@ const createTabStore = () =>
     file: {},
     options: null,
     isBusy: false,
+    fetchContent: async () => {
+      const file = get().file;
+      if (!file.id) {
+        return;
+      }
+      try {
+        const content = await ScriptService.fetchContent(file.id);
+        set({
+          file: {
+            ...file,
+            content,
+          },
+        });
+        return Promise.resolve();
+      } catch (error) {
+        console.error(error);
+        notifications.show({
+          color: "error",
+          title: "Error",
+          message: "Failed to fetch file content",
+        });
+        return Promise.reject(error);
+      }
+    },
     save: async (name?: string) => {
       const file = get().file;
       if (file.fileType != FileType.ScriptFile) {
@@ -60,7 +86,7 @@ const createTabStore = () =>
             await ScriptService.updateContent(file.id, file.content || "");
             return;
         }
-      } else if (!name && !file.name) {
+      } else if (!name) {
         notifications.show({
           color: "red",
           title: "Error",
@@ -68,7 +94,7 @@ const createTabStore = () =>
         });
         return;
       } else {
-        const filename = name || file.name || "New file";
+        const filename = name || "New file";
         switch (file.fileType) {
           case FileType.ScriptFile:
             const script = await useScriptStore
@@ -178,6 +204,11 @@ const createTabStore = () =>
         }
       }
       return undefined;
+    },
+    getDatabaseIdOption: () => {
+      const options = get().options;
+      if (!options) return null;
+      return options.databaseId;
     },
   }));
 

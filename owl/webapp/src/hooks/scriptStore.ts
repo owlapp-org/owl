@@ -7,9 +7,11 @@ import useEditorStore from "./editorStore";
 
 interface IScriptState {
   scripts: IScript[];
+  isCreateModalOpen: boolean;
+  setIsCreateModalOpen: (isCreateModalOpen: boolean) => void;
   create: (name: string, content?: string) => Promise<IScript>;
   updateContent: (id: number, content: string) => void;
-  getContent: (id: number) => Promise<string>;
+  fetchContent: (id: number) => Promise<string>;
   fetchAll: () => void;
   upload: (data: FormData) => void;
   remove: (id: number) => void;
@@ -19,12 +21,15 @@ interface IScriptState {
 
 const useScriptStore = create<IScriptState>((set, get) => ({
   scripts: [],
+  isCreateModalOpen: false,
+  setIsCreateModalOpen: (isCreateModalOpen: boolean) =>
+    set({ isCreateModalOpen }),
   updateContent: async (id: number, content: string) => {
     return ScriptService.updateContent(id, content);
   },
-  getContent: async (id: number) => {
+  fetchContent: async (id: number) => {
     try {
-      const content = await ScriptService.getContent(id);
+      const content = await ScriptService.fetchContent(id);
       return content;
     } catch (e) {
       notifications.show({

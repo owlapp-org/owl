@@ -1,5 +1,4 @@
 import { IEditorTabState } from "@hooks/editorStore";
-import useScriptStore from "@hooks/scriptStore";
 import { Divider, Loader, Menu, Tabs } from "@mantine/core";
 import { IconDeviceFloppy, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
@@ -21,11 +20,6 @@ export default function EditorTab({
   const isBusy = store((state) => state.isBusy);
   const file = store((state) => state.file);
   const findFileName = store((state) => state.findFileName);
-
-  // const scriptId = store((state) => state.scriptId);
-  // const createScript = store((state) => state.createScript);
-  // const saveScriptContent = store((state) => state.saveScriptContent);
-  const { findById: findScriptById } = useScriptStore();
   const [title, setTitle] = useState(`Query ${index + 1}`);
 
   const [opened, setOpened] = useState(false);

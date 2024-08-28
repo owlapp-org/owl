@@ -1,7 +1,6 @@
 import CreateDatabaseModal from "@components/Database/CreateDatabaseModal";
-import { useDatabaseStore } from "@hooks/databaseStore";
-import { IEditorTabStore } from "@hooks/editorStore";
-import { useScriptStore } from "@hooks/scriptStore";
+import useDatabaseStore from "@hooks/databaseStore";
+import { IEditorTabState } from "@hooks/editorStore";
 import {
   ActionIcon,
   Button,
@@ -10,9 +9,11 @@ import {
   Loader,
   Select,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { IconPlayerPlay } from "@tabler/icons-react";
-import { QueryResult } from "@ts/interfaces/database_interface";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { FileType } from "@ts/enums/filetype_enum";
+import { IQueryResult } from "@ts/interfaces/database_interface";
+import { useEffect, useRef, useState } from "react";
 import {
   PanelGroup,
   PanelResizeHandle,
@@ -24,37 +25,45 @@ import Panel from "./Panel";
 import "./styles.css";
 
 interface EditorTabBodyProps {
-  store: UseBoundStore<StoreApi<IEditorTabStore>>;
+  store: UseBoundStore<StoreApi<IEditorTabState>>;
 }
 
 export default function EditorTabBody({ store }: EditorTabBodyProps) {
   const [loading, setLoading] = useState(false);
   const { databases } = useDatabaseStore();
-  const { scriptId, run, code, setDatabase, selectedDatabase, setCode } =
-    useStore(store);
+  const {
+    runQuery,
+    fetchContent,
+    file,
+    setDatabase,
+    getDatabaseIdOption,
+    setContent,
+  } = useStore(store);
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
-  const [result, setResult] = useState<QueryResult>();
-  const [isScriptLoading, setIsScriptLoading] = useState(false);
-  const { getScriptContent } = useScriptStore();
+  const [result, setResult] = useState<IQueryResult>();
+  const [isFileLoading, setIsFileLoading] = useState(false);
   const [isCreateDatabaseModalOpen, setIsCreateDatabaseModalOpen] =
     useState(false);
 
-  useCallback(() => {
-    console.log(code);
-  }, [code]);
-
   useEffect(() => {
-    if (scriptId) {
-      setIsScriptLoading(true);
-      getScriptContent(scriptId)
-        .then((content) => {
-          content && setCode(content);
-        })
-        .finally(() => {
-          setIsScriptLoading(false);
-        });
+    if (file.id) {
+      switch (file.fileType) {
+        case FileType.DataFile: {
+          notifications.show({
+            color: "red",
+            title: "Error",
+            message: "File type not supported",
+          });
+          break;
+        }
+        case FileType.ScriptFile: {
+          setIsFileLoading(true);
+          fetchContent().finally(() => setIsFileLoading(false));
+          break;
+        }
+      }
     }
-  }, [scriptId]);
+  }, [file.id]);
 
   const databaseOptions = databases.map((database) => ({
     value: database.id.toString(),

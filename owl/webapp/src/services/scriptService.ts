@@ -10,7 +10,7 @@ namespace ScriptService {
       content,
     });
   };
-  export const getContent = async (id: number): Promise<string> => {
+  export const fetchContent = async (id: number): Promise<string> => {
     return request.get(`scripts/${id}/content`).then((response) => {
       return response.data["content"];
     });
