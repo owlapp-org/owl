@@ -2,10 +2,10 @@ import { IEditorTabState } from "@hooks/editorStore";
 import { notifications } from "@mantine/notifications";
 import { IQueryResult } from "@ts/interfaces/database_interface";
 
+import "@components/Editor/styles.css";
 import { useEffect, useRef, useState } from "react";
 import DataGrid, { DataGridHandle } from "react-data-grid";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
-import "./styles.css";
 
 interface IResultSetContainerProps {
   result?: IQueryResult;

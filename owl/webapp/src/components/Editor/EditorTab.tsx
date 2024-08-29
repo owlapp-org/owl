@@ -3,6 +3,7 @@ import { Divider, Loader, Menu, Tabs } from "@mantine/core";
 import { IconDeviceFloppy, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
+import "./styles.css";
 
 interface IEditorTabProps {
   id: string;

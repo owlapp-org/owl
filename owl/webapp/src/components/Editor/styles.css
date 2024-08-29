@@ -28,6 +28,13 @@
   display: "flex" !important;
   justify-content: space-between !important;
   border-radius: 0 !important;
+
+}
+
+@media (hover: hover) {
+  .editor-tab:hover:where(:not([data-active])) {
+    border-color: transparent !important;
+  }
 }
 
 .editor-tab .editor-tab-close-icon {
