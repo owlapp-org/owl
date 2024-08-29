@@ -1,5 +1,9 @@
 import { IEditorTabState } from "@hooks/editorStore";
-import { StoreApi, UseBoundStore } from "zustand";
+import { notifications } from "@mantine/notifications";
+import { FileType } from "@ts/enums/filetype_enum";
+import { useEffect, useState } from "react";
+import { StoreApi, UseBoundStore, useStore } from "zustand";
+import ContentLoading from "./ContentLoading";
 import Script from "./Script";
 
 interface IEditorBodyProps {
@@ -7,6 +11,32 @@ interface IEditorBodyProps {
 }
 
 const EditorBody: React.FC<IEditorBodyProps> = ({ store }) => {
+  const [isContentLoading, setIsContentLoading] = useState(false);
+  const { file, fetchContent } = useStore(store);
+
+  useEffect(() => {
+    if (file.id) {
+      setIsContentLoading(true);
+      fetchContent().finally(() => setIsContentLoading(false));
+    }
+  }, [file.id]);
+
+  const File = () => {
+    switch (file.fileType) {
+      case FileType.ScriptFile:
+        return <Script store={store} />;
+      case FileType.DataFile:
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: "Unsupported file type",
+        });
+        return;
+      default:
+        return <Script store={store} />;
+    }
+  };
+
   return (
     <div
       style={{
@@ -30,7 +60,7 @@ const EditorBody: React.FC<IEditorBodyProps> = ({ store }) => {
           height: "100%",
         }}
       >
-        <Script store={store} />
+        {isContentLoading ? <ContentLoading /> : <File />}
       </div>
     </div>
   );

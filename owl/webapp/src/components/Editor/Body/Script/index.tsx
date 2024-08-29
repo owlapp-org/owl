@@ -18,7 +18,7 @@ interface IScriptProps {
 
 const Script: React.FC<IScriptProps> = ({ store }) => {
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
-  const { file, runQuery } = useStore(store);
+  const { file, runQuery, fetchContent } = useStore(store);
   const [queryResult, setQueryResult] = useState<IQueryResult>();
   const [isLoading, setIsLoading] = useState(false);
 

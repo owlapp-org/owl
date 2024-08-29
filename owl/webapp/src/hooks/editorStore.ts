@@ -263,7 +263,7 @@ const useEditorStore = create<IEditorState>((set, get) => ({
 
     const activeTab = uuidv4();
     const newTabStore = createTabStore();
-    newTabStore.setState({ file: { id: fileId, fileType, name, content: "" } });
+    newTabStore.setState({ file: { id: fileId, fileType, name } });
     set((state) => ({
       activeTab,
       tabs: {

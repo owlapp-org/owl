@@ -5,7 +5,12 @@ import useDataFileStore from "@hooks/datafileStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath, MIME_TYPES } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
-import { IconFile, IconFolders, IconUpload } from "@tabler/icons-react";
+import {
+  IconFile,
+  IconFileTypeCsv,
+  IconFolders,
+  IconUpload,
+} from "@tabler/icons-react";
 import { IDataFile } from "@ts/interfaces/datafile_interface";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
@@ -15,15 +20,26 @@ function toNode(
   onDelete: (id: number) => void,
   onRename: (file: IDataFile) => void
 ): TreeNodeData {
+  const icon = () => {
+    if (file.name.endsWith(".csv")) {
+      return (
+        <IconFileTypeCsv
+          stroke={1}
+          size={18}
+          color="var(--mantine-color-gray-8)"
+        />
+      );
+    }
+    return (
+      <IconFile stroke={1} size={18} color="var(--mantine-color-gray-8)" />
+    );
+  };
+
   return {
     label: file.name,
     value: `${file.id}`,
     nodeProps: {
-      icon: (
-        <div>
-          <IconFile stroke={1} size={18} color="var(--mantine-color-gray-8)" />
-        </div>
-      ),
+      icon: <div>{icon()}</div>,
       actions: (
         <FileMenu
           file={file}

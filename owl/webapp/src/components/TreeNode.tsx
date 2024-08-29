@@ -6,7 +6,7 @@ import "./styles.css";
 const TreeNode: React.FC<RenderTreeNodePayload> = (props) => {
   const { node, expanded, hasChildren, elementProps, level } = props;
   // todo offset as parameter
-  const paddingLeft = `${(level - 1) * 35 + 10}px`;
+  const paddingLeft = `${(level - 1) * 30}px`;
 
   return (
     <Group
@@ -16,50 +16,58 @@ const TreeNode: React.FC<RenderTreeNodePayload> = (props) => {
       pr={10}
       align="center"
       gap={5}
-      style={{
-        paddingLeft,
-        flexWrap: "nowrap",
-      }}
       className="tree-node"
     >
-      {hasChildren && (
-        <IconChevronRight
-          stroke={1}
-          size={24}
-          style={{ transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}
-        />
-      )}
       <div
+        style={{
+          paddingLeft,
+          flexWrap: "nowrap",
+          display: "flex",
+          width: "100%",
+          alignItems: "center",
+          gap: "5px",
+        }}
+        data-section="node"
         onClick={(e: any) => {
-          if (e.target.dataset?.section == "label") {
+          if (e.target.dataset?.section == "node") {
             const onClick = node.nodeProps?.onClick;
             onClick && onClick(e);
           }
         }}
-        style={{
-          display: "flex",
-          gap: 10,
-          width: "100%",
-          alignItems: "center",
-        }}
       >
-        {node.nodeProps?.icon && <div>{node.nodeProps?.icon}</div>}
+        {hasChildren && (
+          <IconChevronRight
+            stroke={1}
+            size={24}
+            style={{ transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}
+          />
+        )}
         <div
           style={{
             display: "flex",
-            justifyContent: "space-between",
+            gap: 10,
             width: "100%",
             alignItems: "center",
           }}
         >
+          {node.nodeProps?.icon && <div>{node.nodeProps?.icon}</div>}
           <div
-            className="tree-node-label"
-            data-section="label"
-            style={{ flexGrow: 1 }}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: "100%",
+              alignItems: "center",
+            }}
           >
-            {node.label}
+            <div
+              className="tree-node-label"
+              data-section="label"
+              style={{ flexGrow: 1 }}
+            >
+              {node.label}
+            </div>
+            {node.nodeProps?.actions && node.nodeProps?.actions}
           </div>
-          {node.nodeProps?.actions && node.nodeProps?.actions}
         </div>
       </div>
     </Group>
