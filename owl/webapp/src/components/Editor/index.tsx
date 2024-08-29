@@ -1,23 +1,24 @@
-import { useDatabaseStore } from "@hooks/databaseStore";
+import useDatabaseStore from "@hooks/databaseStore";
 import useEditorStore from "@hooks/editorStore";
 import { ActionIcon, Tabs } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useEffect } from "react";
+import EditorBody from "./Body/EditorBody";
 import EditorTab from "./EditorTab";
-import EditorTabBody from "./EditorTabBody";
 import ZeroTabs from "./ZeroTabs";
 
 export default function Editor() {
-  const { fetchDatabases } = useDatabaseStore();
+  const { fetchAll } = useDatabaseStore();
 
   const { addTab, closeTab, tabs, getTabCount, activeTab, setActiveTab } =
     useEditorStore();
 
   useEffect(() => {
-    fetchDatabases();
-  }, [fetchDatabases]);
+    fetchAll();
+  }, [fetchAll]);
 
   const handleAddTab = () => {
+    // todo: script or text
     addTab();
   };
 
@@ -53,7 +54,7 @@ export default function Editor() {
 
       {Object.entries(tabs).map(([id, store]) => (
         <Tabs.Panel key={id} value={id}>
-          <EditorTabBody store={store} />
+          <EditorBody store={store} />
         </Tabs.Panel>
       ))}
     </Tabs>

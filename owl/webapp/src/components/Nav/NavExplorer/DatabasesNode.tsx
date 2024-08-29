@@ -47,7 +47,9 @@ export default function DatabasesNode() {
     null
   );
 
-  useEffect(() => fetchAll(), [fetchAll]);
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   const handleUpdateDatabase = (database: IDatabase) => {
     setSelectedDatabase(database);

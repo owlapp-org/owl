@@ -60,7 +60,9 @@ export default function ScriptsNode() {
 
   const { addTab } = useEditorStore();
 
-  useEffect(fetchAll, [fetchAll]);
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   const handleDrop = async (files: FileWithPath[]) => {
     if (files.length === 0) {

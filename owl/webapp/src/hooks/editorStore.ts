@@ -177,7 +177,6 @@ const createTabStore = () =>
           title: "Error",
           message: error?.response?.data as string,
         });
-        throw error;
       } finally {
         set({ isBusy: false });
       }

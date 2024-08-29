@@ -36,14 +36,16 @@ function toNode(
   };
 }
 
-export default function FilesNode() {
+export default function DataFilesNode() {
   const { datafiles, fetchAll, remove, upload, rename } = useDataFileStore();
   const [selectedFile, setSelectedFile] = useState<IDataFile | null>(null);
   const openRef = useRef<() => void>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
 
-  useEffect(() => fetchAll(), [fetchAll]);
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   const handleDrop = async (files: FileWithPath[]) => {
     if (files.length === 0) {

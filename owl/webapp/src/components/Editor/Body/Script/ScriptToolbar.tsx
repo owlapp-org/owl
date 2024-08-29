@@ -2,18 +2,21 @@ import useDatabaseStore from "@hooks/databaseStore";
 import { IEditorTabState } from "@hooks/editorStore";
 import { ActionIcon, Button, Divider, Flex, Select } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons-react";
-import { useState } from "react";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 
 interface IScriptToolbarProps {
+  isLoading: boolean;
   store: UseBoundStore<StoreApi<IEditorTabState>>;
   onExecute: () => void;
 }
 
-const ScriptToolbar: React.FC<IScriptToolbarProps> = ({ store, onExecute }) => {
+const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
+  isLoading,
+  store,
+  onExecute,
+}) => {
   const { databases, setIsCreateModalOpen } = useDatabaseStore();
   const { setDatabase, options, file } = useStore(store);
-  const [isLoading, setIsLoading] = useState(false);
 
   const databaseSelectOptions = databases.map((database) => ({
     value: database.id.toString(),

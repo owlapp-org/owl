@@ -2,7 +2,7 @@ import { IEditorTabState } from "@hooks/editorStore";
 import { Divider, Loader, Menu, Tabs } from "@mantine/core";
 import { IconDeviceFloppy, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { StoreApi, UseBoundStore } from "zustand";
+import { StoreApi, UseBoundStore, useStore } from "zustand";
 
 interface IEditorTabProps {
   id: string;
@@ -11,21 +11,18 @@ interface IEditorTabProps {
   handleCloseTab: (id: string) => void;
 }
 
-export default function EditorTab({
+const EditorTab: React.FC<IEditorTabProps> = ({
   id,
   store,
   index,
   handleCloseTab,
-}: IEditorTabProps) {
-  const isBusy = store((state) => state.isBusy);
-  const file = store((state) => state.file);
-  const findFileName = store((state) => state.findFileName);
-  const [title, setTitle] = useState(`Query ${index + 1}`);
-
-  const [opened, setOpened] = useState(false);
+}) => {
+  const { isBusy, file, findFileName } = useStore(store);
+  const [title, setTitle] = useState(`New ${index + 1}`);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const handleContextMenu = (e: any) => {
     e.preventDefault();
-    setOpened(true);
+    setIsContextMenuOpen(true);
   };
 
   useEffect(() => {
@@ -42,11 +39,11 @@ export default function EditorTab({
     <Menu
       shadow="md"
       width={200}
-      opened={opened}
-      onClose={() => setOpened(false)}
-      position="bottom-start" // Position it relative to the tab
+      opened={isContextMenuOpen}
+      onClose={() => setIsContextMenuOpen(false)}
+      position="bottom-start"
       withArrow
-      offset={4} // Adjust this value if needed
+      offset={4}
     >
       <Menu.Target>
         <Tabs.Tab
@@ -111,4 +108,6 @@ export default function EditorTab({
       </Menu.Dropdown>
     </Menu>
   );
-}
+};
+
+export default EditorTab;
