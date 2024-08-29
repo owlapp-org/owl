@@ -27,9 +27,8 @@ const TreeNode: React.FC<RenderTreeNodePayload> = (props) => {
           alignItems: "center",
           gap: "5px",
         }}
-        data-section="node"
         onClick={(e: any) => {
-          if (e.target.dataset?.section == "node") {
+          if (!e.target.closest("[data-section='actions']")) {
             const onClick = node.nodeProps?.onClick;
             onClick && onClick(e);
           }
@@ -66,7 +65,7 @@ const TreeNode: React.FC<RenderTreeNodePayload> = (props) => {
             >
               {node.label}
             </div>
-            {node.nodeProps?.actions && node.nodeProps?.actions}
+            <div data-section="actions">{node.nodeProps?.actions}</div>
           </div>
         </div>
       </div>
