@@ -12,14 +12,14 @@ import { FC, useEffect, useState } from "react";
 
 interface UpdateDatabaseModalProps {
   open: boolean;
-  onClose: () => void;
   database: IDatabase | null;
+  onClose: () => void;
 }
 
 const UpdateDatabaseModal: FC<UpdateDatabaseModalProps> = ({
   open,
-  onClose,
   database,
+  onClose,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");

@@ -118,6 +118,21 @@ const useScriptStore = create<IScriptState>((set, get) => ({
       set((state) => ({
         scripts: state.scripts.map((s) => (s.id === id ? file : s)),
       }));
+
+      const editorTab = Object.entries(useEditorStore.getState().tabs).find(
+        ([_, tab]) => tab.getState().file.id === id
+      );
+      if (editorTab) {
+        const [_, tabStore] = editorTab;
+        const tabFile = tabStore.getState().file;
+        tabStore.setState({
+          file: {
+            ...tabFile,
+            name: file.name,
+          },
+        });
+      }
+
       notifications.show({
         title: "Success",
         message: `Script file renamed successfully`,

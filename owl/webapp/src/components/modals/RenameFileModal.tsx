@@ -12,8 +12,8 @@ interface IRenameFileModalProps {
 
 const RenameFileModal: FC<IRenameFileModalProps> = ({
   open,
-  onClose,
   file,
+  onClose,
   onRename,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +23,7 @@ const RenameFileModal: FC<IRenameFileModalProps> = ({
     if (open && file) {
       setName(file.name);
     }
-  }, [open, file]);
+  }, [open, file?.name]);
 
   const resetState = () => {
     setName("");

@@ -41,6 +41,6 @@ class UpdateScriptInputSchema(BaseModel, extra="ignore"):
 
     @model_validator(mode="after")
     def check_at_least_one_field(self):
-        if not self.name and not self.content:
+        if not self.name and self.content is None:
             raise ValueError("No attributes specified to update")
         return self

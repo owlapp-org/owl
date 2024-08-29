@@ -26,9 +26,8 @@ const EditorTab: React.FC<IEditorTabProps> = ({
   };
 
   useEffect(() => {
-    const filename = findFileName();
-    filename && setTitle(filename);
-  }, [file, setTitle]);
+    file.name && setTitle(file.name);
+  }, [file.name, setTitle]);
 
   const handleSave = () => {
     // todo

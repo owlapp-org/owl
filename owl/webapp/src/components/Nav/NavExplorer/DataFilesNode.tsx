@@ -1,5 +1,5 @@
 import FileMenu from "@components/DataFileMenu";
-import RenameFileModal from "@components/RenameFileModal";
+import RenameFileModal from "@components/modals/RenameFileModal";
 import TreeNode from "@components/TreeNode";
 import useDataFileStore from "@hooks/datafileStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";

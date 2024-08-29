@@ -85,7 +85,7 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
     useEffect(() => {
       if (file.id) {
         const debouncedSave = debounce(() => {
-          if (oldContent != file.content) {
+          if (oldContent != (file.content ?? "")) {
             save();
             setOldContent(file.content || "");
           }

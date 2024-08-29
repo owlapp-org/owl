@@ -188,14 +188,14 @@ const createTabStore = () =>
       }
       switch (file.fileType) {
         case FileType.ScriptFile: {
-          const { findById: findScriptById } = useScriptStore();
+          const { findById: findScriptById } = useScriptStore.getState();
           const script = findScriptById(file.id);
           if (script) {
             return script.name;
           }
         }
         case FileType.DataFile: {
-          const { findById: findDataFileById } = useDataFileStore();
+          const { findById: findDataFileById } = useDataFileStore.getState();
           const dataFile = findDataFileById(file.id);
           if (dataFile) {
             return dataFile.name;
@@ -234,9 +234,36 @@ const useEditorStore = create<IEditorState>((set, get) => ({
         }
       }
     }
+    let name = undefined;
+    if (fileId) {
+      switch (fileType) {
+        case FileType.ScriptFile: {
+          const script = useScriptStore.getState().findById(fileId);
+          if (script) {
+            name = script.name;
+          } else {
+            notifications.show({
+              color: "red",
+              title: "Error",
+              message: "File not found on scripts",
+            });
+          }
+          break;
+        }
+        default: {
+          notifications.show({
+            color: "red",
+            title: "Error",
+            message: "Unsupported file type",
+          });
+          break;
+        }
+      }
+    }
+
     const activeTab = uuidv4();
     const newTabStore = createTabStore();
-    newTabStore.setState({ file: { fileType } });
+    newTabStore.setState({ file: { id: fileId, fileType, name, content: "" } });
     set((state) => ({
       activeTab,
       tabs: {

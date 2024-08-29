@@ -1,6 +1,5 @@
-import CreateDatabaseModal from "@components/Database/CreateDatabaseModal";
-import UpdateDatabaseModal from "@components/Database/UpdateDatabaseModal";
 import DatabaseMenu from "@components/DatabaseMenu";
+import UpdateDatabaseModal from "@components/modals/UpdateDatabaseModal";
 import TreeNode from "@components/TreeNode";
 import useDatabaseStore from "@hooks/databaseStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
@@ -40,8 +39,8 @@ function databaseToTreeNodeData(
 }
 
 export default function DatabasesNode() {
-  const { databases, fetchAll, update, remove } = useDatabaseStore();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { databases, fetchAll, remove, setIsCreateModalOpen } =
+    useDatabaseStore();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedDatabase, setSelectedDatabase] = useState<IDatabase | null>(
     null
@@ -93,10 +92,6 @@ export default function DatabasesNode() {
         clearSelectionOnOutsideClick
         data={data}
         renderNode={(payload) => <TreeNode {...payload} />}
-      />
-      <CreateDatabaseModal
-        open={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
       />
       <UpdateDatabaseModal
         open={isUpdateModalOpen}

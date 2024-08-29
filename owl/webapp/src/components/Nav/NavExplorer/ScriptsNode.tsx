@@ -1,5 +1,5 @@
-import CreateScriptModal from "@components/CreateScriptModal";
-import RenameFileModal from "@components/RenameFileModal";
+import CreateScriptModal from "@components/modals/CreateScriptModal";
+import RenameFileModal from "@components/modals/RenameFileModal";
 import ScriptMenu from "@components/ScriptMenu";
 import TreeNode from "@components/TreeNode";
 import useEditorStore from "@hooks/editorStore";

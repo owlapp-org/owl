@@ -75,7 +75,7 @@ class Script(TimestampMixin, UserSpaceMixin["Script"], db.Model):
     def update_script(
         self, name: Optional[str] = None, content: Optional[str] = None
     ) -> "Script":
-        if not name and not content:
+        if not name and content is None:
             raise ValueError("Name or content must be specified")
 
         self.update_file(name, content)

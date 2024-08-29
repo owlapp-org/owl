@@ -32,7 +32,8 @@ const TreeNode: React.FC<RenderTreeNodePayload> = (props) => {
       <div
         onClick={(e: any) => {
           if (e.target.dataset?.section == "label") {
-            node.nodeProps?.onClick(e);
+            const onClick = node.nodeProps?.onClick;
+            onClick && onClick(e);
           }
         }}
         style={{
