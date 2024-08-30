@@ -12,7 +12,10 @@ interface IEditorBodyProps {
 
 const EditorBody: React.FC<IEditorBodyProps> = ({ store }) => {
   const [isContentLoading, setIsContentLoading] = useState(false);
-  const { file, fetchContent } = useStore(store);
+  const { file, fetchContent } = useStore(store, (state) => ({
+    file: state.file,
+    fetchContent: state.fetchContent,
+  }));
 
   useEffect(() => {
     if (file.id) {

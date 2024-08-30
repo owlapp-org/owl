@@ -33,7 +33,12 @@ export interface ExtendedReactCodeMirrorRef extends ReactCodeMirrorRef {
 const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
   function Code({ store, onExecute, ...other }, ref) {
     const codeMirrorRef = useRef<ReactCodeMirrorRef>(null);
-    const { file, setContent, save } = useStore(store);
+    const { file, setContent, save } = useStore(store, (state) => ({
+      file: state.file,
+      setContent: state.setContent,
+      save: state.save,
+    }));
+
     const { setIsCreateModalOpen: setIsCreateScriptModalOpen } =
       useScriptStore();
 
@@ -47,16 +52,19 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
       }, 200),
       [setContent, file.content]
     );
-    const handleSave = async (name?: string) => {
-      if (file.id) {
-        if (file.content != oldContent) {
-          await save(name);
-          setOldContent(file.content || "");
+    const handleSave = useCallback(
+      async (name?: string) => {
+        if (file.id) {
+          if (file.content != oldContent) {
+            await save(name);
+            setOldContent(file.content || "");
+          }
+        } else {
+          setIsCreateScriptModalOpen(true);
         }
-      } else {
-        setIsCreateScriptModalOpen(true);
-      }
-    };
+      },
+      [file]
+    );
     const shortCutKeymap = [
       {
         key: "Mod-Enter",

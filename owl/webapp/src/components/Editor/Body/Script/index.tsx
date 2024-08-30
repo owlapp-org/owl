@@ -1,7 +1,7 @@
 import "@components/Editor/styles.css";
 import { IEditorTabState } from "@hooks/editorStore";
 import { IQueryResult } from "@ts/interfaces/database_interface";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   PanelGroup,
   PanelResizeHandle,
@@ -18,13 +18,16 @@ interface IScriptProps {
 
 const Script: React.FC<IScriptProps> = ({ store }) => {
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
-  const { file, runQuery } = useStore(store);
+  const { file, runQuery } = useStore(store, (state) => ({
+    file: state.file,
+    runQuery: state.runQuery,
+  }));
   const [queryResult, setQueryResult] = useState<IQueryResult | undefined>(
     undefined
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleExecute = async () => {
+  const handleExecute = useCallback(async () => {
     let query = file.content || "";
     if (codeRef.current) {
       const selected = (codeRef.current?.getSelectedLines?.() ?? []).join("\n");
@@ -39,10 +42,12 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
     setIsLoading(true);
     const result = await runQuery(query, 0, 25); // todo hardcoded values
     setQueryResult(result);
-    console.log(result);
-    console.log(queryResult);
     setIsLoading(false);
-  };
+  }, [codeRef.current?.getSelectedLines?.(), file.content]);
+
+  useEffect(() => {
+    console.log("renderingXXX");
+  });
 
   return (
     <div
