@@ -97,18 +97,26 @@ export default function DataFilesNode() {
           </div>
         ),
         actions: (
-          <ActionIcon
-            className="root-node-action-icon"
-            loading={isLoading}
-            disabled={isLoading}
-            variant="transparent"
-            onClick={(event) => {
-              event.stopPropagation();
-              openRef.current?.();
+          <div
+            style={{
+              display: "flex",
+              gap: "5px",
+              alignItems: "center",
             }}
           >
-            <IconUpload stroke={1} />
-          </ActionIcon>
+            <ActionIcon
+              className="root-node-action-icon"
+              loading={isLoading}
+              disabled={isLoading}
+              variant="transparent"
+              onClick={(event) => {
+                event.stopPropagation();
+                openRef.current?.();
+              }}
+            >
+              <IconUpload stroke={1} />
+            </ActionIcon>
+          </div>
         ),
       },
       children: datafiles.map((file) => toNode(file, remove, handleRename)),

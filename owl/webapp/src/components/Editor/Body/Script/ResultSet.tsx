@@ -62,8 +62,10 @@ const ResultSet: React.FC<IResultSetProps> = ({ result, store }) => {
     setIsLoading(true);
     try {
       const qr = await runQuery(result.query, start_row, end_row, false);
-      setRows([...rows, ...(qr.data || [])]);
-      setEndRow(qr.end_row);
+      if (qr) {
+        setRows([...rows, ...(qr.data || [])]);
+        setEndRow(qr.end_row!);
+      }
     } catch (e) {
       notifications.show({
         title: "Error",

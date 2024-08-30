@@ -16,7 +16,7 @@ interface IEditorTabProps {
 
 const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
   const { closeAllTabs, closeTab, closeOtherTabs } = useEditorStore();
-  const { isBusy, file } = useStore(store);
+  const { file } = useStore(store);
   const { showModal: showRenameFileModal } = useRenameFileModalStore();
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState(`New ${index + 1}`);
@@ -67,7 +67,7 @@ const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
           className="editor-tab"
           onContextMenu={handleContextMenu}
           rightSection={
-            isBusy || isLoading ? (
+            isLoading ? (
               <Loader size="1rem" />
             ) : (
               <IconX

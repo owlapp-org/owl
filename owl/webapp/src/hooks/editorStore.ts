@@ -7,6 +7,7 @@ import useScriptStore from "./scriptStore";
 import IFile from "@ts/interfaces/file_interface";
 import { FileType } from "@ts/enums/filetype_enum";
 import useDataFileStore from "./datafileStore";
+import { IQueryResult } from "@ts/interfaces/database_interface";
 
 export interface IEditorTabOptions {
   databaseId: string | null;
@@ -16,10 +17,8 @@ export interface IEditorTabState {
   id: string;
   file: IFile;
   options: IEditorTabOptions | null;
-  isBusy: boolean;
   fetchContent: () => Promise<void>;
   save: (name?: string) => void;
-  setIsBusy: (value: boolean) => void;
   setContent: (content: string) => void;
   setDatabase: (database: string | null) => void;
   runQuery: (
@@ -27,7 +26,7 @@ export interface IEditorTabState {
     start_row?: number,
     end_row?: number,
     with_total_count?: boolean
-  ) => any;
+  ) => Promise<IQueryResult | undefined>;
   findFileName: () => string | undefined;
   getDatabaseIdOption: () => string | null;
 }
@@ -37,7 +36,6 @@ const createTabStore = () =>
     id: uuidv4(),
     file: {},
     options: null,
-    isBusy: false,
     fetchContent: async () => {
       const file = get().file;
       if (!file.id) {
@@ -111,7 +109,6 @@ const createTabStore = () =>
         }
       }
     },
-    setIsBusy: (isBusy: boolean) => set({ isBusy }),
     setContent: (content: string) =>
       set((state) => ({
         file: {
@@ -150,7 +147,6 @@ const createTabStore = () =>
 
       const { databaseId } = options || {};
       try {
-        set({ isBusy: true });
         const result = await DatabaseService.run(
           databaseId,
           query,
@@ -177,8 +173,6 @@ const createTabStore = () =>
           title: "Error",
           message: error?.response?.data as string,
         });
-      } finally {
-        set({ isBusy: false });
       }
     },
     findFileName: () => {

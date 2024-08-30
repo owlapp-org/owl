@@ -9,7 +9,7 @@ import { IDatabase } from "@ts/interfaces/database_interface";
 import { useEffect } from "react";
 import "./styles.css";
 
-function databaseToTreeNodeData(
+function toNode(
   database: IDatabase,
   onDelete: (id: number) => void,
   onUpdate: (database: IDatabase) => void
@@ -63,21 +63,27 @@ export default function DatabasesNode() {
           </div>
         ),
         actions: (
-          <ActionIcon
-            className="root-node-action-icon"
-            variant="transparent"
-            onClick={(event) => {
-              event.stopPropagation();
-              showCreateDatabaseModal({});
+          <div
+            style={{
+              display: "flex",
+              gap: "5px",
+              alignItems: "center",
             }}
           >
-            <IconPlus stroke={1} />
-          </ActionIcon>
+            <ActionIcon
+              className="root-node-action-icon"
+              variant="transparent"
+              onClick={(event) => {
+                event.stopPropagation();
+                showCreateDatabaseModal({});
+              }}
+            >
+              <IconPlus stroke={1} />
+            </ActionIcon>
+          </div>
         ),
       },
-      children: databases.map((db) =>
-        databaseToTreeNodeData(db, remove, handleUpdateDatabase)
-      ),
+      children: databases.map((db) => toNode(db, remove, handleUpdateDatabase)),
     },
   ];
 

@@ -19,7 +19,9 @@ interface IScriptProps {
 const Script: React.FC<IScriptProps> = ({ store }) => {
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
   const { file, runQuery } = useStore(store);
-  const [queryResult, setQueryResult] = useState<IQueryResult>();
+  const [queryResult, setQueryResult] = useState<IQueryResult | undefined>(
+    undefined
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const handleExecute = async () => {
@@ -37,6 +39,8 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
     setIsLoading(true);
     const result = await runQuery(query, 0, 25); // todo hardcoded values
     setQueryResult(result);
+    console.log(result);
+    console.log(queryResult);
     setIsLoading(false);
   };
 
@@ -62,7 +66,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
         </ResizablePanel>
         <PanelResizeHandle className="panel-resize-handle" />
         <ResizablePanel maxSize={90} minSize={10}>
-          <Panel result={queryResult} store={store} />
+          {queryResult && <Panel result={queryResult} store={store} />}
         </ResizablePanel>
       </PanelGroup>
     </div>

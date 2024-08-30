@@ -107,6 +107,7 @@ export default function ScriptsNode() {
             style={{
               display: "flex",
               gap: "5px",
+              alignItems: "center",
             }}
           >
             <ActionIcon
