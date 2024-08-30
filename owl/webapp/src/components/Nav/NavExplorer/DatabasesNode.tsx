@@ -1,11 +1,12 @@
 import DatabaseMenu from "@components/DatabaseMenu";
-import UpdateDatabaseModal from "@components/modals/UpdateDatabaseModal";
+import { useCreateDatabaseModalStore } from "@components/modals/CreateDatabaseModal/useCreateDatabaseModalStore";
+import { useUpdateDatabaseModalStore } from "@components/modals/UpdateDatabaseModal/useUpdateDatabaseModalStore";
 import TreeNode from "@components/TreeNode";
 import useDatabaseStore from "@hooks/databaseStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { IconBrandOnedrive, IconCylinder, IconPlus } from "@tabler/icons-react";
 import { IDatabase } from "@ts/interfaces/database_interface";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import "./styles.css";
 
 function databaseToTreeNodeData(
@@ -39,20 +40,16 @@ function databaseToTreeNodeData(
 }
 
 export default function DatabasesNode() {
-  const { databases, fetchAll, remove, setIsCreateModalOpen } =
-    useDatabaseStore();
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [selectedDatabase, setSelectedDatabase] = useState<IDatabase | null>(
-    null
-  );
+  const { databases, fetchAll, remove } = useDatabaseStore();
+  const { showModal: showCreateDatabaseModal } = useCreateDatabaseModalStore();
+  const { showModal: showUpdateDatabaseModal } = useUpdateDatabaseModalStore();
 
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
   const handleUpdateDatabase = (database: IDatabase) => {
-    setSelectedDatabase(database);
-    setIsUpdateModalOpen(true);
+    showUpdateDatabaseModal({ databaseId: database.id });
   };
 
   const data: TreeNodeData[] = [
@@ -71,7 +68,7 @@ export default function DatabasesNode() {
             variant="transparent"
             onClick={(event) => {
               event.stopPropagation();
-              setIsCreateModalOpen(true);
+              showCreateDatabaseModal({});
             }}
           >
             <IconPlus stroke={1} />
@@ -92,11 +89,6 @@ export default function DatabasesNode() {
         clearSelectionOnOutsideClick
         data={data}
         renderNode={(payload) => <TreeNode {...payload} />}
-      />
-      <UpdateDatabaseModal
-        open={isUpdateModalOpen}
-        onClose={() => setIsUpdateModalOpen(false)}
-        database={selectedDatabase}
       />
     </>
   );

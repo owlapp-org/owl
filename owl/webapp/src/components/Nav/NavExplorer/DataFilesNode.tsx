@@ -1,5 +1,5 @@
 import FileMenu from "@components/DataFileMenu";
-import RenameFileModal from "@components/modals/RenameFileModal/RenameFileModal";
+import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import TreeNode from "@components/TreeNode";
 import useDataFileStore from "@hooks/datafileStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
@@ -53,11 +53,10 @@ function toNode(
 }
 
 export default function DataFilesNode() {
-  const { datafiles, fetchAll, remove, upload, rename } = useDataFileStore();
-  const [selectedFile, setSelectedFile] = useState<IDataFile | null>(null);
+  const { datafiles, fetchAll, remove, upload } = useDataFileStore();
   const openRef = useRef<() => void>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const { showModal: showRenameFileModal } = useRenameFileModalStore();
 
   useEffect(() => {
     fetchAll();
@@ -85,8 +84,7 @@ export default function DataFilesNode() {
   };
 
   const handleRename = (file: IDataFile) => {
-    setSelectedFile(file);
-    setIsRenameModalOpen(true);
+    showRenameFileModal({ file });
   };
   const data: TreeNodeData[] = [
     {
@@ -138,12 +136,6 @@ export default function DataFilesNode() {
           renderNode={(payload) => <TreeNode {...payload} />}
         />
       </Dropzone>
-      <RenameFileModal
-        open={isRenameModalOpen}
-        onClose={() => setIsRenameModalOpen(false)}
-        file={selectedFile!}
-        onRename={rename}
-      />
     </>
   );
 }

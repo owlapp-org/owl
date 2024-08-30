@@ -10,20 +10,16 @@ import { notifications } from "@mantine/notifications";
 interface IDatabaseState {
   databases: IDatabase[];
   fetched: boolean;
-  isCreateModalOpen: boolean;
-  setIsCreateModalOpen: (isCreateModalOpen: boolean) => void;
   fetchAll: (force?: boolean) => void;
   create: (database: IDatabaseCreateOptions) => void;
   remove: (id: number) => void;
   update: (id: number, database: IDatabaseUpdateOptions) => void;
+  findById: (id: number) => IDatabase | undefined;
 }
 
 const useDatabaseStore = create<IDatabaseState>((set, get) => ({
   databases: [],
   fetched: false,
-  isCreateModalOpen: false,
-  setIsCreateModalOpen: (isCreateModalOpen: boolean) =>
-    set({ isCreateModalOpen }),
   fetchAll: async (force = false) => {
     if (force || !get().fetched) {
       try {
@@ -86,6 +82,10 @@ const useDatabaseStore = create<IDatabaseState>((set, get) => ({
         message: `Failed to update database: ${err}`,
       });
     }
+  },
+  findById: (id: number) => {
+    const databases = get().databases;
+    return databases.find((d) => d.id === id);
   },
 }));
 

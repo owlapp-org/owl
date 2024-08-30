@@ -7,33 +7,38 @@ import {
   TextInput,
   Textarea,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { IDatabase } from "@ts/interfaces/database_interface";
 import { FC, useEffect, useState } from "react";
+import { useUpdateDatabaseModalStore } from "./useUpdateDatabaseModalStore";
 
-interface UpdateDatabaseModalProps {
-  open: boolean;
-  database: IDatabase | null;
-  onClose: () => void;
-}
-
-const UpdateDatabaseModal: FC<UpdateDatabaseModalProps> = ({
-  open,
-  database,
-  onClose,
-}) => {
+const UpdateDatabaseModal: FC = () => {
+  const { update, findById } = useDatabaseStore();
+  const { databaseId, open, destroy } = useUpdateDatabaseModalStore();
+  const [database, setDatabase] = useState<IDatabase>();
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [poolSize, setPoolSize] = useState(1);
-  const { update } = useDatabaseStore();
 
   useEffect(() => {
-    if (open && database) {
+    if (open && databaseId) {
+      const database = findById(databaseId);
+      if (!database) {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: "Database not found",
+        });
+        destroy();
+        return;
+      }
+      setDatabase(database);
       setName(database.name);
       setDescription(database.description as string);
       setPoolSize(database.pool_size);
     }
-  }, [open, database]);
+  }, [open, databaseId]);
 
   const resetState = () => {
     setName("");
@@ -44,22 +49,20 @@ const UpdateDatabaseModal: FC<UpdateDatabaseModalProps> = ({
 
   const handleClose = () => {
     resetState();
-    onClose();
+    destroy();
   };
 
   const handleSubmit = async () => {
-    if (!database) return;
-
+    if (!databaseId) return;
     setIsLoading(true);
     try {
-      await update(database.id, {
+      await update(databaseId, {
         ...database,
         name: name,
         description: description,
         pool_size: poolSize,
       });
     } finally {
-      setIsLoading(false);
       handleClose();
     }
   };

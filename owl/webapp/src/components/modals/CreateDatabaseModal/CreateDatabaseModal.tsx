@@ -8,20 +8,12 @@ import {
   Textarea,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { IDatabase } from "@ts/interfaces/database_interface";
 import { FC, useState } from "react";
+import { useCreateDatabaseModalStore } from "./useCreateDatabaseModalStore";
 
-interface CreateDatabaseModalProps {
-  open: boolean;
-  onClose: () => void;
-  onDatabaseCreated?: (database: IDatabase) => void;
-}
-
-const CreateDatabaseModal: FC<CreateDatabaseModalProps> = ({
-  open,
-  onClose,
-}) => {
+const CreateDatabaseModal: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { open, destroy } = useCreateDatabaseModalStore();
   const { create } = useDatabaseStore();
 
   const form = useForm({
@@ -32,14 +24,10 @@ const CreateDatabaseModal: FC<CreateDatabaseModalProps> = ({
     },
   });
 
-  const resetState = () => {
+  const handleClose = () => {
     form.reset();
     setIsLoading(false);
-  };
-
-  const handleClose = () => {
-    resetState();
-    onClose();
+    destroy();
   };
 
   const handleSubmit = async (values: typeof form.values) => {

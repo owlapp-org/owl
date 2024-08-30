@@ -1,18 +1,13 @@
-import CreateDatabaseModal from "@components/modals/CreateDatabaseModal";
+import CreateDatabaseModal from "@components/modals/CreateDatabaseModal/CreateDatabaseModal";
 import CreateScriptModal from "@components/modals/CreateScriptModal/CreateScriptModal";
 import RenameFileModal from "@components/modals/RenameFileModal/RenameFileModal";
-import useDatabaseStore from "@hooks/databaseStore";
+import UpdateDatabaseModal from "@components/modals/UpdateDatabaseModal/UpdateDatabaseModal";
 import DatabasesNode from "./DatabasesNode";
 import DataFilesNode from "./DataFilesNode";
 import ScriptsNode from "./ScriptsNode";
 import "./styles.css";
 
 export default function NavExplorer() {
-  const {
-    isCreateModalOpen: isCreateDatabaseModalOpen,
-    setIsCreateModalOpen: setIsCreateDatabaseModalOpen,
-  } = useDatabaseStore();
-
   return (
     <div
       className="nav-explorer"
@@ -27,10 +22,8 @@ export default function NavExplorer() {
       <DataFilesNode />
       <ScriptsNode />
       {/* -- modals -- */}
-      <CreateDatabaseModal
-        open={isCreateDatabaseModalOpen}
-        onClose={() => setIsCreateDatabaseModalOpen(false)}
-      />
+      <CreateDatabaseModal />
+      <UpdateDatabaseModal />
       <RenameFileModal />
       <CreateScriptModal />
     </div>
