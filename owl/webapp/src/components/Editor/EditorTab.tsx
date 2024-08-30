@@ -1,6 +1,9 @@
+import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import useEditorStore, { IEditorTabState } from "@hooks/editorStore";
 import { Divider, Loader, Menu, Tabs } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { IconDeviceFloppy, IconX } from "@tabler/icons-react";
+import { FileType } from "@ts/enums/filetype_enum";
 import { useEffect, useState } from "react";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import "./styles.css";
@@ -14,6 +17,8 @@ interface IEditorTabProps {
 const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
   const { closeAllTabs, closeTab, closeOtherTabs } = useEditorStore();
   const { isBusy, file } = useStore(store);
+  const { showModal: showRenameFileModal } = useRenameFileModalStore();
+  const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState(`New ${index + 1}`);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const handleContextMenu = (e: any) => {
@@ -28,6 +33,20 @@ const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
   const handleSave = () => {
     // todo
     console.log("Save clicked");
+  };
+
+  const handleRename = () => {
+    if (!file.id) {
+      notifications.show({
+        color: "warning",
+        title: "Error",
+        message: "File not saved",
+      });
+      return;
+    }
+    setIsLoading(true);
+    showRenameFileModal({ file: { ...file, fileType: FileType.ScriptFile } });
+    setIsLoading(false);
   };
 
   return (
@@ -48,7 +67,7 @@ const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
           className="editor-tab"
           onContextMenu={handleContextMenu}
           rightSection={
-            isBusy ? (
+            isBusy || isLoading ? (
               <Loader size="1rem" />
             ) : (
               <IconX
@@ -78,7 +97,10 @@ const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
         >
           Save
         </Menu.Item>
-        <Menu.Item leftSection={<div style={{ width: "1.2rem" }} />}>
+        <Menu.Item
+          onClick={handleRename}
+          leftSection={<div style={{ width: "1.2rem" }} />}
+        >
           Rename
         </Menu.Item>
         <Divider></Divider>

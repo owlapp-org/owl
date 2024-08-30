@@ -1,4 +1,6 @@
 import CreateDatabaseModal from "@components/modals/CreateDatabaseModal";
+import CreateScriptModal from "@components/modals/CreateScriptModal/CreateScriptModal";
+import RenameFileModal from "@components/modals/RenameFileModal/RenameFileModal";
 import useDatabaseStore from "@hooks/databaseStore";
 import DatabasesNode from "./DatabasesNode";
 import DataFilesNode from "./DataFilesNode";
@@ -29,6 +31,8 @@ export default function NavExplorer() {
         open={isCreateDatabaseModalOpen}
         onClose={() => setIsCreateDatabaseModalOpen(false)}
       />
+      <RenameFileModal />
+      <CreateScriptModal />
     </div>
   );
 }

@@ -8,6 +8,8 @@ import useEditorStore from "./editorStore";
 interface IScriptState {
   scripts: IScript[];
   isCreateModalOpen: boolean;
+  isRenameModalOpen: boolean;
+  setIsRenameModalOpen: (isRenameModalOpen: boolean) => void;
   setIsCreateModalOpen: (isCreateModalOpen: boolean) => void;
   create: (name: string, content?: string) => Promise<IScript>;
   updateContent: (id: number, content: string) => void;
@@ -22,8 +24,11 @@ interface IScriptState {
 const useScriptStore = create<IScriptState>((set, get) => ({
   scripts: [],
   isCreateModalOpen: false,
+  isRenameModalOpen: false,
   setIsCreateModalOpen: (isCreateModalOpen: boolean) =>
     set({ isCreateModalOpen }),
+  setIsRenameModalOpen: (isRenameModalOpen: boolean) =>
+    set({ isRenameModalOpen }),
   updateContent: async (id: number, content: string) => {
     return ScriptService.updateContent(id, content);
   },

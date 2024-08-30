@@ -1,30 +1,14 @@
+import useScriptStore from "@hooks/scriptStore";
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { FC, useState } from "react";
+import { useCreateScriptModalStore } from "./useCreateScriptModalStore";
 
-interface ICreateScriptModalProps {
-  open: boolean;
-  onClose: () => void;
-  onCreate: (name: string) => void;
-}
-
-const CreateScriptModal: FC<ICreateScriptModalProps> = ({
-  open,
-  onClose,
-  onCreate,
-}) => {
+const CreateScriptModal: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
-
-  const resetState = () => {
-    setName("");
-    setIsLoading(false);
-  };
-
-  const handleClose = () => {
-    resetState();
-    onClose();
-  };
+  const { open, destroy } = useCreateScriptModalStore();
+  const { create } = useScriptStore();
 
   const handleSubmit = async () => {
     if (!name.endsWith(".sql")) {
@@ -38,16 +22,16 @@ const CreateScriptModal: FC<ICreateScriptModalProps> = ({
     setIsLoading(true);
     try {
       setIsLoading(true);
-      await onCreate(name);
+      await create(name);
     } catch (error) {
     } finally {
       setIsLoading(false);
-      handleClose();
+      destroy();
     }
   };
 
   return (
-    <Modal opened={open} onClose={handleClose} title="New Script">
+    <Modal opened={open} onClose={destroy} title="New Script">
       <div style={{ display: "flex", flexDirection: "column" }}>
         <TextInput
           label="File Name"
@@ -57,7 +41,7 @@ const CreateScriptModal: FC<ICreateScriptModalProps> = ({
           required
         />
         <Group mt="md" justify="right">
-          <Button variant="default" onClick={handleClose}>
+          <Button variant="default" onClick={destroy}>
             Cancel
           </Button>
           <Button

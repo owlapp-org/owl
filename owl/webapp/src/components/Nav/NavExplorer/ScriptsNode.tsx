@@ -1,5 +1,5 @@
-import CreateScriptModal from "@components/modals/CreateScriptModal";
-import RenameFileModal from "@components/modals/RenameFileModal";
+import { useCreateScriptModalStore } from "@components/modals/CreateScriptModal/useCreateScriptModalStore";
+import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import ScriptMenu from "@components/ScriptMenu";
 import TreeNode from "@components/TreeNode";
 import useEditorStore from "@hooks/editorStore";
@@ -13,6 +13,7 @@ import {
   IconPlus,
   IconUpload,
 } from "@tabler/icons-react";
+import { FileType } from "@ts/enums/filetype_enum";
 import { IScript } from "@ts/interfaces/script_interface";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
@@ -50,15 +51,12 @@ function toNode(
 }
 
 export default function ScriptsNode() {
-  const { scripts, create, fetchAll, remove, upload, rename } =
-    useScriptStore();
-  const [selectedScript, setSelectedScript] = useState<IScript | null>(null);
+  const { scripts, fetchAll, remove, upload } = useScriptStore();
   const openRef = useRef<() => void>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
-  const [isCreateScriptModalOpen, setIsCreateScriptModalOpen] = useState(false);
-
   const { addTab } = useEditorStore();
+  const { showModal: showRenameFileModal } = useRenameFileModalStore();
+  const { showModal: showCreateScriptModal } = useCreateScriptModalStore();
 
   useEffect(() => {
     fetchAll();
@@ -84,13 +82,12 @@ export default function ScriptsNode() {
     }
   };
   const handleRename = (file: IScript) => {
-    setSelectedScript(file);
-    setIsRenameModalOpen(true);
+    showRenameFileModal({ file: { ...file, fileType: FileType.ScriptFile } });
   };
-  const handleCreate = async (name: string) => {
+  const handleCreate = async () => {
     setIsLoading(true);
     try {
-      await create(name);
+      await showCreateScriptModal({});
     } finally {
       setIsLoading(false);
     }
@@ -117,9 +114,9 @@ export default function ScriptsNode() {
               loading={isLoading}
               disabled={isLoading}
               variant="transparent"
-              onClick={(event) => {
+              onClick={async (event) => {
                 event.stopPropagation();
-                setIsCreateScriptModalOpen(true);
+                await handleCreate();
               }}
             >
               <IconPlus stroke={1} />
@@ -159,17 +156,6 @@ export default function ScriptsNode() {
           renderNode={(payload) => <TreeNode {...payload} />}
         />
       </Dropzone>
-      <RenameFileModal
-        open={isRenameModalOpen}
-        onClose={() => setIsRenameModalOpen(false)}
-        file={selectedScript!}
-        onRename={rename}
-      />
-      <CreateScriptModal
-        open={isCreateScriptModalOpen}
-        onClose={() => setIsCreateScriptModalOpen(false)}
-        onCreate={handleCreate}
-      />
     </>
   );
 }
