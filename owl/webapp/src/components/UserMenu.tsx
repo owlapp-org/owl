@@ -31,6 +31,8 @@ const UserButton = forwardRef<HTMLDivElement, IUserButtonProps>(
     >
       <Group
         px={10}
+        gap={7}
+        align="center"
         style={{
           width: "100%",
         }}

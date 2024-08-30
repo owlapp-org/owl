@@ -65,7 +65,16 @@ const TreeNode: React.FC<RenderTreeNodePayload> = (props) => {
             >
               {node.label}
             </div>
-            <div data-section="actions">{node.nodeProps?.actions}</div>
+            <div
+              style={{
+                display: "flex",
+                gap: "5px",
+                alignItems: "center",
+              }}
+              data-section="actions"
+            >
+              {node.nodeProps?.actions}
+            </div>
           </div>
         </div>
       </div>
