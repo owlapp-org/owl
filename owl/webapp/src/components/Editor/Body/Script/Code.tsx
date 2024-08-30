@@ -1,6 +1,7 @@
 import { sql } from "@codemirror/lang-sql";
 import { Prec } from "@codemirror/state";
 import { keymap } from "@codemirror/view";
+import "@components/Editor/styles.css";
 import CodeMirror from "@uiw/react-codemirror";
 import { debounce, trim } from "lodash";
 import {
@@ -12,7 +13,6 @@ import {
   useRef,
   useState,
 } from "react";
-import "./styles.css";
 
 interface IContentProps {
   store: UseBoundStore<StoreApi<IEditorTabState>>;

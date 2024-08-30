@@ -10,7 +10,7 @@ import ZeroTabs from "./ZeroTabs";
 export default function Editor() {
   const { fetchAll } = useDatabaseStore();
 
-  const { addTab, closeTab, tabs, getTabCount, activeTab, setActiveTab } =
+  const { addTab, tabs, getTabCount, activeTab, setActiveTab } =
     useEditorStore();
 
   useEffect(() => {
@@ -20,10 +20,6 @@ export default function Editor() {
   const handleAddTab = () => {
     // todo: script or text
     addTab();
-  };
-
-  const handleCloseTab = (id: string) => {
-    closeTab(id);
   };
 
   if (getTabCount() == 0) {
@@ -38,13 +34,7 @@ export default function Editor() {
         style={{ display: "flex", flexWrap: "nowrap", alignItems: "center" }}
       >
         {Object.entries(tabs).map(([id, store], index) => (
-          <EditorTab
-            key={id}
-            index={index}
-            store={store}
-            id={id}
-            handleCloseTab={handleCloseTab}
-          />
+          <EditorTab key={id} index={index} store={store} id={id} />
         ))}
         <ActionIcon variant="transparent" onClick={handleAddTab}>
           <IconPlus size={20} stroke={1} />

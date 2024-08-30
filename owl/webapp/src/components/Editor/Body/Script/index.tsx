@@ -1,3 +1,4 @@
+import "@components/Editor/styles.css";
 import { IEditorTabState } from "@hooks/editorStore";
 import { IQueryResult } from "@ts/interfaces/database_interface";
 import { useRef, useState } from "react";
@@ -10,7 +11,6 @@ import { StoreApi, UseBoundStore, useStore } from "zustand";
 import Code, { ExtendedReactCodeMirrorRef } from "./Code";
 import Panel from "./Panel";
 import ScriptToolbar from "./ScriptToolbar";
-import "./styles.css";
 
 interface IScriptProps {
   store: UseBoundStore<StoreApi<IEditorTabState>>;
@@ -18,7 +18,7 @@ interface IScriptProps {
 
 const Script: React.FC<IScriptProps> = ({ store }) => {
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
-  const { file, runQuery, fetchContent } = useStore(store);
+  const { file, runQuery } = useStore(store);
   const [queryResult, setQueryResult] = useState<IQueryResult>();
   const [isLoading, setIsLoading] = useState(false);
 

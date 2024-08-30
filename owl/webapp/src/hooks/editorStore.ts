@@ -218,6 +218,8 @@ export interface IEditorState {
   getTabCount(): number;
   addTab: (fileId?: number, fileType?: FileType) => void;
   closeTab: (id: string) => void;
+  closeAllTabs: () => void;
+  closeOtherTabs: (id: string) => void;
 }
 
 const useEditorStore = create<IEditorState>((set, get) => ({
@@ -283,6 +285,20 @@ const useEditorStore = create<IEditorState>((set, get) => ({
         newActiveTab = Object.keys(tabs)[0];
       }
       return { tabs, activeTab: newActiveTab };
+    });
+  },
+  closeAllTabs: () => {
+    set({ tabs: {}, activeTab: null });
+  },
+  closeOtherTabs: (id: string) => {
+    set((state) => {
+      const tabs = { ...state.tabs };
+      const ids = Object.keys(tabs);
+      for (let i = 0; i < ids.length; i++) {
+        if (ids[i] === id) continue;
+        delete tabs[ids[i]];
+      }
+      return { tabs, activeTab: id };
     });
   },
 }));

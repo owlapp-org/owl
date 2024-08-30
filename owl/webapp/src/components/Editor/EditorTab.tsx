@@ -1,4 +1,4 @@
-import { IEditorTabState } from "@hooks/editorStore";
+import useEditorStore, { IEditorTabState } from "@hooks/editorStore";
 import { Divider, Loader, Menu, Tabs } from "@mantine/core";
 import { IconDeviceFloppy, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
@@ -9,16 +9,11 @@ interface IEditorTabProps {
   id: string;
   index: number;
   store: UseBoundStore<StoreApi<IEditorTabState>>;
-  handleCloseTab: (id: string) => void;
 }
 
-const EditorTab: React.FC<IEditorTabProps> = ({
-  id,
-  store,
-  index,
-  handleCloseTab,
-}) => {
-  const { isBusy, file, findFileName } = useStore(store);
+const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
+  const { closeAllTabs, closeTab, closeOtherTabs } = useEditorStore();
+  const { isBusy, file } = useStore(store);
   const [title, setTitle] = useState(`New ${index + 1}`);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const handleContextMenu = (e: any) => {
@@ -61,7 +56,7 @@ const EditorTab: React.FC<IEditorTabProps> = ({
                 className="editor-tab-close-icon"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleCloseTab(id);
+                  closeTab(id);
                 }}
               />
             )
@@ -89,19 +84,19 @@ const EditorTab: React.FC<IEditorTabProps> = ({
         <Divider></Divider>
         <Menu.Item
           leftSection={<IconX stroke={1} size={"1.2rem"} />}
-          onClick={() => handleCloseTab(id)}
+          onClick={() => closeTab(id)}
         >
           Close
         </Menu.Item>
         <Menu.Item
           leftSection={<div style={{ width: "1.2rem" }} />}
-          onClick={() => handleCloseTab(id)}
+          onClick={() => closeOtherTabs(id)}
         >
           Close Others
         </Menu.Item>
         <Menu.Item
           leftSection={<div style={{ width: "1.2rem" }} />}
-          onClick={() => handleCloseTab(id)}
+          onClick={closeAllTabs}
         >
           Close All
         </Menu.Item>
