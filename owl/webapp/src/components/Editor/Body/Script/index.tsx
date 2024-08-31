@@ -18,8 +18,9 @@ interface IScriptProps {
 
 const Script: React.FC<IScriptProps> = ({ store }) => {
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
-  const { file, runQuery } = useStore(store, (state) => ({
+  const { file, content, runQuery } = useStore(store, (state) => ({
     file: state.file,
+    content: state.content,
     runQuery: state.runQuery,
   }));
   const [queryResult, setQueryResult] = useState<IQueryResult | undefined>(
@@ -28,7 +29,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleExecute = useCallback(async () => {
-    let query = file.content || "";
+    let query = content || "";
     if (codeRef.current) {
       const selected = (codeRef.current?.getSelectedLines?.() ?? []).join("\n");
       if (selected) {
@@ -43,7 +44,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
     const result = await runQuery(query, 0, 25); // todo hardcoded values
     setQueryResult(result);
     setIsLoading(false);
-  }, [codeRef.current?.getSelectedLines?.(), file.content]);
+  }, [runQuery]);
 
   useEffect(() => {
     console.log("renderingXXX");

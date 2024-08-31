@@ -17,6 +17,7 @@ export interface IEditorTabState {
   id: string;
   file: IFile;
   options: IEditorTabOptions | null;
+  content: string;
   fetchContent: () => Promise<void>;
   save: (name?: string) => void;
   setContent: (content: string) => void;
@@ -36,6 +37,7 @@ const createTabStore = () =>
     id: uuidv4(),
     file: {},
     options: null,
+    content: "",
     fetchContent: async () => {
       const file = get().file;
       if (!file.id) {
@@ -43,12 +45,7 @@ const createTabStore = () =>
       }
       try {
         const content = await ScriptService.fetchContent(file.id);
-        set({
-          file: {
-            ...file,
-            content,
-          },
-        });
+        set({ content });
         return Promise.resolve();
       } catch (error) {
         console.error(error);
@@ -62,6 +59,7 @@ const createTabStore = () =>
     },
     save: async (name?: string) => {
       const file = get().file;
+      const content = get().content;
       if (file.fileType != FileType.ScriptFile) {
         notifications.show({
           color: "yellow",
@@ -81,7 +79,7 @@ const createTabStore = () =>
       if (file.id) {
         switch (file.fileType) {
           case FileType.ScriptFile:
-            await ScriptService.updateContent(file.id, file.content || "");
+            await ScriptService.updateContent(file.id, content || "");
             return;
         }
       } else if (!name) {
@@ -97,7 +95,7 @@ const createTabStore = () =>
           case FileType.ScriptFile:
             const script = await useScriptStore
               .getState()
-              .create(filename, file.content || "");
+              .create(filename, content || "");
             set((state) => ({
               file: {
                 ...state.file,
@@ -109,13 +107,9 @@ const createTabStore = () =>
         }
       }
     },
-    setContent: (content: string) =>
-      set((state) => ({
-        file: {
-          ...state.file,
-          content,
-        },
-      })),
+    setContent: (content: string) => {
+      set({ content });
+    },
     setDatabase: (databaseId: string | null) => {
       const options = { ...get().options, databaseId };
       set({ options });

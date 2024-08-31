@@ -3,15 +3,15 @@ import { Prec } from "@codemirror/state";
 import { keymap } from "@codemirror/view";
 import "@components/Editor/styles.css";
 import CodeMirror from "@uiw/react-codemirror";
-import { debounce, trim } from "lodash";
+import { debounce } from "lodash";
 import {
   forwardRef,
   memo,
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
-  useState,
 } from "react";
 
 interface IContentProps {
@@ -33,54 +33,56 @@ export interface ExtendedReactCodeMirrorRef extends ReactCodeMirrorRef {
 const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
   function Code({ store, onExecute, ...other }, ref) {
     const codeMirrorRef = useRef<ReactCodeMirrorRef>(null);
-    const { file, setContent, save } = useStore(store, (state) => ({
-      file: state.file,
-      setContent: state.setContent,
-      save: state.save,
-    }));
-
+    const { fileId, content, setContent, setFileContent, save } = useStore(
+      store,
+      (state) => ({
+        fileId: state.file.id,
+        content: state.content,
+        setContent: state.setContent,
+        setFileContent: state.setContent,
+        save: state.save,
+      })
+    );
     const { setIsCreateModalOpen: setIsCreateScriptModalOpen } =
       useScriptStore();
 
-    const [oldContent, setOldContent] = useState<string>("");
-
-    const onChange = useCallback(
-      debounce((newContent: string) => {
-        if (trim(newContent) != trim(file.content)) {
+    const onChange = useMemo(
+      () =>
+        debounce((newContent: string) => {
           setContent(newContent);
-        }
-      }, 200),
-      [setContent, file.content]
+        }, 200),
+      [setContent]
     );
     const handleSave = useCallback(
       async (name?: string) => {
-        if (file.id) {
-          if (file.content != oldContent) {
-            await save(name);
-            setOldContent(file.content || "");
-          }
+        if (fileId) {
+          // setFileContent(content);
+          await save(name);
         } else {
           setIsCreateScriptModalOpen(true);
         }
       },
-      [file]
+      [fileId]
     );
-    const shortCutKeymap = [
-      {
-        key: "Mod-Enter",
-        run: () => {
-          onExecute();
-          return true;
+    const shortCutKeymap = useMemo(
+      () => [
+        {
+          key: "Mod-Enter",
+          run: () => {
+            onExecute();
+            return true;
+          },
         },
-      },
-      {
-        key: "Mod-s",
-        run: () => {
-          handleSave();
-          return true;
+        {
+          key: "Mod-s",
+          run: () => {
+            handleSave();
+            return true;
+          },
         },
-      },
-    ];
+      ],
+      [onExecute, handleSave]
+    );
     useImperativeHandle(ref, () => ({
       getSelectedLines: () => {
         const view = codeMirrorRef.current?.view;
@@ -91,12 +93,9 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
       },
     }));
     useEffect(() => {
-      if (file.id) {
+      if (fileId) {
         const debouncedSave = debounce(() => {
-          if (oldContent != (file.content ?? "")) {
-            save();
-            setOldContent(file.content || "");
-          }
+          save();
         }, 500);
 
         const intervalId = setInterval(() => {
@@ -107,14 +106,14 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
           clearInterval(intervalId);
         };
       }
-    }, [file, save]);
+    }, [fileId, save]);
 
     return (
       <div id="code" style={{ height: "100%" }} {...other}>
         <CodeMirror
           ref={codeMirrorRef}
           className="code-mirror"
-          value={file.content || ""}
+          value={content || ""}
           height="100%"
           extensions={[sql({}), Prec.highest(keymap.of(shortCutKeymap))]}
           onChange={onChange}
