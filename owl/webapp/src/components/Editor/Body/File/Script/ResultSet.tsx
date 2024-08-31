@@ -1,20 +1,23 @@
-import { IEditorTabStore } from "@hooks/editorStore";
+import { IEditorTabState } from "@hooks/editorStore";
 import { notifications } from "@mantine/notifications";
-import { QueryResult } from "@ts/interfaces/database_interface";
+import { IQueryResult } from "@ts/interfaces/database_interface";
 
+import "@components/Editor/styles.css";
 import { useEffect, useRef, useState } from "react";
 import DataGrid, { DataGridHandle } from "react-data-grid";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
-import "./styles.css";
 
-function ResultSet({
-  result,
-  store,
-}: {
-  result: QueryResult;
-  store: UseBoundStore<StoreApi<IEditorTabStore>>;
-}) {
-  const { run } = useStore(store);
+interface IResultSetContainerProps {
+  result?: IQueryResult;
+  store: UseBoundStore<StoreApi<IEditorTabState>>;
+}
+interface IResultSetProps {
+  result: IQueryResult;
+  store: UseBoundStore<StoreApi<IEditorTabState>>;
+}
+
+const ResultSet: React.FC<IResultSetProps> = ({ result, store }) => {
+  const { runQuery } = useStore(store);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [rows, setRows] = useState<Record<string, any>[]>([]);
@@ -58,15 +61,11 @@ function ResultSet({
 
     setIsLoading(true);
     try {
-      const qr = await run(
-        result.database_id,
-        result.query,
-        start_row,
-        end_row,
-        false
-      );
-      setRows([...rows, ...(qr.data || [])]);
-      setEndRow(qr.end_row);
+      const qr = await runQuery(result.query, start_row, end_row, false);
+      if (qr) {
+        setRows([...rows, ...(qr.data || [])]);
+        setEndRow(qr.end_row!);
+      }
     } catch (e) {
       notifications.show({
         title: "Error",
@@ -99,14 +98,11 @@ function ResultSet({
       {isLoading && <div className="load-more-grid">Loading more rows...</div>}
     </div>
   );
-}
+};
 
-const ResultSetContainer = ({
+const ResultSetContainer: React.FC<IResultSetContainerProps> = ({
   result,
   store,
-}: {
-  result?: QueryResult | undefined;
-  store: UseBoundStore<StoreApi<IEditorTabStore>>;
 }) => {
   if (result == undefined) {
     return <></>;

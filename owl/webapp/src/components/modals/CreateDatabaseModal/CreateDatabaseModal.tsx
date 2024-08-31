@@ -1,4 +1,4 @@
-import { useDatabaseStore } from "@hooks/databaseStore";
+import useDatabaseStore from "@hooks/databaseStore";
 import {
   Button,
   Group,
@@ -8,21 +8,13 @@ import {
   Textarea,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Database } from "@ts/interfaces/database_interface";
 import { FC, useState } from "react";
+import { useCreateDatabaseModalStore } from "./useCreateDatabaseModalStore";
 
-interface CreateDatabaseModalProps {
-  open: boolean;
-  onClose: () => void;
-  onDatabaseCreated?: (database: Database) => void;
-}
-
-const CreateDatabaseModal: FC<CreateDatabaseModalProps> = ({
-  open,
-  onClose,
-}) => {
-  const [loading, setLoading] = useState(false);
-  const { createDatabase } = useDatabaseStore();
+const CreateDatabaseModal: FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { open, destroy } = useCreateDatabaseModalStore();
+  const { create } = useDatabaseStore();
 
   const form = useForm({
     initialValues: {
@@ -32,27 +24,22 @@ const CreateDatabaseModal: FC<CreateDatabaseModalProps> = ({
     },
   });
 
-  const resetState = () => {
-    form.reset();
-    setLoading(false);
-  };
-
   const handleClose = () => {
-    resetState();
-    onClose();
+    form.reset();
+    setIsLoading(false);
+    destroy();
   };
 
   const handleSubmit = async (values: typeof form.values) => {
-    setLoading(true);
+    setIsLoading(true);
     try {
-      createDatabase({
+      await create({
         name: values.name,
         pool_size: values.poolSize,
         description: values.description,
       });
-    } catch (error) {
     } finally {
-      setLoading(false);
+      setIsLoading(false);
       handleClose();
     }
   };
@@ -90,7 +77,7 @@ const CreateDatabaseModal: FC<CreateDatabaseModalProps> = ({
           <Button variant="default" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="submit" loading={loading}>
+          <Button type="submit" loading={isLoading}>
             Create
           </Button>
         </Group>

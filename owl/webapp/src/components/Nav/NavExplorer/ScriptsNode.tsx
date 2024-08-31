@@ -1,9 +1,9 @@
-import CreateScriptModal from "@components/CreateScriptModal";
-import RenameFileModal from "@components/RenameFileModal";
+import { useCreateScriptModalStore } from "@components/modals/CreateScriptModal/useCreateScriptModalStore";
+import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import ScriptMenu from "@components/ScriptMenu";
 import TreeNode from "@components/TreeNode";
 import useEditorStore from "@hooks/editorStore";
-import { useScriptStore } from "@hooks/scriptStore";
+import useScriptStore from "@hooks/scriptStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
@@ -13,15 +13,15 @@ import {
   IconPlus,
   IconUpload,
 } from "@tabler/icons-react";
-import { IFile } from "@ts/interfaces/file_interface";
+import { FileType } from "@ts/enums/filetype_enum";
 import { IScript } from "@ts/interfaces/script_interface";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 
-function scriptToTreeNodeData(
+function toNode(
   script: IScript,
   onDelete: (id: number) => void,
-  onRename: (file: IFile) => void,
+  onRename: (file: IScript) => void,
   onClick: (e: any) => void
 ): TreeNodeData {
   return {
@@ -51,19 +51,16 @@ function scriptToTreeNodeData(
 }
 
 export default function ScriptsNode() {
-  const { scripts, create, fetchScripts, removeScript, upload, renameScript } =
-    useScriptStore();
-  const [selectedScript, setSelectedScript] = useState<IScript | null>(null);
+  const { scripts, fetchAll, remove, upload } = useScriptStore();
   const openRef = useRef<() => void>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
-  const [isCreateScriptModalOpen, setIsCreateScriptModalOpen] = useState(false);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { addTab } = useEditorStore();
+  const { showModal: showRenameFileModal } = useRenameFileModalStore();
+  const { showModal: showCreateScriptModal } = useCreateScriptModalStore();
 
   useEffect(() => {
-    fetchScripts();
-  }, [fetchScripts]);
+    fetchAll();
+  }, [fetchAll]);
 
   const handleDrop = async (files: FileWithPath[]) => {
     if (files.length === 0) {
@@ -74,19 +71,26 @@ export default function ScriptsNode() {
       });
       return;
     }
-    setLoading(true);
+    setIsLoading(true);
     const file = files[0];
     const formData = new FormData();
     formData.append("file", file);
-    await upload(formData);
-    setLoading(false);
+    try {
+      await upload(formData);
+    } finally {
+      setIsLoading(false);
+    }
   };
-  const handleRenameScript = (file: IFile) => {
-    setSelectedScript(file);
-    setIsRenameModalOpen(true);
+  const handleRename = (file: IScript) => {
+    showRenameFileModal({ file: { ...file, fileType: FileType.ScriptFile } });
   };
-  const handleCreateScript = async (name: string) => {
-    await create(name);
+  const handleCreate = async () => {
+    setIsLoading(true);
+    try {
+      await showCreateScriptModal({});
+    } finally {
+      setIsLoading(false);
+    }
   };
   const data: TreeNodeData[] = [
     {
@@ -103,24 +107,25 @@ export default function ScriptsNode() {
             style={{
               display: "flex",
               gap: "5px",
+              alignItems: "center",
             }}
           >
             <ActionIcon
               className="root-node-action-icon"
-              loading={loading}
-              disabled={loading}
+              loading={isLoading}
+              disabled={isLoading}
               variant="transparent"
-              onClick={(event) => {
+              onClick={async (event) => {
                 event.stopPropagation();
-                setIsCreateScriptModalOpen(true);
+                await handleCreate();
               }}
             >
               <IconPlus stroke={1} />
             </ActionIcon>
             <ActionIcon
               className="root-node-action-icon"
-              loading={loading}
-              disabled={loading}
+              loading={isLoading}
+              disabled={isLoading}
               variant="transparent"
               onClick={(event) => {
                 event.stopPropagation();
@@ -133,15 +138,10 @@ export default function ScriptsNode() {
         ),
       },
       children: scripts.map((scriptFile) =>
-        scriptToTreeNodeData(
-          scriptFile,
-          removeScript,
-          handleRenameScript,
-          (e: any) => {
-            e.stopPropagation();
-            addTab(scriptFile.id);
-          }
-        )
+        toNode(scriptFile, remove, handleRename, (e: any) => {
+          e.stopPropagation();
+          addTab(scriptFile.id);
+        })
       ),
     },
   ];
@@ -157,17 +157,6 @@ export default function ScriptsNode() {
           renderNode={(payload) => <TreeNode {...payload} />}
         />
       </Dropzone>
-      <RenameFileModal
-        open={isRenameModalOpen}
-        onClose={() => setIsRenameModalOpen(false)}
-        file={selectedScript!}
-        onRename={renameScript}
-      />
-      <CreateScriptModal
-        open={isCreateScriptModalOpen}
-        onClose={() => setIsCreateScriptModalOpen(false)}
-        onCreate={handleCreateScript}
-      />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { useDatabaseStore } from "@hooks/databaseStore";
+import useDatabaseStore from "@hooks/databaseStore";
 import {
   Button,
   Group,
@@ -7,58 +7,61 @@ import {
   TextInput,
   Textarea,
 } from "@mantine/core";
-import { Database } from "@ts/interfaces/database_interface";
+import { notifications } from "@mantine/notifications";
+import { IDatabase } from "@ts/interfaces/database_interface";
 import { FC, useEffect, useState } from "react";
+import { useUpdateDatabaseModalStore } from "./useUpdateDatabaseModalStore";
 
-interface UpdateDatabaseModalProps {
-  open: boolean;
-  onClose: () => void;
-  database: Database | null;
-}
-
-const UpdateDatabaseModal: FC<UpdateDatabaseModalProps> = ({
-  open,
-  onClose,
-  database,
-}) => {
-  const [loading, setLoading] = useState(false);
+const UpdateDatabaseModal: FC = () => {
+  const { update, findById } = useDatabaseStore();
+  const { databaseId, open, destroy } = useUpdateDatabaseModalStore();
+  const [database, setDatabase] = useState<IDatabase>();
+  const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [poolSize, setPoolSize] = useState(1);
-  const { updateDatabase } = useDatabaseStore();
 
   useEffect(() => {
-    if (open && database) {
+    if (open && databaseId) {
+      const database = findById(databaseId);
+      if (!database) {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: "Database not found",
+        });
+        destroy();
+        return;
+      }
+      setDatabase(database);
       setName(database.name);
       setDescription(database.description as string);
       setPoolSize(database.pool_size);
     }
-  }, [open, database]);
+  }, [open, databaseId]);
 
   const resetState = () => {
     setName("");
     setDescription("");
     setPoolSize(1);
-    setLoading(false);
+    setIsLoading(false);
   };
 
   const handleClose = () => {
     resetState();
-    onClose();
+    destroy();
   };
 
   const handleSubmit = async () => {
-    if (!database) return;
-
-    setLoading(true);
+    if (!databaseId) return;
+    setIsLoading(true);
     try {
-      updateDatabase(database.id, {
+      await update(databaseId, {
         ...database,
         name: name,
         description: description,
         pool_size: poolSize,
       });
-    } catch (error) {
     } finally {
       handleClose();
     }
@@ -96,7 +99,7 @@ const UpdateDatabaseModal: FC<UpdateDatabaseModalProps> = ({
           <Button variant="default" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="button" onClick={handleSubmit} loading={loading}>
+          <Button type="button" onClick={handleSubmit} loading={isLoading}>
             Update
           </Button>
         </Group>

@@ -1,18 +1,18 @@
-import CreateDatabaseModal from "@components/Database/CreateDatabaseModal";
-import UpdateDatabaseModal from "@components/Database/UpdateDatabaseModal";
 import DatabaseMenu from "@components/DatabaseMenu";
+import { useCreateDatabaseModalStore } from "@components/modals/CreateDatabaseModal/useCreateDatabaseModalStore";
+import { useUpdateDatabaseModalStore } from "@components/modals/UpdateDatabaseModal/useUpdateDatabaseModalStore";
 import TreeNode from "@components/TreeNode";
-import { useDatabaseStore } from "@hooks/databaseStore";
+import useDatabaseStore from "@hooks/databaseStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { IconBrandOnedrive, IconCylinder, IconPlus } from "@tabler/icons-react";
-import { Database } from "@ts/interfaces/database_interface";
-import { useEffect, useState } from "react";
+import { IDatabase } from "@ts/interfaces/database_interface";
+import { useEffect } from "react";
 import "./styles.css";
 
-function databaseToTreeNodeData(
-  database: Database,
+function toNode(
+  database: IDatabase,
   onDelete: (id: number) => void,
-  onUpdate: (database: Database) => void
+  onUpdate: (database: IDatabase) => void
 ): TreeNodeData {
   return {
     label: database.name,
@@ -40,21 +40,16 @@ function databaseToTreeNodeData(
 }
 
 export default function DatabasesNode() {
-  const { databases, fetchDatabases, updateDatabase, removeDatabase } =
-    useDatabaseStore();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [selectedDatabase, setSelectedDatabase] = useState<Database | null>(
-    null
-  );
+  const { databases, fetchAll, remove } = useDatabaseStore();
+  const { showModal: showCreateDatabaseModal } = useCreateDatabaseModalStore();
+  const { showModal: showUpdateDatabaseModal } = useUpdateDatabaseModalStore();
 
   useEffect(() => {
-    fetchDatabases();
-  }, [fetchDatabases]);
+    fetchAll();
+  }, [fetchAll]);
 
-  const handleUpdateDatabase = (database: Database) => {
-    setSelectedDatabase(database);
-    setIsUpdateModalOpen(true);
+  const handleUpdateDatabase = (database: IDatabase) => {
+    showUpdateDatabaseModal({ databaseId: database.id });
   };
 
   const data: TreeNodeData[] = [
@@ -68,21 +63,27 @@ export default function DatabasesNode() {
           </div>
         ),
         actions: (
-          <ActionIcon
-            className="root-node-action-icon"
-            variant="transparent"
-            onClick={(event) => {
-              event.stopPropagation();
-              setIsCreateModalOpen(true);
+          <div
+            style={{
+              display: "flex",
+              gap: "5px",
+              alignItems: "center",
             }}
           >
-            <IconPlus stroke={1} />
-          </ActionIcon>
+            <ActionIcon
+              className="root-node-action-icon"
+              variant="transparent"
+              onClick={(event) => {
+                event.stopPropagation();
+                showCreateDatabaseModal({});
+              }}
+            >
+              <IconPlus stroke={1} />
+            </ActionIcon>
+          </div>
         ),
       },
-      children: databases.map((db) =>
-        databaseToTreeNodeData(db, removeDatabase, handleUpdateDatabase)
-      ),
+      children: databases.map((db) => toNode(db, remove, handleUpdateDatabase)),
     },
   ];
 
@@ -94,15 +95,6 @@ export default function DatabasesNode() {
         clearSelectionOnOutsideClick
         data={data}
         renderNode={(payload) => <TreeNode {...payload} />}
-      />
-      <CreateDatabaseModal
-        open={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-      />
-      <UpdateDatabaseModal
-        open={isUpdateModalOpen}
-        onClose={() => setIsUpdateModalOpen(false)}
-        database={selectedDatabase}
       />
     </>
   );

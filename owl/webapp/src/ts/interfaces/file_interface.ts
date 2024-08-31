@@ -1,9 +1,7 @@
-import { User } from "./user_interface";
+import { FileType } from "@ts/enums/filetype_enum";
 
-export interface IFile {
-  id: number;
-  path: string;
-  owner: User;
-  name: string;
-  extension: string;
+export default interface IFile {
+  id?: number;
+  name?: string;
+  fileType?: FileType;
 }

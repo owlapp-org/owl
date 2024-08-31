@@ -1,28 +1,29 @@
-import { useDatabaseStore } from "@hooks/databaseStore";
+import useDatabaseStore from "@hooks/databaseStore";
 import useEditorStore from "@hooks/editorStore";
 import { ActionIcon, Tabs } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useEffect } from "react";
+import EditorBody from "./Body/EditorBody";
 import EditorTab from "./EditorTab";
-import EditorTabBody from "./EditorTabBody";
 import ZeroTabs from "./ZeroTabs";
 
 export default function Editor() {
-  const { fetchDatabases } = useDatabaseStore();
+  const { fetchAll } = useDatabaseStore();
 
-  const { addTab, closeTab, tabs, getTabCount, activeTab, setActiveTab } =
+  const { addTab, tabs, getTabCount, activeTab, setActiveTab } =
     useEditorStore();
 
   useEffect(() => {
-    fetchDatabases();
-  }, [fetchDatabases]);
+    console.log("Rerendering Editor.index");
+  }, []);
+
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   const handleAddTab = () => {
+    // todo: script or text
     addTab();
-  };
-
-  const handleCloseTab = (id: string) => {
-    closeTab(id);
   };
 
   if (getTabCount() == 0) {
@@ -37,13 +38,7 @@ export default function Editor() {
         style={{ display: "flex", flexWrap: "nowrap", alignItems: "center" }}
       >
         {Object.entries(tabs).map(([id, store], index) => (
-          <EditorTab
-            key={id}
-            index={index}
-            store={store}
-            id={id}
-            handleCloseTab={handleCloseTab}
-          />
+          <EditorTab key={id} index={index} store={store} id={id} />
         ))}
         <ActionIcon variant="transparent" onClick={handleAddTab}>
           <IconPlus size={20} stroke={1} />
@@ -53,7 +48,7 @@ export default function Editor() {
 
       {Object.entries(tabs).map(([id, store]) => (
         <Tabs.Panel key={id} value={id}>
-          <EditorTabBody store={store} />
+          <EditorBody store={store} />
         </Tabs.Panel>
       ))}
     </Tabs>

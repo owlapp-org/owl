@@ -1,34 +1,24 @@
 import logging
-import os
 from typing import Optional
 
-from app.lib.fs import with_storage_path
 from app.models.base import TimestampMixin, db
-from app.settings import settings
+from app.models.mixins.user_space_mixin import UserSpaceMixin
 from sqlalchemy import Column, ForeignKey, Integer, String, and_
 from sqlalchemy.orm import relationship
 from werkzeug.datastructures import FileStorage
-from werkzeug.utils import secure_filename
 
 logger = logging.getLogger(__name__)
 
 
-class Script(TimestampMixin, db.Model):
+class Script(TimestampMixin, UserSpaceMixin["Script"], db.Model):
     __tablename__ = "scripts"
+    __folder__ = "scripts"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     path = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     owner = relationship("User", back_populates="scripts")
-
-    @property
-    def name(self) -> str:
-        return self.path.rsplit("/", 1)[1]
-
-    @property
-    def extension(self) -> str:
-        return self.name.rsplit(".", 1)[1].lower()
 
     @classmethod
     def find_by_id(cls, id: int) -> Optional["Script"]:
@@ -45,109 +35,53 @@ class Script(TimestampMixin, db.Model):
         ).one_or_none()
 
     @classmethod
+    def create_script(
+        cls, owner_id: int, filename: str, content: Optional[str] = None
+    ) -> "Script":
+        script = cls(owner_id=owner_id).create_file(filename, content)
+        script.path = script.relative_path(filename)
+        try:
+            db.session.add(script)
+            db.session.commit()
+            return script
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    @classmethod
     def delete_by_id(cls, id: int, owner_id: int = None) -> "Script":
         script: Script = cls.query.filter(
             and_(cls.id == id, cls.owner_id == owner_id)
         ).one()
-
-        path = os.path.join(settings.STORAGE_BASE_PATH, script.path)
         try:
+            script.delete_file()
             db.session.delete(script)
             db.session.commit()
-            os.remove(path)
         except FileNotFoundError:
-            logger.warning("Script not found: %s" % path)
+            logger.warning("Script not found: %s" % script.relative_path())
 
     @classmethod
-    def upload_script(cls, owner_id: int, script: FileStorage) -> "Script":
-        script_name = secure_filename(script.filename)
-        scripts_folder = os.path.join(
-            settings.STORAGE_BASE_PATH,
-            "users",
-            str(owner_id),
-            "scripts",
-        )
-        if not os.path.exists(scripts_folder):
-            os.makedirs(scripts_folder)
-
-        path = os.path.join(scripts_folder, script_name)
-        if os.path.exists(path):
-            raise FileExistsError("Script already exists: %s" % script_name)
+    def upload_script(cls, owner_id: int, file: FileStorage) -> "Script":
+        script = Script(owner_id=owner_id).upload_file(file)
+        script.path = script.relative_path(file.filename)
         try:
-            script.save(path)
-            relative_path = os.path.join("users", str(owner_id), "scripts", script_name)
-            model = Script(path=relative_path, owner_id=owner_id)
-            db.session.add(model)
+            db.session.add(script)
             db.session.commit()
-            return model
+            return script
         except Exception as e:
             db.session.rollback()
-            if os.path.exists(path) and not os.path.isdir(path):
-                os.remove(path)
             raise e
 
-    def script_exists(self) -> bool:
-        return os.path.exists(os.path.join(settings.STORAGE_BASE_PATH, self.path))
-
-    def rename(self, name: str) -> "Script":
-        if not name:
-            raise Exception("Name can't be empty")
-        path: str = self.path
-        name = secure_filename(name)
-        self.path = os.path.join(path.rsplit("/", 1)[0], name)
-        if not os.path.isdir(path):
-            os.rename(with_storage_path(path), with_storage_path(self.path))
-        db.session.add(self)
-        db.session.commit()
-
-        return self
-
-    def content(self) -> str:
-        path = os.path.join(settings.STORAGE_BASE_PATH, self.path)
-        with open(path, "r") as f:
-            return f.read()
-
-    def write_to_script_file(self, content: str) -> "Script":
-        path = os.path.join(settings.STORAGE_BASE_PATH, self.path)
-        with open(path, "w") as f:
-            f.write(content)
-        return self
-
-    def update_content(self, content: str) -> "Script":
-        self.write_to_script_file(content)
-        db.session.add(self)
-        db.session.commit()
-        return self
-
-    @classmethod
-    def create_script(
-        cls, owner_id: int, filename: str, content: Optional[str] = None
+    def update_script(
+        self, name: Optional[str] = None, content: Optional[str] = None
     ) -> "Script":
-        script_name = secure_filename(filename)
-        scripts_folder = os.path.join(
-            settings.STORAGE_BASE_PATH,
-            "users",
-            str(owner_id),
-            "scripts",
-        )
-        if not os.path.exists(scripts_folder):
-            os.makedirs(scripts_folder)
+        if not name and content is None:
+            raise ValueError("Name or content must be specified")
 
-        path = os.path.join(scripts_folder, script_name)
-        if os.path.exists(path):
-            raise FileExistsError("Script file already exists: %s" % script_name)
-        try:
+        self.update_file(name, content)
+        if name:
+            self.path = self.relative_path(name)
 
-            with open(path, "w") as f:
-                if content is not None:
-                    f.write(content)
-            relative_path = os.path.join("users", str(owner_id), "scripts", script_name)
-            model = Script(path=relative_path, owner_id=owner_id)
-            db.session.add(model)
-            db.session.commit()
-            return model
-        except Exception as e:
-            db.session.rollback()
-            if os.path.exists(path) and not os.path.isdir(path):
-                os.remove(path)
-            raise e
+        db.session.add(self)
+        db.session.commit()
+        return self

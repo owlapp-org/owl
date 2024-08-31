@@ -7,14 +7,14 @@ import { IconHelp, IconLogout, IconSettings } from "@tabler/icons-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface UserButtonProps extends React.ComponentPropsWithoutRef<"div"> {
+interface IUserButtonProps extends React.ComponentPropsWithoutRef<"div"> {
   userName?: string;
   opened: boolean;
   onClick: () => void;
 }
 
-const UserButton = forwardRef<HTMLDivElement, UserButtonProps>(
-  ({ userName, opened, onClick, ...others }: UserButtonProps, ref) => (
+const UserButton = forwardRef<HTMLDivElement, IUserButtonProps>(
+  ({ userName, opened, onClick, ...others }: IUserButtonProps, ref) => (
     <Box
       ref={ref}
       style={{
@@ -31,6 +31,8 @@ const UserButton = forwardRef<HTMLDivElement, UserButtonProps>(
     >
       <Group
         px={10}
+        gap={7}
+        align="center"
         style={{
           width: "100%",
         }}
@@ -49,14 +51,14 @@ const UserButton = forwardRef<HTMLDivElement, UserButtonProps>(
   )
 );
 
-interface UserMenuProps {
+interface IUserMenuProps {
   userName?: string;
   onSettingsClick: () => void;
   onHelpClick: () => void;
   onLogoutClick: () => void;
 }
 
-const UserMenu: React.FC<UserMenuProps> = ({
+const UserMenu: React.FC<IUserMenuProps> = ({
   userName,
   onSettingsClick,
   onHelpClick,

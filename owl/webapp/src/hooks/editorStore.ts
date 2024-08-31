@@ -3,59 +3,148 @@ import { create, StoreApi, UseBoundStore } from "zustand";
 import { notifications } from "@mantine/notifications";
 import { v4 as uuidv4 } from "uuid";
 import ScriptService from "@services/scriptService";
-import { useScriptStore } from "./scriptStore";
+import useScriptStore from "./scriptStore";
+import IFile from "@ts/interfaces/file_interface";
+import { FileType } from "@ts/enums/filetype_enum";
+import useDataFileStore from "./datafileStore";
+import { IQueryResult } from "@ts/interfaces/database_interface";
 
-export interface IEditorTabStore {
+export interface IEditorTabOptions {
+  databaseId: string | null;
+}
+
+export interface IEditorTabState {
   id: string;
-  scriptId?: number;
-  code: string;
-  selectedDatabase: string | null;
-  isBusy: boolean;
-  createScript: (name: string, content: string) => void;
-  saveScriptContent: (content: string) => void;
-  setIsBusy: (value: boolean) => void;
-  setCode: (code: string) => void;
+  file: IFile;
+  options: IEditorTabOptions | null;
+  content: string;
+  setFile: (file: IFile) => void;
+  fetchContent: () => Promise<void>;
+  save: (name?: string) => void;
+  setContent: (content: string) => void;
   setDatabase: (database: string | null) => void;
-  run: (
-    databaseId: number | string | null,
+  runQuery: (
     query: string,
     start_row?: number,
     end_row?: number,
     with_total_count?: boolean
-  ) => any;
+  ) => Promise<IQueryResult | undefined>;
+  findFileName: () => string | undefined;
+  getDatabaseIdOption: () => string | null;
 }
 
 const createTabStore = () =>
-  create<IEditorTabStore>((set, get) => ({
+  create<IEditorTabState>((set, get) => ({
     id: uuidv4(),
-    isBusy: false,
-    scriptId: undefined,
-    code: "",
-    selectedDatabase: null,
-    data: [],
-    queryResult: undefined,
-    createScript: async (name: string, content: string) => {
-      const script = await useScriptStore.getState().create(name, content);
-      set({ scriptId: script.id });
+    file: {},
+    options: null,
+    content: "",
+    setFile: (file: IFile) => {
+      set({ file });
     },
-    saveScriptContent: async (content: string) => {
-      const scriptId = get().scriptId;
-      if (scriptId) {
-        return ScriptService.saveScriptContent(scriptId, content);
+    fetchContent: async () => {
+      const file = get().file;
+      if (!file.id) {
+        return;
+      }
+      try {
+        const content = await ScriptService.fetchContent(file.id);
+        set({ content });
+        return Promise.resolve();
+      } catch (error) {
+        console.error(error);
+        notifications.show({
+          color: "error",
+          title: "Error",
+          message: "Failed to fetch file content",
+        });
+        return Promise.reject(error);
       }
     },
-    setIsBusy: (value: boolean) => set({ isBusy: value }),
-    setCode: (code) => set({ code }),
-    setDatabase: (database) => set({ selectedDatabase: database }),
-    run: async (
-      databaseId: number | string | null,
+    save: async (name?: string) => {
+      const file = get().file;
+      const content = get().content;
+      if (file.fileType != FileType.ScriptFile) {
+        notifications.show({
+          color: "yellow",
+          title: "Warning",
+          message: "Currently only script files are supported.",
+        });
+        return;
+      } else if (!file.fileType) {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: "Unknown file type",
+        });
+        return;
+      }
+
+      if (file.id) {
+        switch (file.fileType) {
+          case FileType.ScriptFile:
+            await ScriptService.updateContent(file.id, content || "");
+            return;
+        }
+      } else if (!name) {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: "Unknown file name",
+        });
+        return;
+      } else {
+        const filename = name || "New file";
+        switch (file.fileType) {
+          case FileType.ScriptFile:
+            const script = await useScriptStore
+              .getState()
+              .create(filename, content || "");
+            set((state) => ({
+              file: {
+                ...state.file,
+                name: filename,
+                id: script.id,
+              },
+            }));
+            return;
+        }
+      }
+    },
+    setContent: async (content: string) => {
+      set({ content: content });
+    },
+    setDatabase: (databaseId: string | null) => {
+      const options = { ...get().options, databaseId };
+      set({ options });
+    },
+    runQuery: async (
       query: string,
       start_row?: number,
       end_row?: number,
-      with_total_count: boolean = true
+      with_total_count?: boolean
     ) => {
+      const { file, options } = get();
+
+      if (file.fileType != FileType.ScriptFile) {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: "File type is not supported",
+        });
+        return;
+      }
+      if (!query) {
+        notifications.show({
+          color: "yellow",
+          title: "Warning",
+          message: "Nothing to run",
+        });
+        return;
+      }
+
+      const { databaseId } = options || {};
       try {
-        set({ isBusy: true });
         const result = await DatabaseService.run(
           databaseId,
           query,
@@ -78,75 +167,140 @@ const createTabStore = () =>
         return result;
       } catch (error: any) {
         notifications.show({
+          color: "red",
           title: "Error",
           message: error?.response?.data as string,
-          color: "red",
         });
-        throw error;
-      } finally {
-        set({ isBusy: false });
       }
+    },
+    findFileName: () => {
+      const file = get().file;
+      if (!file.id || !file.fileType) {
+        return undefined;
+      }
+      switch (file.fileType) {
+        case FileType.ScriptFile: {
+          const { findById: findScriptById } = useScriptStore.getState();
+          const script = findScriptById(file.id);
+          if (script) {
+            return script.name;
+          }
+        }
+        case FileType.DataFile: {
+          const { findById: findDataFileById } = useDataFileStore.getState();
+          const dataFile = findDataFileById(file.id);
+          if (dataFile) {
+            return dataFile.name;
+          }
+        }
+      }
+      return undefined;
+    },
+    getDatabaseIdOption: () => {
+      const options = get().options;
+      if (!options) return null;
+      return options.databaseId;
     },
   }));
 
-export interface IEditorStore {
+export interface IEditorState {
   activeTab: string | null;
-  tabs: Record<string, UseBoundStore<StoreApi<IEditorTabStore>>>;
+  tabs: Record<string, UseBoundStore<StoreApi<IEditorTabState>>>;
   setActiveTab(id: string | null): void;
   getTabCount(): number;
-  addTab: (scriptId?: number) => void;
+  addTab: (fileId?: number, fileType?: FileType) => void;
   closeTab: (id: string) => void;
+  closeAllTabs: () => void;
+  closeOtherTabs: (id: string) => void;
+  findTabById: (
+    id: string
+  ) => UseBoundStore<StoreApi<IEditorTabState>> | undefined;
 }
 
-const useEditorStore = create<IEditorStore>((set, get) => ({
+const useEditorStore = create<IEditorState>((set, get) => ({
   activeTab: null,
   tabs: {},
-  setActiveTab: (id: string) => {
-    set({
-      activeTab: id,
-    });
-  },
-  getTabCount: () => {
-    return Object.keys(get().tabs).length;
-  },
-  addTab: (scriptId?: number) => {
-    let isExistingTab = false;
-    if (scriptId) {
-      Object.entries(get().tabs).forEach(([id, store]) => {
-        if (store.getState().scriptId == scriptId) {
+  setActiveTab: (activeTab: string) => set({ activeTab }),
+  getTabCount: () => Object.keys(get().tabs).length,
+  addTab: (fileId?: number, fileType: FileType = FileType.ScriptFile) => {
+    if (fileId) {
+      for (const [id, store] of Object.entries(get().tabs)) {
+        if (store.getState().file.id === fileId) {
           set({ activeTab: id });
-          isExistingTab = true;
+          return;
         }
-      });
+      }
     }
-    if (isExistingTab) {
-      return;
+    let name = undefined;
+    if (fileId) {
+      switch (fileType) {
+        case FileType.ScriptFile: {
+          const script = useScriptStore.getState().findById(fileId);
+          if (script) {
+            name = script.name;
+          } else {
+            notifications.show({
+              color: "red",
+              title: "Error",
+              message: "File not found on scripts",
+            });
+          }
+          break;
+        }
+        default: {
+          notifications.show({
+            color: "red",
+            title: "Error",
+            message: "Unsupported file type",
+          });
+          break;
+        }
+      }
     }
-    const id = uuidv4();
-    const store = createTabStore();
-    store.setState({ scriptId });
+
+    const activeTab = uuidv4();
+    const newTabStore = createTabStore();
+    newTabStore.setState({
+      id: activeTab,
+      file: { id: fileId, fileType, name },
+    });
     set((state) => ({
-      activeTab: id,
+      activeTab,
       tabs: {
         ...state.tabs,
-        [id]: store,
+        [activeTab]: newTabStore,
       },
     }));
   },
   closeTab: (id: string) => {
     set((state) => {
-      const newTabs = { ...state.tabs };
-      delete newTabs[id];
+      const tabs = { ...state.tabs };
+      delete tabs[id];
       // If the closed tab was the active tab, set a new active tab
       let newActiveTab = state.activeTab === id ? null : state.activeTab;
-
       // If there are still tabs left, set the first tab as the active tab
-      if (newActiveTab === null && Object.keys(newTabs).length > 0) {
-        newActiveTab = Object.keys(newTabs)[0];
+      if (newActiveTab === null && Object.keys(tabs).length > 0) {
+        newActiveTab = Object.keys(tabs)[0];
       }
-
-      return { tabs: newTabs, activeTab: newActiveTab };
+      return { tabs, activeTab: newActiveTab };
     });
+  },
+  closeAllTabs: () => {
+    set({ tabs: {}, activeTab: null });
+  },
+  closeOtherTabs: (id: string) => {
+    set((state) => {
+      const tabs = { ...state.tabs };
+      const ids = Object.keys(tabs);
+      for (let i = 0; i < ids.length; i++) {
+        if (ids[i] === id) continue;
+        delete tabs[ids[i]];
+      }
+      return { tabs, activeTab: id };
+    });
+  },
+  findTabById: (id: string) => {
+    return get().tabs[id];
   },
 }));
 

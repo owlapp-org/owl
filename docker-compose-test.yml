@@ -56,7 +56,7 @@ services:
     build:
       context: . # Set build context to the root of the project
       dockerfile: Dockerfile # Ensure this path is correct]
-    command: ["sh", "-c", "./wait-for-flask.sh flask 5000 pytest -s"]
+    command: ["sh", "-c", "./wait-for-flask.sh flask 5000 pytest -s -x"]
     depends_on:
       - postgres
       - migrate

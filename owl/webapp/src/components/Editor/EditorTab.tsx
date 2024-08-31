@@ -1,64 +1,147 @@
-import { IEditorTabStore } from "@hooks/editorStore";
-import { useScriptStore } from "@hooks/scriptStore";
-import { Loader, Tabs } from "@mantine/core";
-import { IconX } from "@tabler/icons-react";
+import { useCreateScriptModalStore } from "@components/modals/CreateScriptModal/useCreateScriptModalStore";
+import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
+import useEditorStore, { IEditorTabState } from "@hooks/editorStore";
+import { Divider, Loader, Menu, Tabs } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconDeviceFloppy, IconX } from "@tabler/icons-react";
+import { FileType } from "@ts/enums/filetype_enum";
 import { useEffect, useState } from "react";
-import { StoreApi, UseBoundStore } from "zustand";
+import { StoreApi, UseBoundStore, useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import "./styles.css";
 
-interface EditorTabProps {
+interface IEditorTabProps {
   id: string;
   index: number;
-  store: UseBoundStore<StoreApi<IEditorTabStore>>;
-  handleCloseTab: (id: string) => void;
+  store: UseBoundStore<StoreApi<IEditorTabState>>;
 }
 
-export default function EditorTab({
-  id,
-  store,
-  index,
-  handleCloseTab,
-}: EditorTabProps) {
-  const isBusy = store((state) => state.isBusy);
-  const scriptId = store((state) => state.scriptId);
-  const { scripts } = useScriptStore();
-  const [title, setTitle] = useState(`Query ${index + 1}`);
+const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
+  const { closeAllTabs, closeTab, closeOtherTabs } = useEditorStore();
+  const { file, save, tabId } = useStore(
+    store,
+    useShallow((state) => ({
+      file: state.file,
+      save: state.save,
+      tabId: state.id,
+    }))
+  );
+  const { showModal: showRenameFileModal } = useRenameFileModalStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [title, setTitle] = useState(`New ${index + 1}`);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const handleContextMenu = (e: any) => {
+    e.preventDefault();
+    setIsContextMenuOpen(true);
+  };
+  const { showModal: showCreateScriptModal } = useCreateScriptModalStore();
 
   useEffect(() => {
-    for (let i = 0; i < scripts.length; i++) {
-      if (scripts[i].id === scriptId) {
-        setTitle(scripts[i].name);
-        return;
+    file.name && setTitle(file.name);
+  }, [file.name, setTitle]);
+
+  const handleSave = async () => {
+    if (file.id) {
+      await save();
+    } else {
+      switch (file.fileType) {
+        case FileType.ScriptFile: {
+          showCreateScriptModal({ tabId });
+        }
       }
     }
-  }, [scripts, scriptId]);
+  };
+
+  const handleRename = () => {
+    if (!file.id) {
+      notifications.show({
+        color: "warning",
+        title: "Error",
+        message: "File not saved",
+      });
+      return;
+    }
+    setIsLoading(true);
+    showRenameFileModal({ file: { ...file, fileType: FileType.ScriptFile } });
+    setIsLoading(false);
+  };
 
   return (
-    <Tabs.Tab
-      w={140}
-      px={4}
-      value={id}
-      className="editor-tab"
-      rightSection={
-        isBusy ? (
-          <Loader size="1rem" />
-        ) : (
-          <IconX
-            stroke={1}
-            className="editor-tab-close-icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCloseTab(id);
-            }}
-          />
-        )
-      }
-      style={{
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-        textOverflow: "ellipsis",
-      }}
+    <Menu
+      shadow="md"
+      width={200}
+      opened={isContextMenuOpen}
+      onClose={() => setIsContextMenuOpen(false)}
+      position="bottom-start"
+      withArrow
+      offset={4}
     >
-      {title}
-    </Tabs.Tab>
+      <Menu.Target>
+        <Tabs.Tab
+          w={140}
+          px={4}
+          value={id}
+          className="editor-tab"
+          onContextMenu={handleContextMenu}
+          rightSection={
+            isLoading ? (
+              <Loader size="1rem" />
+            ) : (
+              <IconX
+                stroke={1}
+                className="editor-tab-close-icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeTab(id);
+                }}
+              />
+            )
+          }
+          style={{
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {title}
+        </Tabs.Tab>
+      </Menu.Target>
+
+      <Menu.Dropdown>
+        <Menu.Item
+          onClick={handleSave}
+          leftSection={<IconDeviceFloppy stroke={1} size={"1.2rem"} />}
+        >
+          Save
+        </Menu.Item>
+        <Menu.Item
+          onClick={handleRename}
+          leftSection={<div style={{ width: "1.2rem" }} />}
+        >
+          Rename
+        </Menu.Item>
+        <Divider></Divider>
+        <Menu.Item
+          leftSection={<IconX stroke={1} size={"1.2rem"} />}
+          onClick={() => closeTab(id)}
+        >
+          Close
+        </Menu.Item>
+        <Menu.Item
+          leftSection={<div style={{ width: "1.2rem" }} />}
+          onClick={() => closeOtherTabs(id)}
+        >
+          Close Others
+        </Menu.Item>
+        <Menu.Item
+          leftSection={<div style={{ width: "1.2rem" }} />}
+          onClick={closeAllTabs}
+        >
+          Close All
+        </Menu.Item>
+      </Menu.Dropdown>
+    </Menu>
   );
-}
+};
+
+export default EditorTab;

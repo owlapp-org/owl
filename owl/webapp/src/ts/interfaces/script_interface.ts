@@ -1,9 +1,9 @@
-import { User } from "./user_interface";
+import { IUser } from "./user_interface";
 
 export interface IScript {
   id: number;
   path: string;
-  owner: User;
+  owner: IUser;
   name: string;
   extension: string;
 }

@@ -1,31 +1,33 @@
 import { create } from "zustand";
 
-import FileService from "@services/fileService";
-import { IFile } from "@ts/interfaces/file_interface";
+import DataFileService from "@services/datafileService";
+import { IDataFile } from "@ts/interfaces/datafile_interface";
 import { notifications } from "@mantine/notifications";
 
-interface FileState {
-  files: IFile[];
-  fetchFiles: () => void;
+interface IDataFileState {
+  datafiles: IDataFile[];
+  fetchAll: () => void;
   upload: (data: FormData) => void;
-  removeFile: (id: number) => void;
-  renameFile: (id: number, name: string) => void;
+  remove: (id: number) => void;
+  rename: (id: number, name: string) => void;
+  findById: (id: number) => IDataFile | undefined;
 }
 
-export const useFileStore = create<FileState>((set) => ({
-  files: [],
-  fetchFiles: async () => {
+const useDataFileStore = create<IDataFileState>((set, get) => ({
+  datafiles: [],
+  fetchAll: async () => {
     try {
-      const files = await FileService.list();
-      set({ files: files });
+      const datafiles = await DataFileService.fetchAll();
+      set({ datafiles });
     } catch (error) {
       console.error("Failed to fetch files", error);
+      throw error;
     }
   },
   upload: async (data: FormData) => {
     try {
-      const file = await FileService.upload(data);
-      set((state) => ({ files: [...state.files, file] }));
+      const datafile = await DataFileService.upload(data);
+      set((state) => ({ datafiles: [...state.datafiles, datafile] }));
       notifications.show({
         title: "Success",
         message: `File uploaded successfully`,
@@ -39,11 +41,11 @@ export const useFileStore = create<FileState>((set) => ({
       });
     }
   },
-  removeFile: async (id: number) => {
+  remove: async (id: number) => {
     try {
-      await FileService.del(id);
+      await DataFileService.remove(id);
       set((state) => ({
-        files: state.files.filter((f) => f.id !== id),
+        datafiles: state.datafiles.filter((f) => f.id !== id),
       }));
       notifications.show({
         title: "Success",
@@ -58,11 +60,11 @@ export const useFileStore = create<FileState>((set) => ({
       });
     }
   },
-  renameFile: async (id: number, name: string) => {
+  rename: async (id: number, name: string) => {
     try {
-      const file = await FileService.rename(id, name);
+      const file = await DataFileService.rename(id, name);
       set((state) => ({
-        files: state.files.map((f) => (f.id === id ? file : f)),
+        datafiles: state.datafiles.map((f) => (f.id === id ? file : f)),
       }));
       notifications.show({
         title: "Success",
@@ -77,4 +79,14 @@ export const useFileStore = create<FileState>((set) => ({
       });
     }
   },
+  findById: (id: number) => {
+    const datafiles = get().datafiles;
+    for (let i = 0; i < datafiles.length; i++) {
+      if (datafiles[i].id === id) {
+        return datafiles[i];
+      }
+    }
+  },
 }));
+
+export default useDataFileStore;

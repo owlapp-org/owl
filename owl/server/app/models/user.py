@@ -20,8 +20,8 @@ class User(TimestampMixin, db.Model):
         single_parent=True,
     )
 
-    files = relationship(
-        "File",
+    data_files = relationship(
+        "DataFile",
         back_populates="owner",
         lazy="dynamic",
         cascade="all, delete-orphan",

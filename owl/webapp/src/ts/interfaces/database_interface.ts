@@ -1,38 +1,25 @@
-import { User } from "./user_interface";
+import { IUser } from "./user_interface";
 
-export interface DatabaseCreateOptions {
+export interface IDatabaseCreateOptions {
   name: string;
   pool_size?: number;
   description?: string;
 }
 
-export interface DatabaseUpdateOptions {
+export interface IDatabaseUpdateOptions {
   name: string;
   pool_size?: number;
   description?: string;
 }
 
-export interface Database {
+export interface IDatabase {
   id: number;
   name: string;
   pool_size: number;
-  owner?: User;
+  owner?: IUser;
   description?: string;
 }
-
-// depreciated
-export interface ExecuteQueryResult {
-  statement_type: string;
-  data?: Record<string, any>[];
-  columns?: string[];
-  affected_rows?: number;
-  total_count?: number;
-  total_pages?: number;
-  current_page?: number;
-  page_size?: number;
-}
-
-export interface QueryResult {
+export interface IQueryResult {
   database_id: number;
   query: string;
   statement_type: string;
