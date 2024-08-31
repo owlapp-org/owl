@@ -4,7 +4,7 @@ description = ""
 name = "owlapp"
 packages = [{include = "app", from = "owl/server"}]
 readme = "README.md"
-version = "0.3.5"
+version = "0.3.6"
 
 [tool.poetry.dependencies]
 alembic = ">=1.13.1"

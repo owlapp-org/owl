@@ -1,8 +1,10 @@
+import { useCreateDatabaseModalStore } from "@components/modals/CreateDatabaseModal/useCreateDatabaseModalStore";
 import useDatabaseStore from "@hooks/databaseStore";
 import { IEditorTabState } from "@hooks/editorStore";
 import { ActionIcon, Button, Divider, Flex, Select } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons-react";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 
 interface IScriptToolbarProps {
   isLoading: boolean;
@@ -15,8 +17,16 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
   store,
   onExecute,
 }) => {
-  const { databases, setIsCreateModalOpen } = useDatabaseStore();
-  const { setDatabase, options, file } = useStore(store);
+  const { databases } = useDatabaseStore();
+  const { setDatabase, options, content } = useStore(
+    store,
+    useShallow((state) => ({
+      setDatabase: state.setDatabase,
+      options: state.options,
+      content: state.content,
+    }))
+  );
+  const { showModal: showCreateDatabaseModal } = useCreateDatabaseModalStore();
 
   const databaseSelectOptions = databases.map((database) => ({
     value: database.id.toString(),
@@ -36,7 +46,7 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
         <Button
           miw={200}
           variant="transparent"
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => showCreateDatabaseModal({})}
         >
           Add database
         </Button>
@@ -59,7 +69,7 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
         h="100%"
         radius={0}
         p={0}
-        disabled={file.content?.trim() === ""}
+        disabled={!content.trim()}
         aria-label="Run"
         variant="transparent"
         miw={40}
