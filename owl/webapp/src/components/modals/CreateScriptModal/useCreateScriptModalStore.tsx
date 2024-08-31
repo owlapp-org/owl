@@ -4,6 +4,7 @@ interface ICreateScriptModalState {
   open: boolean;
   title?: string;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
+  tabId?: string;
   showModal: (
     options: Omit<
       ICreateScriptModalState,
@@ -20,6 +21,7 @@ export const useCreateScriptModalStore = create<ICreateScriptModalState>(
     open: false,
     title: "Create Script",
     size: "md",
+    tabId: undefined,
     showModal: (options) => set({ ...options, open: true }),
     closeModal: () => set({ open: false }),
     reset: () => set({ open: false, title: "Create Script" }),

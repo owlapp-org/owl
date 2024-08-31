@@ -1,14 +1,28 @@
+import useEditorStore from "@hooks/editorStore";
 import useScriptStore from "@hooks/scriptStore";
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { FC, useState } from "react";
+import { FileType } from "@ts/enums/filetype_enum";
+import { FC, useEffect, useState } from "react";
 import { useCreateScriptModalStore } from "./useCreateScriptModalStore";
 
 const CreateScriptModal: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
-  const { open, destroy } = useCreateScriptModalStore();
+  const { tabId, open, destroy } = useCreateScriptModalStore();
   const { create } = useScriptStore();
+  const { findTabById } = useEditorStore();
+
+  const resetAndDestroy = () => {
+    setName("");
+    destroy();
+  };
+
+  useEffect(() => {
+    if (open) {
+      setName("");
+    }
+  }, [open]);
 
   const handleSubmit = async () => {
     if (!name.endsWith(".sql")) {
@@ -22,11 +36,21 @@ const CreateScriptModal: FC = () => {
     setIsLoading(true);
     try {
       setIsLoading(true);
-      await create(name);
+      const script = await create(name);
+      if (tabId) {
+        const tabStore = findTabById(tabId);
+        if (tabStore) {
+          tabStore?.getState().setFile({
+            id: script.id,
+            name: script.name,
+            fileType: FileType.ScriptFile,
+          });
+        }
+      }
     } catch (error) {
     } finally {
       setIsLoading(false);
-      destroy();
+      resetAndDestroy();
     }
   };
 

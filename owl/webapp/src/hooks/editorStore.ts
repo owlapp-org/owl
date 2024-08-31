@@ -18,6 +18,7 @@ export interface IEditorTabState {
   file: IFile;
   options: IEditorTabOptions | null;
   content: string;
+  setFile: (file: IFile) => void;
   fetchContent: () => Promise<void>;
   save: (name?: string) => void;
   setContent: (content: string) => void;
@@ -38,6 +39,9 @@ const createTabStore = () =>
     file: {},
     options: null,
     content: "",
+    setFile: (file: IFile) => {
+      set({ file });
+    },
     fetchContent: async () => {
       const file = get().file;
       if (!file.id) {
@@ -208,6 +212,9 @@ export interface IEditorState {
   closeTab: (id: string) => void;
   closeAllTabs: () => void;
   closeOtherTabs: (id: string) => void;
+  findTabById: (
+    id: string
+  ) => UseBoundStore<StoreApi<IEditorTabState>> | undefined;
 }
 
 const useEditorStore = create<IEditorState>((set, get) => ({
@@ -253,7 +260,10 @@ const useEditorStore = create<IEditorState>((set, get) => ({
 
     const activeTab = uuidv4();
     const newTabStore = createTabStore();
-    newTabStore.setState({ file: { id: fileId, fileType, name } });
+    newTabStore.setState({
+      id: activeTab,
+      file: { id: fileId, fileType, name },
+    });
     set((state) => ({
       activeTab,
       tabs: {
@@ -288,6 +298,9 @@ const useEditorStore = create<IEditorState>((set, get) => ({
       }
       return { tabs, activeTab: id };
     });
+  },
+  findTabById: (id: string) => {
+    return get().tabs[id];
   },
 }));
 

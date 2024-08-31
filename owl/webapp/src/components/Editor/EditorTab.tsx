@@ -1,3 +1,4 @@
+import { useCreateScriptModalStore } from "@components/modals/CreateScriptModal/useCreateScriptModalStore";
 import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import useEditorStore, { IEditorTabState } from "@hooks/editorStore";
 import { Divider, Loader, Menu, Tabs } from "@mantine/core";
@@ -6,6 +7,7 @@ import { IconDeviceFloppy, IconX } from "@tabler/icons-react";
 import { FileType } from "@ts/enums/filetype_enum";
 import { useEffect, useState } from "react";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 import "./styles.css";
 
 interface IEditorTabProps {
@@ -16,7 +18,14 @@ interface IEditorTabProps {
 
 const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
   const { closeAllTabs, closeTab, closeOtherTabs } = useEditorStore();
-  const { file } = useStore(store);
+  const { file, save, tabId } = useStore(
+    store,
+    useShallow((state) => ({
+      file: state.file,
+      save: state.save,
+      tabId: state.id,
+    }))
+  );
   const { showModal: showRenameFileModal } = useRenameFileModalStore();
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState(`New ${index + 1}`);
@@ -25,14 +34,22 @@ const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
     e.preventDefault();
     setIsContextMenuOpen(true);
   };
+  const { showModal: showCreateScriptModal } = useCreateScriptModalStore();
 
   useEffect(() => {
     file.name && setTitle(file.name);
   }, [file.name, setTitle]);
 
-  const handleSave = () => {
-    // todo
-    console.log("Save clicked");
+  const handleSave = async () => {
+    if (file.id) {
+      await save();
+    } else {
+      switch (file.fileType) {
+        case FileType.ScriptFile: {
+          showCreateScriptModal({ tabId });
+        }
+      }
+    }
   };
 
   const handleRename = () => {

@@ -1,7 +1,7 @@
 import "@components/Editor/styles.css";
 import { IEditorTabState } from "@hooks/editorStore";
 import { IQueryResult } from "@ts/interfaces/database_interface";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PanelGroup,
   PanelResizeHandle,
@@ -18,8 +18,7 @@ interface IScriptProps {
 
 const Script: React.FC<IScriptProps> = ({ store }) => {
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
-  const { file, content, runQuery } = useStore(store, (state) => ({
-    file: state.file,
+  const { content, runQuery } = useStore(store, (state) => ({
     content: state.content,
     runQuery: state.runQuery,
   }));
@@ -28,7 +27,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleExecute = useCallback(async () => {
+  const handleExecute = async () => {
     let query = content || "";
     if (codeRef.current) {
       const selected = (codeRef.current?.getSelectedLines?.() ?? []).join("\n");
@@ -44,7 +43,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
     const result = await runQuery(query, 0, 25); // todo hardcoded values
     setQueryResult(result);
     setIsLoading(false);
-  }, [runQuery]);
+  };
 
   useEffect(() => {
     console.log("Script.index");
