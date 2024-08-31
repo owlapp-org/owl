@@ -107,8 +107,8 @@ const createTabStore = () =>
         }
       }
     },
-    setContent: (content: string) => {
-      set({ content });
+    setContent: async (content: string) => {
+      set({ content: content });
     },
     setDatabase: (databaseId: string | null) => {
       const options = { ...get().options, databaseId };

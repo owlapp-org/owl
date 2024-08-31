@@ -1,10 +1,9 @@
 import { IEditorTabState } from "@hooks/editorStore";
-import { notifications } from "@mantine/notifications";
-import { FileType } from "@ts/enums/filetype_enum";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 import ContentLoading from "./ContentLoading";
-import Script from "./Script";
+import File from "./File";
 
 interface IEditorBodyProps {
   store: UseBoundStore<StoreApi<IEditorTabState>>;
@@ -12,33 +11,25 @@ interface IEditorBodyProps {
 
 const EditorBody: React.FC<IEditorBodyProps> = ({ store }) => {
   const [isContentLoading, setIsContentLoading] = useState(false);
-  const { file, fetchContent } = useStore(store, (state) => ({
-    file: state.file,
-    fetchContent: state.fetchContent,
-  }));
+  const { fileId, fileType, fetchContent } = useStore(
+    store,
+    useShallow((state) => ({
+      fileId: state.file.id,
+      fileType: state.file.fileType,
+      fetchContent: state.fetchContent,
+    }))
+  );
 
   useEffect(() => {
-    if (file.id) {
+    console.log("rendering EditorBody");
+  });
+
+  useEffect(() => {
+    if (fileId) {
       setIsContentLoading(true);
       fetchContent().finally(() => setIsContentLoading(false));
     }
-  }, [file.id]);
-
-  const File = () => {
-    switch (file.fileType) {
-      case FileType.ScriptFile:
-        return <Script store={store} />;
-      case FileType.DataFile:
-        notifications.show({
-          color: "red",
-          title: "Error",
-          message: "Unsupported file type",
-        });
-        return;
-      default:
-        return <Script store={store} />;
-    }
-  };
+  }, [fileId]);
 
   return (
     <div
@@ -63,7 +54,11 @@ const EditorBody: React.FC<IEditorBodyProps> = ({ store }) => {
           height: "100%",
         }}
       >
-        {isContentLoading ? <ContentLoading /> : <File />}
+        {isContentLoading ? (
+          <ContentLoading />
+        ) : (
+          <File fileType={fileType} store={store} />
+        )}
       </div>
     </div>
   );

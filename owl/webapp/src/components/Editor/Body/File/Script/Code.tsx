@@ -113,7 +113,7 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
         <CodeMirror
           ref={codeMirrorRef}
           className="code-mirror"
-          value={content || ""}
+          value={content}
           height="100%"
           extensions={[sql({}), Prec.highest(keymap.of(shortCutKeymap))]}
           onChange={onChange}

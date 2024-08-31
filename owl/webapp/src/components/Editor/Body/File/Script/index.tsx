@@ -47,7 +47,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
   }, [runQuery]);
 
   useEffect(() => {
-    console.log("renderingXXX");
+    console.log("Script.index");
   });
 
   return (

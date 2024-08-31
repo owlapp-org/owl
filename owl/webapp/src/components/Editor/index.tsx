@@ -14,6 +14,10 @@ export default function Editor() {
     useEditorStore();
 
   useEffect(() => {
+    console.log("Rerendering Editor.index");
+  }, []);
+
+  useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
