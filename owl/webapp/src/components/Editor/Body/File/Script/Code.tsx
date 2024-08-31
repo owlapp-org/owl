@@ -24,6 +24,7 @@ import { IEditorTabState } from "@hooks/editorStore";
 import useScriptStore from "@hooks/scriptStore";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 
 // Define a custom type that extends ReactCodeMirrorRef
 export interface ExtendedReactCodeMirrorRef extends ReactCodeMirrorRef {
@@ -33,15 +34,14 @@ export interface ExtendedReactCodeMirrorRef extends ReactCodeMirrorRef {
 const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
   function Code({ store, onExecute, ...other }, ref) {
     const codeMirrorRef = useRef<ReactCodeMirrorRef>(null);
-    const { fileId, content, setContent, setFileContent, save } = useStore(
+    const { fileId, content, setContent, save } = useStore(
       store,
-      (state) => ({
+      useShallow((state) => ({
         fileId: state.file.id,
         content: state.content,
         setContent: state.setContent,
-        setFileContent: state.setContent,
         save: state.save,
-      })
+      }))
     );
     const { setIsCreateModalOpen: setIsCreateScriptModalOpen } =
       useScriptStore();
@@ -56,7 +56,6 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
     const handleSave = useCallback(
       async (name?: string) => {
         if (fileId) {
-          // setFileContent(content);
           await save(name);
         } else {
           setIsCreateScriptModalOpen(true);

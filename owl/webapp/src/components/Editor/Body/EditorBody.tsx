@@ -21,10 +21,6 @@ const EditorBody: React.FC<IEditorBodyProps> = ({ store }) => {
   );
 
   useEffect(() => {
-    console.log("rendering EditorBody");
-  });
-
-  useEffect(() => {
     if (fileId) {
       setIsContentLoading(true);
       fetchContent().finally(() => setIsContentLoading(false));
