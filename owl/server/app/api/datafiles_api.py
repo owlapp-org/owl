@@ -48,6 +48,7 @@ def update_datafile(id: int):
         return make_response("Validation failed %s" % str(e))
 
     try:
+        print(id)
         datafile = DataFile.find_by_id_and_owner(id=id, owner_id=get_jwt_identity())
     except Exception as e:
         logger.exception(str(e))

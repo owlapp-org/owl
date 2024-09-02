@@ -10,8 +10,8 @@ const RenameFileModal: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const { file, open, destroy } = useRenameFileModalStore();
-  const { rename: renameScript } = useDataFileStore();
-  const { rename: renameDataFile } = useScriptStore();
+  const { rename: renameDataFile } = useDataFileStore();
+  const { rename: renameScript } = useScriptStore();
 
   useEffect(() => {
     open && file && setName(file.name || "");
