@@ -69,7 +69,7 @@ const config: Config = {
           label: "Tutorial",
         },
         {
-          href: "https://github.com/facebook/docusaurus",
+          href: "https://github.com/owlapp-org/owl",
           label: "GitHub",
           position: "right",
         },
@@ -92,12 +92,12 @@ const config: Config = {
           items: [
             {
               label: "GitHub",
-              href: "https://github.com/facebook/docusaurus",
+              href: "https://github.com/owlapp-org/owl",
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Blue Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} owlapp-org. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,
