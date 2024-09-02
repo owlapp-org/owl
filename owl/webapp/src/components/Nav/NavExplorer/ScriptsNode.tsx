@@ -17,6 +17,7 @@ import { FileType } from "@ts/enums/filetype_enum";
 import { IScript } from "@ts/interfaces/script_interface";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
+import "./styles.upload.css";
 
 function toNode(
   script: IScript,
@@ -148,7 +149,12 @@ export default function ScriptsNode() {
 
   return (
     <>
-      <Dropzone maxFiles={1} openRef={openRef} onDrop={handleDrop}>
+      <Dropzone
+        maxFiles={1}
+        openRef={openRef}
+        onDrop={handleDrop}
+        className="file-upload"
+      >
         <Tree
           className="nav-tree"
           selectOnClick
