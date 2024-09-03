@@ -1,5 +1,5 @@
 import { ActionIcon, Flex } from "@mantine/core";
-import { IconMenu2 } from "@tabler/icons-react";
+import { IconBrandGithub, IconMenu2 } from "@tabler/icons-react";
 import React from "react";
 
 interface TopNavBarProps {
@@ -11,6 +11,7 @@ const TopNavBar: React.FC<TopNavBarProps> = (props) => {
   return (
     <Flex
       align={"center"}
+      justify={"space-between"}
       px="md"
       py={0}
       mih={42}
@@ -20,9 +21,37 @@ const TopNavBar: React.FC<TopNavBarProps> = (props) => {
       }}
       {...otherProps}
     >
-      <ActionIcon variant="transparent" onClick={onMenuClick}>
-        <IconMenu2 size={24} stroke={1} />
-      </ActionIcon>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActionIcon variant="transparent" onClick={onMenuClick}>
+          <IconMenu2 size={24} stroke={1} />
+        </ActionIcon>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActionIcon
+          variant="transparent"
+          onClick={() => {
+            window.open("https://github.com/owlapp-org/owl", "_blank");
+          }}
+        >
+          <IconBrandGithub
+            size={24}
+            stroke={1}
+            color="var(--mantine-color-gray-7)"
+          />
+        </ActionIcon>
+      </div>
     </Flex>
   );
 };
