@@ -24,10 +24,15 @@ const ResultSet: React.FC<IResultSetProps> = ({ result, store }) => {
   const [endRow, setEndRow] = useState(result.end_row || 0);
   const gridRef = useRef<DataGridHandle>(null);
 
-  const headers = result.columns?.map((column) => ({
-    key: column,
-    name: column,
-  }));
+  const defaultColumnProperties = {
+    resizable: true,
+  };
+  const headers = result.columns
+    ?.map((column) => ({
+      key: column,
+      name: column,
+    }))
+    .map((c) => ({ ...c, ...defaultColumnProperties }));
 
   useEffect(() => {
     const idx = 0,
