@@ -8,6 +8,7 @@ import { notifications } from "@mantine/notifications";
 import {
   IconFile,
   IconFileTypeCsv,
+  IconFileTypeXls,
   IconFolders,
   IconUpload,
 } from "@tabler/icons-react";
@@ -24,6 +25,14 @@ function toNode(
     if (file.name.endsWith(".csv")) {
       return (
         <IconFileTypeCsv
+          stroke={1}
+          size={18}
+          color="var(--mantine-color-gray-8)"
+        />
+      );
+    } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xlsx")) {
+      return (
+        <IconFileTypeXls
           stroke={1}
           size={18}
           color="var(--mantine-color-gray-8)"
