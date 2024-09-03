@@ -1,5 +1,6 @@
 import "@components/Editor/styles.css";
 import { IEditorTabState } from "@hooks/editorStore";
+import { IconBorderAll } from "@tabler/icons-react";
 import { IQueryResult } from "@ts/interfaces/database_interface";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -72,6 +73,29 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
         <PanelResizeHandle className="panel-resize-handle" />
         <ResizablePanel maxSize={90} minSize={10}>
           {queryResult && <Panel result={queryResult} store={store} />}
+          {!queryResult && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+                height: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div>
+                <IconBorderAll
+                  size={48}
+                  stroke={1}
+                  color="var(--mantine-color-gray-2)"
+                />
+              </div>
+              <div style={{ color: "var(--mantine-color-gray-4)" }}>
+                Results will be shown here
+              </div>
+            </div>
+          )}
         </ResizablePanel>
       </PanelGroup>
     </div>
