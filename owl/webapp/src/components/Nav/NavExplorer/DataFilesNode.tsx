@@ -135,6 +135,7 @@ export default function DataFilesNode() {
           MIME_TYPES.xls,
           "application/vnd.apache.parquet",
         ]}
+        className="file-upload"
       >
         <Tree
           className="nav-tree"
