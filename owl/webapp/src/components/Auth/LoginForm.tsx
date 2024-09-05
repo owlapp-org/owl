@@ -1,6 +1,6 @@
 import { Avatar, Button, Checkbox, Group, TextInput } from "@mantine/core";
 import { AppService } from "@services/appService";
-import { login } from "@services/authService";
+import { AuthService } from "@services/authService";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { StorageType, UserStorage } from "src/lib/storage";
@@ -25,7 +25,7 @@ export default function LoginForm() {
 
   const handleLogin = async () => {
     try {
-      const data = await login(email, password);
+      const data = await AuthService.login(email, password);
 
       // Store the token in localStorage or sessionStorage
       if (rememberMe) {
