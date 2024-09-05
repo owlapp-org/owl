@@ -30,10 +30,18 @@ export class UserStorage {
   }
 
   static set(user: User, storageType: StorageType = StorageType.Session) {
+    // todo fix this
     try {
-      if (storageType === StorageType.Session) {
+      if (
+        storageType == StorageType.Session ||
+        localStorage.getItem(UserStorage.STORAGE_KEY)
+      ) {
         sessionStorage.setItem(UserStorage.STORAGE_KEY, JSON.stringify(user));
-      } else {
+      }
+      if (
+        storageType == StorageType.Local ||
+        sessionStorage.getItem(UserStorage.STORAGE_KEY)
+      ) {
         localStorage.setItem(UserStorage.STORAGE_KEY, JSON.stringify(user));
       }
     } catch (error) {

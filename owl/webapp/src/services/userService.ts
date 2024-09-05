@@ -9,6 +9,18 @@ namespace UserService {
       })
       .then((response) => response.data);
   };
+  export const updateUser = async (
+    name?: string,
+    password?: string
+  ): Promise<IUser> => {
+    let payload = {};
+    name && (payload = { ...payload, name });
+    password && (payload = { ...payload, password });
+
+    return request
+      .put("users/password", payload)
+      .then((response) => response.data);
+  };
 }
 
 export default UserService;

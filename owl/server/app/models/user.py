@@ -58,3 +58,12 @@ class User(TimestampMixin, db.Model):
         return pwhash.verify(
             self.password_hash.encode("utf-8"), password.encode("utf-8")
         )
+
+    def update_user(self, name: str = None, password: str = None) -> "User":
+        if password is not None:
+            self.hash_password(password)
+        if name:
+            self.name = name
+
+        db.session.commit()
+        return self

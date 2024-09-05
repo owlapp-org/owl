@@ -1,5 +1,5 @@
 from app.models import User, db
-from app.schemas.user_schema import UserSchema
+from app.schemas.user_schema import UpdateUserInputSchema, UserSchema
 from flask import Blueprint, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy.exc import NoResultFound
@@ -35,17 +35,12 @@ def get_user_by_email(email: str):
 
 
 @bp.route("/password", methods=["PUT"])
-def update_password():
-    user_id = get_jwt_identity()
-    password = request.json.get("password")
-    if password is None:
-        return make_response("Missing new password"), 400
-
-    user = User.find_by_id(user_id)
-    if user is None:
+@bp.route("/", methods=["PUT"])
+def update_user():
+    input_schema = UpdateUserInputSchema.model_validate(request.json)
+    if user := User.find_by_id(id=get_jwt_identity()):
+        user.update_user(input_schema.name, input_schema.password)
+    else:
         return make_response("User not found"), 404
 
-    user.hash_password(password)
-    db.session.commit()
-
-    return jsonify({"message": "Password updated successfully."}), 200
+    return UserSchema.validate_and_dump(user), 200
