@@ -1,7 +1,8 @@
 import { Avatar, Button, Checkbox, Group, TextInput } from "@mantine/core";
 import { AppService } from "@services/appService";
 import { AuthService } from "@services/authService";
-import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { StorageType, UserStorage } from "src/lib/storage";
 
@@ -18,6 +19,10 @@ export default function LoginForm() {
     });
   }, [setIsGoogleLogin]);
 
+  useCallback(() => {
+    Cookies.set("login-remember-me", String(rememberMe));
+  }, [rememberMe]);
+
   const onGoogleLogin = () => {
     const basePath = window.location.origin;
     window.location.href = `${basePath}/api/auth/google/login`;
@@ -33,7 +38,6 @@ export default function LoginForm() {
       } else {
         UserStorage.set(data, StorageType.Session);
       }
-
       navigate("/ui");
     } catch (error) {
       console.error("Login failed:", error);
