@@ -1,16 +1,17 @@
 import { FC, useEffect, useState } from "react";
 
 import UserMenu from "@components/UserMenu";
+import useUserStore from "@hooks/userStore";
 import { Flex } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
-import { UserStorage } from "src/lib/storage";
+import { AppStorage } from "src/lib/storage";
 import NavExplorer from "./NavExplorer"; // Assuming you have this component
 import NavSettings from "./NavSettings";
 
 interface NavLeftSidebarProps {}
 
 const NavLeftSidebar: FC<NavLeftSidebarProps> = ({}) => {
-  const user = UserStorage.get();
+  const { name } = useUserStore();
   const [isSettingsView, setIsSettingsView] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const NavLeftSidebar: FC<NavLeftSidebarProps> = ({}) => {
   };
 
   const handleLogoutClick = () => {
-    UserStorage.clear();
+    AppStorage.removeAccessToken();
   };
 
   const handleBackToExplorer = () => {
@@ -51,7 +52,7 @@ const NavLeftSidebar: FC<NavLeftSidebarProps> = ({}) => {
         }}
       >
         <UserMenu
-          userName={user?.name}
+          userName={name}
           onSettingsClick={handleSettingsClick}
           onHelpClick={handleHelpClick}
           onLogoutClick={handleLogoutClick}

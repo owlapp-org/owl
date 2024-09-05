@@ -1,56 +1,26 @@
-export enum StorageType {
-  Session,
-  Local,
-}
+// todo remove this
+// export interface User {
+//   access_token: string;
+//   email: string;
+//   name: string;
+// }
 
-export interface User {
-  access_token: string;
-  email: string;
-  name: string;
-}
-
-export class UserStorage {
-  static readonly STORAGE_KEY = "user";
-
-  static get(): User | null {
-    let data = localStorage.getItem(UserStorage.STORAGE_KEY);
-    if (!data) {
-      data = sessionStorage.getItem(UserStorage.STORAGE_KEY);
+export namespace AppStorage {
+  export function getAccessToken() {
+    let access_token = sessionStorage.getItem("access_token");
+    if (!access_token) {
+      access_token = localStorage.getItem("access_token");
     }
-
-    if (data) {
-      try {
-        return JSON.parse(data) as User;
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-        return null;
-      }
-    }
-    return null;
+    return access_token;
   }
-
-  static set(user: User, storageType: StorageType = StorageType.Session) {
-    // todo fix this
-    try {
-      if (
-        storageType == StorageType.Session ||
-        localStorage.getItem(UserStorage.STORAGE_KEY)
-      ) {
-        sessionStorage.setItem(UserStorage.STORAGE_KEY, JSON.stringify(user));
-      }
-      if (
-        storageType == StorageType.Local ||
-        sessionStorage.getItem(UserStorage.STORAGE_KEY)
-      ) {
-        localStorage.setItem(UserStorage.STORAGE_KEY, JSON.stringify(user));
-      }
-    } catch (error) {
-      console.error("Error storing user data:", error);
+  export function setAccessToken(access_token: string, rememberMe: boolean) {
+    sessionStorage.setItem("access_token", access_token);
+    if (rememberMe) {
+      localStorage.setItem("access_token", access_token);
     }
   }
-
-  static clear() {
-    localStorage.removeItem(UserStorage.STORAGE_KEY);
-    sessionStorage.removeItem(UserStorage.STORAGE_KEY);
+  export function removeAccessToken() {
+    localStorage.removeItem("access_token");
+    sessionStorage.removeItem("access_token");
   }
 }

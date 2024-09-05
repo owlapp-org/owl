@@ -1,40 +1,27 @@
-import { UserStorage } from "@lib/storage";
+import useUserStore from "@hooks/userStore";
 import { Button, TextInput } from "@mantine/core";
-import { showNotification } from "@mantine/notifications";
-import UserService from "@services/userService";
 import { useEffect, useState } from "react";
 
 export default function AccountSettings() {
-  const user = UserStorage.get();
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { currentName, email, updateUser } = useUserStore((state) => ({
+    currentName: state.name,
+    email: state.email,
+    updateUser: state.update,
+  }));
 
   useEffect(() => {
-    const name = UserStorage.get()?.name;
-    if (name) {
-      setName(name);
-    }
-  });
+    currentName && setName(name);
+  }, [currentName]);
 
   const handleSubmit = async () => {
     try {
-      const user = await UserService.updateUser(name, password);
-      if (user) {
-        let u = UserStorage.get();
-        if (u) {
-          u.name = user.name;
-          UserStorage.set(u);
-        }
-      }
-      showNotification({
-        title: "Success",
-        message: "User updated successfully",
-      });
-    } catch (error: any) {
-      showNotification({
-        title: "Error",
-        message: error?.response?.data,
-      });
+      setIsLoading(true);
+      await updateUser(name, password);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -49,7 +36,7 @@ export default function AccountSettings() {
       }}
     >
       <div style={{ width: "100%", maxWidth: 400, marginTop: 16 }}>
-        <TextInput disabled label="Email" value={user?.email} />
+        <TextInput disabled label="Email" value={email} />
       </div>
       <div style={{ width: "100%", maxWidth: 400, marginTop: 16 }}>
         <TextInput
@@ -67,7 +54,12 @@ export default function AccountSettings() {
         />
       </div>
       <div style={{ width: "100%", maxWidth: 400, marginTop: 24 }}>
-        <Button fullWidth onClick={handleSubmit} disabled={!password || !name}>
+        <Button
+          fullWidth
+          onClick={handleSubmit}
+          disabled={!password || !name}
+          loading={isLoading}
+        >
           Update
         </Button>
       </div>

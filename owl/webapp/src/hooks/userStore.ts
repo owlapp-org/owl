@@ -1,3 +1,4 @@
+import { AppStorage } from "@lib/storage";
 import { notifications } from "@mantine/notifications";
 import { AuthService } from "@services/authService";
 import UserService from "@services/userService";
@@ -18,9 +19,10 @@ interface IUserState {
   isRememberMe: boolean | null;
   googleAuth: () => boolean;
   checkAuthentication: () => Promise<boolean>;
-  loadFromLocalStorage: () => Promise<boolean>;
+  loadFromStorage: () => Promise<boolean>;
   login: (email: string, password: string, remember: boolean) => Promise<void>;
-  saveStateToLocalStorage: () => void;
+  saveStateToLocalStorage: (remember: boolean) => void;
+  update: (name: string | undefined, password: string | undefined) => void;
 }
 
 const useUserStore = create<IUserState>((set, get) => ({
@@ -37,22 +39,24 @@ const useUserStore = create<IUserState>((set, get) => ({
       isRememberMe: Cookies.get("login-remember-me") == "true",
     };
     if (!access_token) return false;
-    set({ name, email, access_token, isRememberMe });
-    if (isRememberMe) {
-      localStorage.setItem("access_token", access_token);
-    }
+    const isAuthenticated = true;
+    set({ name, email, access_token, isRememberMe, isAuthenticated });
+    AppStorage.setAccessToken(access_token, isRememberMe);
     return true;
   },
   checkAuthentication: async () => {
-    const { isAuthenticated, loadFromLocalStorage } = get();
+    const { isAuthenticated, loadFromStorage } = get();
     if (isAuthenticated) {
       return Promise.resolve(true);
     } else {
-      return loadFromLocalStorage();
+      return loadFromStorage();
     }
   },
-  loadFromLocalStorage: async () => {
-    let access_token = localStorage.getItem("access_token");
+  loadFromStorage: async () => {
+    let access_token = AppStorage.getAccessToken();
+
+    console.log(access_token);
+
     if (!access_token) {
       return Promise.resolve(false);
     }
@@ -79,7 +83,7 @@ const useUserStore = create<IUserState>((set, get) => ({
         name: user.name,
         email: user.email,
       });
-      remember && get().saveStateToLocalStorage();
+      get().saveStateToLocalStorage(remember);
     } catch (err) {
       notifications.show({
         color: "red",
@@ -89,16 +93,22 @@ const useUserStore = create<IUserState>((set, get) => ({
       throw err;
     }
   },
-  saveStateToLocalStorage: () => {
-    const { access_token, name, email } = get();
-    sessionStorage.setItem(
-      "user",
-      JSON.stringify({
-        name,
-        email,
-        access_token,
-      })
-    );
+  saveStateToLocalStorage: (remember: boolean) => {
+    const { access_token } = get();
+    access_token && AppStorage.setAccessToken(access_token, remember);
+  },
+  update: async (name: string | undefined, password: string | undefined) => {
+    try {
+      const user = await UserService.updateUser(name, password);
+      name && set({ name: user.name });
+    } catch (err) {
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: `Failed to update ${err}`,
+      });
+      throw err;
+    }
   },
 }));
 

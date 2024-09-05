@@ -5,10 +5,18 @@ import { useNavigate } from "react-router-dom";
 
 const HandleGoogleCallbackPage = () => {
   const navigate = useNavigate();
-  const { googleAuth } = userStore();
+  const { googleAuth, isAuthenticated, access_token } = userStore((state) => ({
+    googleAuth: state.googleAuth,
+    isAuthenticated: state.isAuthenticated,
+    access_token: state.access_token,
+  }));
 
   useEffect(() => {
-    googleAuth();
+    !isAuthenticated && googleAuth();
+    if (isAuthenticated && access_token) {
+      console.log(access_token);
+      sessionStorage.setItem("access_token", access_token);
+    }
     Cookies.remove("google-user-name");
     Cookies.remove("google-user-email");
     Cookies.remove("google-user-access_token");
