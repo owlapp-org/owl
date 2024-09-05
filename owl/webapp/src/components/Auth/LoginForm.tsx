@@ -1,9 +1,9 @@
+import useUserStore from "@hooks/userStore";
 import { Avatar, Button, Checkbox, Group, TextInput } from "@mantine/core";
 import { AppService } from "@services/appService";
-import { login } from "@services/authService";
-import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { StorageType, UserStorage } from "src/lib/storage";
 
 export default function LoginForm() {
   const navigate = useNavigate();
@@ -11,12 +11,17 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isGoogleLogin, setIsGoogleLogin] = useState(false);
+  const { login } = useUserStore();
 
   useEffect(() => {
     AppService.getConfig().then((config) => {
       setIsGoogleLogin(config.google_login);
     });
   }, [setIsGoogleLogin]);
+
+  useCallback(() => {
+    Cookies.set("login-remember-me", String(rememberMe));
+  }, [rememberMe]);
 
   const onGoogleLogin = () => {
     const basePath = window.location.origin;
@@ -25,15 +30,7 @@ export default function LoginForm() {
 
   const handleLogin = async () => {
     try {
-      const data = await login(email, password);
-
-      // Store the token in localStorage or sessionStorage
-      if (rememberMe) {
-        UserStorage.set(data, StorageType.Local);
-      } else {
-        UserStorage.set(data, StorageType.Session);
-      }
-
+      await login(email, password, rememberMe);
       navigate("/ui");
     } catch (error) {
       console.error("Login failed:", error);

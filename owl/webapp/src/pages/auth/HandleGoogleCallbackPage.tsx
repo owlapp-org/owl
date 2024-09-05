@@ -1,24 +1,26 @@
-import { UserStorage } from "@lib/storage";
+import userStore from "@hooks/userStore";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const HandleGoogleCallbackPage = () => {
   const navigate = useNavigate();
+  const { googleAuth, isAuthenticated, access_token } = userStore((state) => ({
+    googleAuth: state.googleAuth,
+    isAuthenticated: state.isAuthenticated,
+    access_token: state.access_token,
+  }));
 
   useEffect(() => {
-    const user = {
-      name: Cookies.get("google-user-name") as string,
-      email: Cookies.get("google-user-email") as string,
-      access_token: Cookies.get("google-user-access_token") as string,
-    };
-    if (user.email) {
-      UserStorage.clear();
-      UserStorage.set(user);
+    !isAuthenticated && googleAuth();
+    if (isAuthenticated && access_token) {
+      console.log(access_token);
+      sessionStorage.setItem("access_token", access_token);
     }
     Cookies.remove("google-user-name");
     Cookies.remove("google-user-email");
     Cookies.remove("google-user-access_token");
+    Cookies.remove("login-remember-me");
     navigate("/");
   }, [navigate]);
 

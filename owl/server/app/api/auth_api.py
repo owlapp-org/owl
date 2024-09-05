@@ -29,7 +29,6 @@ def login():
 
 @bp.route("/google/callback", methods=["GET"])
 def google_callback():
-
     token = oauth.google.authorize_access_token()
     userinfo = token["userinfo"]
 

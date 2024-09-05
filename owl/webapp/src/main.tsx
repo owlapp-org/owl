@@ -6,6 +6,7 @@ import {
   createBrowserRouter,
   Navigate,
   RouterProvider,
+  useNavigation,
 } from "react-router-dom";
 import theme from "./theme";
 
@@ -19,20 +20,36 @@ import App from "@pages/App";
 import { default as Auth } from "@pages/auth/Auth";
 import LoginPage from "@pages/auth/LoginPage";
 
-import { UserStorage } from "@lib/storage";
 import { Notifications } from "@mantine/notifications";
 import "@mantine/notifications/styles.css";
 import HandleGoogleCallbackPage from "@pages/auth/HandleGoogleCallbackPage";
 import AccountSettings from "@pages/settings/AccountSettings";
 
+import useUserStore from "@hooks/userStore";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css"; // This will include the default styles
 import "react-data-grid/lib/styles.css";
 
-const isAuthenticated = () => {
-  return Boolean(UserStorage.get()?.access_token);
-};
-
 const ProtectedRoute = ({ element }: any) => {
-  return isAuthenticated() ? element : <Navigate to="/ui/auth/login" replace />;
+  const { isAuthenticated, checkAuthentication } = useUserStore();
+  const navigation = useNavigation();
+
+  React.useEffect(() => {
+    if (navigation.state === "loading") {
+      NProgress.start();
+    } else {
+      NProgress.done();
+    }
+  }, [navigation.state]);
+
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      await checkAuthentication();
+    };
+    checkAuth();
+  }, []);
+
+  return isAuthenticated ? element : <Navigate to="/ui/auth/login" replace />;
 };
 
 const router = createBrowserRouter(

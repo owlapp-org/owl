@@ -7,10 +7,23 @@ from sqlalchemy.exc import NoResultFound
 bp = Blueprint("users", __name__)
 
 
+@bp.route("/test-access-token")
+def test_access_token():
+    return jsonify({}), 200
+
+
 @bp.route("/")
 def get_users():
     users = User.find_all()
     return [UserSchema.model_validate(u).model_dump() for u in users]
+
+
+@bp.route("/me")
+def get_me():
+    if user := User.find_by_id(id=get_jwt_identity()):
+        return UserSchema.validate_and_dump(user), 200
+    else:
+        return make_response("Not Found"), 404
 
 
 @bp.route("/<int:id>")
