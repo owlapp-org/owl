@@ -14,7 +14,6 @@ const HandleGoogleCallbackPage = () => {
   useEffect(() => {
     !isAuthenticated && googleAuth();
     if (isAuthenticated && access_token) {
-      console.log(access_token);
       sessionStorage.setItem("access_token", access_token);
     }
     Cookies.remove("google-user-name");

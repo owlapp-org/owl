@@ -1,10 +1,3 @@
-// todo remove this
-// export interface User {
-//   access_token: string;
-//   email: string;
-//   name: string;
-// }
-
 export namespace AppStorage {
   export function getAccessToken() {
     let access_token = sessionStorage.getItem("access_token");

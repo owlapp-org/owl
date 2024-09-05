@@ -54,9 +54,6 @@ const useUserStore = create<IUserState>((set, get) => ({
   },
   loadFromStorage: async () => {
     let access_token = AppStorage.getAccessToken();
-
-    console.log(access_token);
-
     if (!access_token) {
       return Promise.resolve(false);
     }

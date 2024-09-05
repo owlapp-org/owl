@@ -83,7 +83,6 @@ const UpdateDatabaseModal: FC = () => {
           min={1}
           value={poolSize}
           onChange={(value) => {
-            console.log(value);
             setPoolSize(Number.parseInt(value as string) || 1);
           }}
           required
