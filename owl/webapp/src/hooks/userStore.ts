@@ -49,7 +49,7 @@ const useUserStore = create<IUserState>((set, get) => ({
     if (isAuthenticated) {
       return Promise.resolve(true);
     } else {
-      return loadFromStorage();
+      return await loadFromStorage();
     }
   },
   loadFromStorage: async () => {

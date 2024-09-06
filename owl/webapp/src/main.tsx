@@ -33,6 +33,7 @@ import "react-data-grid/lib/styles.css";
 const ProtectedRoute = ({ element }: any) => {
   const { isAuthenticated, checkAuthentication } = useUserStore();
   const navigation = useNavigation();
+  const [authChecked, setAuthChecked] = React.useState(false);
 
   React.useEffect(() => {
     if (navigation.state === "loading") {
@@ -45,9 +46,14 @@ const ProtectedRoute = ({ element }: any) => {
   React.useEffect(() => {
     const checkAuth = async () => {
       await checkAuthentication();
+      setAuthChecked(true);
     };
     checkAuth();
-  }, []);
+  }, [checkAuthentication]);
+
+  if (!authChecked) {
+    return <div>Loading ...</div>;
+  }
 
   return isAuthenticated ? element : <Navigate to="/ui/auth/login" replace />;
 };
