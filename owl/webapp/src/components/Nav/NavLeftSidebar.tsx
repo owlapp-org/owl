@@ -26,7 +26,7 @@ const NavLeftSidebar: FC<NavLeftSidebarProps> = ({}) => {
   };
 
   const handleHelpClick = () => {
-    console.log("Help clicked");
+    window.open("https://github.com/owlapp-org/owl", "_blank");
   };
 
   const handleLogoutClick = () => {
