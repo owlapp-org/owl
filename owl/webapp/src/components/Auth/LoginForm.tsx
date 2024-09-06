@@ -87,11 +87,7 @@ export default function LoginForm() {
         </Anchor> */}
       </Group>
       <div style={{ width: "100%", maxWidth: 400, marginTop: 16 }}>
-        <Button
-          fullWidth
-          onClick={handleLogin}
-          disabled={email === "" || password === ""}
-        >
+        <Button fullWidth onClick={handleLogin} disabled={!email || !password}>
           Login
         </Button>
       </div>
