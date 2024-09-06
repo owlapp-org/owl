@@ -13,7 +13,7 @@ export default function AccountSettings() {
   }));
 
   useEffect(() => {
-    currentName && setName(name);
+    currentName && setName(currentName);
   }, [currentName]);
 
   const handleSubmit = async () => {
@@ -57,7 +57,7 @@ export default function AccountSettings() {
         <Button
           fullWidth
           onClick={handleSubmit}
-          disabled={!password || !name}
+          disabled={!password && !name}
           loading={isLoading}
         >
           Update

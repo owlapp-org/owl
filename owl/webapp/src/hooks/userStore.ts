@@ -98,6 +98,10 @@ const useUserStore = create<IUserState>((set, get) => ({
     try {
       const user = await UserService.updateUser(name, password);
       name && set({ name: user.name });
+      notifications.show({
+        title: "Success",
+        message: "Updated successfully",
+      });
     } catch (err) {
       notifications.show({
         color: "red",
