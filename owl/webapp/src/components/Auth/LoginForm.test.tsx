@@ -40,7 +40,7 @@ describe("LoginForm", () => {
     expect(loginButton).toBeDisabled();
   });
   it("calls handleLogin when the Login button is clicked", async () => {
-    const { login } = await import("@services/authService");
+    const { AuthService } = await import("@services/authService");
 
     const { getByLabelText, getByRole } = render(
       <TestWrapper>
@@ -57,6 +57,9 @@ describe("LoginForm", () => {
 
     fireEvent.click(getByRole("button", { name: /Login/ }));
 
-    expect(login).toHaveBeenCalledWith("test@example.com", "password123");
+    expect(AuthService.login).toHaveBeenCalledWith(
+      "test@example.com",
+      "password123"
+    );
   });
 });
