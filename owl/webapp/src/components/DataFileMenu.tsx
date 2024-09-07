@@ -2,9 +2,11 @@
 import { useAlertDialog } from "@contexts/AlertDialogContext";
 import { ActionIcon, Menu } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import DataFileService from "@services/datafileService";
 import {
   IconCopy,
   IconDotsVertical,
+  IconDownload,
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
@@ -34,16 +36,24 @@ export default function FileMenu({
     });
   };
 
-  const handleRename = () => {
-    onRename(file);
-  };
-
   const handleCopyPath = async () => {
     await navigator.clipboard.writeText(`'{{files}}/${file.name}'`);
     notifications.show({
       title: "Success",
       message: "Copied file path",
     });
+  };
+  const handleDownload = async () => {
+    const { id, name } = file;
+    try {
+      await DataFileService.download(id, name);
+    } catch (error) {
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: `Error downloading file. ${error}`,
+      });
+    }
   };
 
   return (
@@ -68,7 +78,21 @@ export default function FileMenu({
             <div>Copy path</div>
           </div>
         </Menu.Item>
-        <Menu.Item onClick={handleRename}>
+        <Menu.Item onClick={handleDownload}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <div>
+              <IconDownload size={16} stroke={1} />
+            </div>
+            <div>Download</div>
+          </div>
+        </Menu.Item>
+        <Menu.Item onClick={() => onRename(file)}>
           <div
             style={{
               display: "flex",

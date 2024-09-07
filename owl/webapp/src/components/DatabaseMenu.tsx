@@ -1,7 +1,14 @@
 // src/components/DatabaseMenu.tsx
 import { useAlertDialog } from "@contexts/AlertDialogContext";
 import { ActionIcon, Menu } from "@mantine/core";
-import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
+import DatabaseService from "@services/databaseService";
+import {
+  IconDotsVertical,
+  IconDownload,
+  IconEdit,
+  IconTrash,
+} from "@tabler/icons-react";
 import { IDatabase } from "@ts/interfaces/database_interface";
 
 interface IDatabaseMenuProps {
@@ -28,9 +35,17 @@ export default function DatabaseMenu({
       onOk: () => onDelete(database.id),
     });
   };
-
-  const handleUpdate = () => {
-    onUpdate(database);
+  const handleDownload = async () => {
+    const { id, name } = database;
+    try {
+      await DatabaseService.download(id, name);
+    } catch (error) {
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: `Error downloading database. ${error}`,
+      });
+    }
   };
 
   return (
@@ -41,7 +56,7 @@ export default function DatabaseMenu({
         </ActionIcon>
       </Menu.Target>
       <Menu.Dropdown miw={200}>
-        <Menu.Item onClick={handleUpdate}>
+        <Menu.Item onClick={() => onUpdate(database)}>
           <div
             style={{
               display: "flex",
@@ -53,6 +68,20 @@ export default function DatabaseMenu({
               <IconEdit size={16} stroke={1} />
             </div>
             <div>Edit</div>
+          </div>
+        </Menu.Item>
+        <Menu.Item onClick={handleDownload}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <div>
+              <IconDownload size={16} stroke={1} />
+            </div>
+            <div>Download</div>
           </div>
         </Menu.Item>
         <Menu.Item

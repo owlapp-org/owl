@@ -1,7 +1,14 @@
 // src/components/DatabaseMenu.tsx
 import { useAlertDialog } from "@contexts/AlertDialogContext";
 import { ActionIcon, Menu } from "@mantine/core";
-import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
+import ScriptService from "@services/scriptService";
+import {
+  IconDotsVertical,
+  IconDownload,
+  IconEdit,
+  IconTrash,
+} from "@tabler/icons-react";
 import { IScript } from "@ts/interfaces/script_interface";
 
 interface IScriptMenuProps {
@@ -34,6 +41,18 @@ export default function ScriptMenu({
     e.stopPropagation();
     onRename(script);
   };
+  const handleDownload = async () => {
+    const { id, name } = script;
+    try {
+      await ScriptService.download(id, name);
+    } catch (error) {
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: `Error downloading file. ${error}`,
+      });
+    }
+  };
 
   return (
     <Menu withinPortal position="bottom-end" withArrow>
@@ -43,6 +62,20 @@ export default function ScriptMenu({
         </ActionIcon>
       </Menu.Target>
       <Menu.Dropdown miw={200}>
+        <Menu.Item onClick={handleDownload}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <div>
+              <IconDownload size={16} stroke={1} />
+            </div>
+            <div>Download</div>
+          </div>
+        </Menu.Item>
         <Menu.Item onClick={handleRename}>
           <div
             style={{

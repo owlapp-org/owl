@@ -58,55 +58,50 @@ const ProtectedRoute = ({ element }: any) => {
   return isAuthenticated ? element : <Navigate to="/ui/auth/login" replace />;
 };
 
-const router = createBrowserRouter(
-  [
-    {
-      path: "/",
-      element: <Navigate to="/ui" replace />,
-    },
-    {
-      path: "/ui/auth",
-      element: <Auth />,
-      children: [
-        {
-          path: "login",
-          element: <LoginPage />,
-        },
-        {
-          path: "handle-google-callback",
-          element: <HandleGoogleCallbackPage />,
-        },
-      ],
-    },
-    {
-      path: "/ui",
-      element: <ProtectedRoute element={<App />} />,
-      errorElement: <ErrorPage />,
-      children: [
-        {
-          path: "",
-          element: <Editor />,
-        },
-        {
-          path: "settings",
-          children: [
-            {
-              path: "",
-              element: <Navigate to="account" replace />,
-            },
-            {
-              path: "account",
-              element: <AccountSettings />,
-            },
-          ],
-        },
-      ],
-    },
-  ]
-  // {
-  //   basename: "/ui",
-  // }
-);
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Navigate to="/ui" replace />,
+  },
+  {
+    path: "/ui/auth",
+    element: <Auth />,
+    children: [
+      {
+        path: "login",
+        element: <LoginPage />,
+      },
+      {
+        path: "handle-google-callback",
+        element: <HandleGoogleCallbackPage />,
+      },
+    ],
+  },
+  {
+    path: "/ui",
+    element: <ProtectedRoute element={<App />} />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "",
+        element: <Editor />,
+      },
+      {
+        path: "settings",
+        children: [
+          {
+            path: "",
+            element: <Navigate to="account" replace />,
+          },
+          {
+            path: "account",
+            element: <AccountSettings />,
+          },
+        ],
+      },
+    ],
+  },
+]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

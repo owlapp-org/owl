@@ -4,7 +4,7 @@ from app.constants import ALLOWED_DATAFILE_EXTENSIONS
 from app.lib.fs import is_extension_valid
 from app.models.datafile import DataFile
 from app.schemas.datafile_schema import DataFileOutputSchema, UpdateDataFileInputSchema
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, jsonify, make_response, request, send_file
 from flask_jwt_extended import get_jwt_identity
 from pydantic import ValidationError
 
@@ -96,3 +96,28 @@ def delete_datafile(id: int):
         return make_response(str(e)), 500
 
     return jsonify({"message": "File deleted successfully"}), 200
+
+
+@bp.route("/<int:id>/download", methods=["GET"])
+def download_datafile(id: int):
+    try:
+        if datafile := DataFile.find_by_id_and_owner(id, owner_id=get_jwt_identity()):
+            filepath = datafile.absolute_path()
+            file = open(filepath, "rb")
+            return (
+                send_file(
+                    file,
+                    as_attachment=True,
+                    download_name=datafile.name,
+                    conditional=True,
+                ),
+                200,
+                {"Connection": "close"},
+            )
+        else:
+            return make_response("File not found"), 404
+    except FileNotFoundError:
+        return make_response("File not found"), 404
+    except Exception as e:
+        print(str(e))
+        return make_response(str(e)), 500

@@ -17,18 +17,19 @@ from app.errors.errors import (
 from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
 from app.models.base import TimestampMixin, db
+from app.models.mixins.user_space_mixin import UserSpaceMixin
 from app.schemas import ExecutionResult, UpdateDatabaseInputSchema
 from app.settings import settings
 from duckdb import DuckDBPyConnection
 from flask import json
-from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint, and_
 from sqlalchemy.orm import relationship
 from sqlparse.sql import Statement as SqlParseStatement
 
 logger = logging.getLogger(__name__)
 
 
-class Database(TimestampMixin, db.Model):
+class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
     __tablename__ = "databases"
     __table_args__ = (UniqueConstraint("name", "owner_id", name="_name_owner_uc"),)
 
@@ -66,6 +67,12 @@ class Database(TimestampMixin, db.Model):
     @classmethod
     def find_by_owner(cls, id: int) -> list["Database"]:
         return cls.query.filter(cls.owner_id == id).all()
+
+    @classmethod
+    def find_by_id_and_owner(cls, id: int, owner_id: int) -> "Database":
+        return cls.query.filter(
+            and_(cls.id == id, cls.owner_id == owner_id)
+        ).one_or_none()
 
     @classmethod
     def delete_by_id(cls, id: int, owner_id: int = None) -> "Database":

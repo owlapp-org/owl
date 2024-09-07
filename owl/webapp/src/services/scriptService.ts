@@ -43,6 +43,23 @@ namespace ScriptService {
       .post("scripts", { name, content })
       .then((response) => response.data);
   };
+  export const download = async (id: number, name: string): Promise<void> => {
+    try {
+      const response = await request.get(`scripts/${id}/download`, {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${name}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Error downloading the file:", error);
+      throw error;
+    }
+  };
 }
 
 export default ScriptService;

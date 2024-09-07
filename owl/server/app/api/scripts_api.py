@@ -3,10 +3,12 @@ from logging import getLogger
 from app.constants import ALLOWED_SCRIPT_EXTENSIONS
 from app.lib.fs import is_extension_valid
 from app.models.script import Script
-from app.schemas.script_schema import (CreateScriptInputSchema,
-                                       ScriptOutputSchema,
-                                       UpdateScriptInputSchema)
-from flask import Blueprint, jsonify, make_response, request
+from app.schemas.script_schema import (
+    CreateScriptInputSchema,
+    ScriptOutputSchema,
+    UpdateScriptInputSchema,
+)
+from flask import Blueprint, jsonify, make_response, request, send_file
 from flask_jwt_extended import get_jwt_identity
 
 logger = getLogger(__name__)
@@ -110,3 +112,28 @@ def delete_script(id: int):
         return make_response(str(e)), 500
 
     return jsonify({"message": "Script deleted successfully"}), 200
+
+
+@bp.route("/<int:id>/download", methods=["GET"])
+def download_script(id: int):
+    try:
+        if script := Script.find_by_id_and_owner(id, owner_id=get_jwt_identity()):
+            filepath = script.absolute_path()
+            file = open(filepath, "rb")
+            return (
+                send_file(
+                    file,
+                    as_attachment=True,
+                    download_name=script.name,
+                    conditional=True,
+                ),
+                200,
+                {"Connection": "close"},
+            )
+        else:
+            return make_response("File not found"), 404
+    except FileNotFoundError:
+        return make_response("File not found"), 404
+    except Exception as e:
+        print(str(e))
+        return make_response(str(e)), 500

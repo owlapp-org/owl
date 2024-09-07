@@ -10,7 +10,7 @@ from app.schemas import (
     UpdateDatabaseInputSchema,
 )
 from app.settings import settings
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, jsonify, make_response, request, send_file
 from flask_jwt_extended import get_jwt_identity
 
 bp = Blueprint("databases", __name__)
@@ -106,4 +106,29 @@ def run(id: Optional[int] = None):
             403,
         )
     except Exception as e:
+        return make_response(str(e)), 500
+
+
+@bp.route("/<int:id>/download", methods=["GET"])
+def download_database(id: int):
+    try:
+        if database := Database.find_by_id_and_owner(id, owner_id=get_jwt_identity()):
+            filepath = database.absolute_path()
+            file = open(filepath, "rb")
+            return (
+                send_file(
+                    file,
+                    as_attachment=True,
+                    download_name=database.name + ".db",
+                    conditional=True,
+                ),
+                200,
+                {"Connection": "close"},
+            )
+        else:
+            return make_response("File not found"), 404
+    except FileNotFoundError:
+        return make_response("File not found"), 404
+    except Exception as e:
+        print(str(e))
         return make_response(str(e)), 500
