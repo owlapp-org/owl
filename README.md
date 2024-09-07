@@ -57,7 +57,7 @@ See `.env` file for configuration options.
 ### Databases
 
 You can create as many databases as you want. If you didn't create any database then
-an in memory database will be used for your queries. In memory database will only execute
+an `in memory database` will be used for your queries. In memory database will only execute
 `SELECT` queries. Other statement types are not supported.
 
 ### Querying uploaded files
