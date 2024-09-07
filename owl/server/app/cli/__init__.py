@@ -65,7 +65,9 @@ def run():
     """Run the Flask application using Gunicorn."""
     import os
 
-    os.system("gunicorn -b 127.0.0.1:8000 app.wsgi:app -w 1 --threads 12")
+    os.system(
+        "gunicorn -b 127.0.0.1:8000 app.wsgi:app -w 1 --threads 12"
+    )  # nosec B603, B607, B605
 
 
 cli.add_command(run_command, "runserver")

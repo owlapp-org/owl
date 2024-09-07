@@ -223,13 +223,11 @@ class Database(TimestampMixin, db.Model):
 
         offset = start_row
         limit = end_row - start_row
-        query_wrapper = (
-            f"select * from ({statement}) order by * LIMIT {limit} OFFSET {offset}"
-        )
+        query_wrapper = f"select * from ({statement}) order by * LIMIT {limit} OFFSET {offset}"  # nosec B608
         df = conn.execute(query_wrapper).pl()
 
         if with_total_count:
-            total_count_query = f"select count(*) from ({statement})"
+            total_count_query = f"select count(*) from ({statement})"  # nosec B608
             total_count = conn.execute(total_count_query).fetchone()[0]
         else:
             total_count = None

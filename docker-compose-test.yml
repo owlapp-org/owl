@@ -68,5 +68,15 @@ services:
       STORAGE_BASE_PATH: "/app/storage"
       FLASK_API_URL: "http://flask:5000" # Add this if your tests need to access the Flask service
 
+  bandit:
+    build:
+      context: . # Set build context to the root of the project
+      dockerfile: Dockerfile
+    command: ["sh", "-c", "bandit -r owl/server/app"]
+    volumes:
+      - .:/owl
+    environment:
+      OWL_ENV_FILE: ".env.test"
+
 volumes:
   flask_venv:

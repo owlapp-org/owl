@@ -25,7 +25,8 @@ class CreateScriptInputSchema(BaseModel, extra="ignore"):
     @field_validator("name")
     @classmethod
     def name_must_end_with_sql(cls, value: str, info: ValidationInfo):
-        assert value.endswith(".sql"), f"{info.field_name} must end with .sql"
+        if not value.endswith(".sql"):
+            raise Exception(f"{info.field_name} must end with .sql")
         return value
 
 
@@ -36,7 +37,8 @@ class UpdateScriptInputSchema(BaseModel, extra="ignore"):
     @field_validator("name")
     @classmethod
     def name_must_end_with_sql(cls, value: str, info: ValidationInfo):
-        assert value.endswith(".sql"), f"{info.field_name} must end with .sql"
+        if not value.endswith(".sql"):
+            raise Exception(f"{info.field_name} must end with .sql")
         return value
 
     @model_validator(mode="after")
