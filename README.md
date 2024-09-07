@@ -52,5 +52,17 @@ owl --help
 
 See `.env` file for configuration options.
 
+## Usage
+
+### Querying uploaded files
+
+You can query the files using the following pattern:
+```sql
+-- example
+-- if you have uploaded a file named `addresses.csv`
+-- you can query it using the following query;
+select * from '{{files}}/addresses.csv'
+```
+`{{files}}` are the base path of the uploaded files.
 
 
