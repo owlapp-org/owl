@@ -3,7 +3,7 @@ from typing import Optional
 
 from app.models.base import TimestampMixin, db
 from app.models.mixins.user_space_mixin import UserSpaceMixin
-from sqlalchemy import Column, ForeignKey, Integer, String, and_
+from sqlalchemy import Column, ForeignKey, Integer, String, and_, asc
 from sqlalchemy.orm import relationship
 from werkzeug.datastructures import FileStorage
 
@@ -26,7 +26,7 @@ class Script(TimestampMixin, UserSpaceMixin["Script"], db.Model):
 
     @classmethod
     def find_by_owner(cls, id: int) -> list["Script"]:
-        return cls.query.filter(cls.owner_id == id).all()
+        return cls.query.filter(cls.owner_id == id).order_by(cls.path).all()
 
     @classmethod
     def find_by_id_and_owner(cls, id: int, owner_id: int) -> Optional["Script"]:

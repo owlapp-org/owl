@@ -66,7 +66,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
 
     @classmethod
     def find_by_owner(cls, id: int) -> list["Database"]:
-        return cls.query.filter(cls.owner_id == id).all()
+        return cls.query.filter(cls.owner_id == id).order_by(cls.path).all()
 
     @classmethod
     def find_by_id_and_owner(cls, id: int, owner_id: int) -> "Database":

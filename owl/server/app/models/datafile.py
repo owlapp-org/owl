@@ -26,7 +26,7 @@ class DataFile(TimestampMixin, UserSpaceMixin["DataFile"], db.Model):
 
     @classmethod
     def find_by_owner(cls, id: int) -> list["DataFile"]:
-        return cls.query.filter(cls.owner_id == id).all()
+        return cls.query.filter(cls.owner_id == id).order_by(cls.path).all()
 
     @classmethod
     def find_by_id_and_owner(cls, id: int, owner_id: int) -> Optional["DataFile"]:
