@@ -1,16 +1,16 @@
 from typing import List, Optional
 
-from apiflask import APIBlueprint
+from apiflask import APIBlueprint, abort
+from apiflask.fields import Integer
 from app.errors.errors import ModelNotFoundException, NotAuthorizedError
 from app.models import db
 from app.models.database import Database
 from app.schemas import (
-    CreateDatabaseInputSchema,
     DatabaseSchema,
     QueryDatabaseInputSchema,
     UpdateDatabaseInputSchema,
 )
-from app.schemas.database_schema import CreateDatabaseIn, DatabaseOut
+from app.schemas.database_schema import CreateDatabaseIn, DatabaseOut, UpdateDatabaseIn
 from app.settings import settings
 from flask import jsonify, make_response, request, send_file
 from flask_jwt_extended import get_jwt_identity
@@ -19,23 +19,31 @@ bp = APIBlueprint("databases", __name__, tag="Databases")
 
 
 @bp.route("/")
-@bp.output(DatabaseOut(many=True), status_code=200, description="List of databases")
+@bp.output(
+    DatabaseOut.Schema(many=True), status_code=200, description="List of databases"
+)
 @bp.doc(security="TokenAuth")
+@bp.doc("Returns list of databases owned by the authenticated user.")
 def get_databases():
     return Database.find_by_owner(id=get_jwt_identity())
 
 
 @bp.route("/", methods=["POST"])
 @bp.input(
-    CreateDatabaseIn,
+    CreateDatabaseIn.Schema,
+    arg_name="payload",
     example={
         "name": "demo-database",
         "pool_size": 2,
         "description": "My demo database description.",
     },
 )
-@bp.output(DatabaseOut, status_code=200, description="created database")
-@bp.doc(security="TokenAuth")
+@bp.output(DatabaseOut.Schema, status_code=200, description="created database")
+@bp.doc(
+    security="TokenAuth",
+    summary="Create a new database",
+    description="Create a new database owned by the authenticated user",
+)
 def create_database(payload: CreateDatabaseIn):
     database = Database(
         name=payload.name,
@@ -46,10 +54,16 @@ def create_database(payload: CreateDatabaseIn):
     try:
         return database.create()
     except Exception as e:
-        return make_response(f"Error creating database {str(e)}"), 500
+        return abort(500, f"Error creating database {str(e)}")
 
 
 @bp.route("/<int:id>", methods=["DELETE"])
+@bp.output(dict, status_code=200)
+@bp.doc(
+    security="TokenAuth",
+    summary="Delete database",
+    description="Delete database by id which is owned by authenticated user",
+)
 def delete_database(id: int):
     try:
         Database.delete_by_id(id, owner_id=get_jwt_identity())
@@ -62,23 +76,49 @@ def delete_database(id: int):
 
 
 @bp.route("/<int:id>")
+@bp.output(
+    DatabaseOut.Schema,
+    status_code=200,
+    description="Database for the given id which belongs to the authenticated user",
+)
+@bp.doc(
+    security="TokenAuth",
+    summary="Get database",
+    description="Returns the database for the given id which belongs to the authenticated user",
+)
 def get_database(id: int):
     database = Database.find_by_id(id)
     if not database:
-        return make_response(f"Database with id {id} not found"), 403
+        return abort(403, f"Database with id {id} not found")
 
-    return DatabaseSchema.model_validate(database).model_dump_json()
+    return database
 
 
 @bp.route("/<int:id>", methods=["PUT"])
-def update_database(id: int):
+@bp.input(
+    UpdateDatabaseIn.Schema,
+    arg_name="payload",
+    example={
+        "pool_size": 2,
+    },
+)
+@bp.output(
+    DatabaseOut.Schema,
+    status_code=200,
+    description="Database for the given id which belongs to the authenticated user",
+)
+@bp.doc(
+    security="TokenAuth",
+    summary="Update database",
+    description="Update the and return the updated database",
+)
+def update_database(id: int, payload: UpdateDatabaseIn):
     if database := Database.find_by_id(id):
-        schema = UpdateDatabaseInputSchema.model_validate(request.json)
-        database.update(schema)
+        database.update(payload.name, payload.pool_size, payload.description)
         db.session.commit()
-        return DatabaseSchema.model_validate(database).model_dump_json()
-    else:
-        return make_response("Database not found"), 404
+        return database
+
+    return abort(404, "Database not found")
 
 
 @bp.route("/run", methods=["POST"])

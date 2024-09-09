@@ -1,7 +1,6 @@
 from dataclasses import field
 
 from apiflask.validators import Email, Length
-from marshmallow import EXCLUDE
 from marshmallow_dataclass import dataclass
 
 

@@ -1,25 +1,61 @@
+from dataclasses import field
 from typing import Any, Optional
 
 from apiflask import Schema, fields
+from apiflask.validators import Length
 from app.schemas.user_schema import UserOut, UserSchema
+from marshmallow import ValidationError, post_load
+from marshmallow_dataclass import dataclass
 from pydantic import BaseModel, ConfigDict
 
 
-class DatabaseOut(Schema):
-    id = fields.Integer()
-    name = fields.String()
-    pool_size = fields.Integer()
-    owner = fields.Nested(UserOut)
-    description = fields.String()
-
-    class Meta:
-        unknown = "exclude"
+@dataclass
+class DatabaseOut:
+    id: int = field()
+    name: str = field()
+    pool_size: int = field()
+    owner: UserOut = field()
+    description: Optional[str] = field(default=None)
 
 
-class CreateDatabaseIn(Schema):
-    name = fields.String()
-    pool_size = fields.Integer()
-    description = fields.String()
+@dataclass
+class CreateDatabaseIn:
+    name: str = field(metadata={"required": True, "validate": Length(min=1)})
+    pool_size: Optional[int] = field(
+        metadata={
+            "required": False,
+        },
+        default=1,
+    )
+    description: Optional[str] = field(
+        metadata={
+            "required": False,
+        },
+        default=None,
+    )
+
+
+@dataclass
+class UpdateDatabaseIn:
+    name: Optional[str] = field(metadata={"required": False})
+    pool_size: Optional[int] = field(
+        metadata={
+            "required": False,
+        },
+        default=1,
+    )
+    description: Optional[str] = field(
+        metadata={
+            "required": False,
+        },
+        default=None,
+    )
+
+    @post_load
+    def check_at_least_one_argument(self, data, **kwargs):
+        if not any([data.get("name"), data.get("pool_size"), data.get("description")]):
+            raise ValidationError("At least one argument must be provided.")
+        return data
 
 
 class DatabaseSchema(BaseModel, extra="ignore"):

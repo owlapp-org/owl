@@ -1,17 +1,21 @@
+from dataclasses import field
 from typing import Optional
 
-from apiflask import Schema, fields
+from apiflask.validators import Email
 from app.schemas.base import BaseSchema
+from marshmallow import EXCLUDE
+from marshmallow_dataclass import dataclass
 from pydantic import ConfigDict, model_validator
 
 
-class UserOut(Schema):
-    id = fields.Integer()
-    name = fields.String()
-    email = fields.Email()
+@dataclass
+class UserOut:
+    id: int = field(metadata={"required": True})
+    name: str = field(metadata={"required": True})
+    email: str = field(metadata={"required": True, "validate": Email()})
 
     class Meta:
-        unknown = "exclude"
+        unknown = EXCLUDE
 
 
 class UserSchema(BaseSchema):

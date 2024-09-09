@@ -1,6 +1,7 @@
 import logging
 import os
 import uuid
+from typing import Optional
 
 import duckdb
 import jinja2
@@ -103,16 +104,23 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         )
         return self
 
-    def update(self, database: UpdateDatabaseInputSchema) -> "Database":
-        if database.name:
-            self.name = database.name
-        if database.description:
-            self.description = database.description
-        if not database.pool_size or database.pool_size == self.pool_size:
+    def update(
+        self,
+        name: Optional[str] = None,
+        pool_size: Optional[int] = None,
+        description: Optional[str] = None,
+    ) -> "Database":
+        if name:
+            self.name = name
+        if description:
+            self.description = description
+
+        if not pool_size or pool_size == self.pool_size:
             return self
 
+        self.pool_size = pool_size
         if pool := registry.get(self.id):
-            pool.reset_pool_size(database.pool_size)
+            pool.reset_pool_size(pool_size)
 
         return self
 

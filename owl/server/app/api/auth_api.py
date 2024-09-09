@@ -1,7 +1,7 @@
 import os
 from logging import getLogger
 
-from apiflask import APIBlueprint, abort
+from apiflask import APIBlueprint, Schema, abort
 from app.auth.oauth import oauth
 from app.models import db
 from app.models.user import User
@@ -22,8 +22,6 @@ logger = getLogger(__name__)
     arg_name="payload",
 )
 @bp.output(LoginOut.Schema, status_code=200, description="login success")
-@bp.output(status_code=403, description="login failure")
-@bp.output(status_code=500, description="internal server error")
 def login(payload: LoginIn):
     try:
         user = User.find_by_email(payload.email)
