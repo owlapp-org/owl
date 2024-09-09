@@ -1,6 +1,13 @@
+from dataclasses import field
 from typing import Any
 
+from marshmallow_dataclass import dataclass
 from pydantic import BaseModel
+
+
+@dataclass
+class IdSchema:
+    id: int = field()
 
 
 class BaseSchema(BaseModel):

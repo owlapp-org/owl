@@ -20,6 +20,7 @@ from app.lib.database.validation import validate_query
 from app.models.base import TimestampMixin, db
 from app.models.mixins.user_space_mixin import UserSpaceMixin
 from app.schemas import ExecutionResult, UpdateDatabaseInputSchema
+from app.schemas.database_schema import RunOut
 from app.settings import settings
 from duckdb import DuckDBPyConnection
 from flask import json
@@ -153,9 +154,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         return query
 
     @classmethod
-    def run(
-        cls, id: int | None, query: str, owner_id: int, **kwargs
-    ) -> ExecutionResult:
+    def run(cls, id: int | None, query: str, owner_id: int, **kwargs) -> RunOut:
         logger.debug("Received query", extra=query)
 
         query = _.chain(query).trim().trim_end(";").value()
@@ -205,7 +204,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
 
     def run_execute(
         self, conn: DuckDBPyConnection, statement: SqlParseStatement
-    ) -> ExecutionResult:
+    ) -> RunOut:
         statement_type = statement.get_type()
         result = conn.execute(str(statement))
         conn.commit()
@@ -214,14 +213,14 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             StatementType.UPDATE,
             StatementType.DELETE,
         ]:
-            return ExecutionResult(
+            return RunOut(
                 database_id=self.id,
                 query=str(statement),
                 statement_type=statement_type,
                 affected_rows=result.fetchone()[0],
             )
         else:
-            return ExecutionResult(
+            return RunOut(
                 database_id=self.id,
                 query=str(statement),
                 statement_type=statement_type,

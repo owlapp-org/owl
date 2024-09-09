@@ -10,7 +10,14 @@ from app.schemas import (
     QueryDatabaseInputSchema,
     UpdateDatabaseInputSchema,
 )
-from app.schemas.database_schema import CreateDatabaseIn, DatabaseOut, UpdateDatabaseIn
+from app.schemas.database_schema import (
+    CreateDatabaseIn,
+    DatabaseOut,
+    RunIn,
+    RunOut,
+    RunQuery,
+    UpdateDatabaseIn,
+)
 from app.settings import settings
 from flask import jsonify, make_response, request, send_file
 from flask_jwt_extended import get_jwt_identity
@@ -122,42 +129,35 @@ def update_database(id: int, payload: UpdateDatabaseIn):
 
 
 @bp.route("/run", methods=["POST"])
-@bp.route("/<int:id>/run", methods=["POST"])
-def run(id: Optional[int] = None):
-    schema = QueryDatabaseInputSchema.model_validate(request.json)
-
-    start_row = request.args.get("start_row", default=0, type=int)
-    end_row = request.args.get(
-        "end_row",
-        default=settings.DEFAULT_SELECT_PAGE_SIZE or settings.result_set_hard_limit,
-        type=int,
-    )
-    with_total_count = request.args.get(
-        "with_total_count",
-        default=True,
-        type=bool,
-    )
-
-    owner_id = get_jwt_identity()
+@bp.input(RunIn.Schema, example={"query": "select * from my_table"}, arg_name="payload")
+@bp.input(RunQuery.Schema, location="query", example="database_id=1", arg_name="q")
+@bp.output(
+    RunOut.Schema,
+    status_code=200,
+    description="Execution result with possible metadata",
+)
+@bp.doc(
+    security="TokenAuth",
+    summary="Run query",
+    description="Runs a query and returns result",
+)
+def run(payload: RunIn, q: Optional[RunQuery] = None):
+    q = q or RunQuery()
     try:
-        result = Database.run(
+        return Database.run(
             id=id,
-            owner_id=owner_id,
-            query=schema.query,
-            start_row=start_row,
-            end_row=end_row,
-            with_total_count=with_total_count,
+            owner_id=get_jwt_identity(),
+            query=payload.query,
+            start_row=q.start_row,
+            end_row=q.end_row,
+            with_total_count=q.with_total_count,
         )
-        return result.model_dump(), 200
     except ModelNotFoundException:
-        make_response("Database not found"), 404
+        return abort(404, "Database not found")
     except NotAuthorizedError:
-        return (
-            make_response("Not authorized to execute the query on this database"),
-            403,
-        )
+        return abort(403, "Not authorized to execute the query on this database")
     except Exception as e:
-        return make_response(str(e)), 500
+        return abort(500, str(e))
 
 
 @bp.route("/<int:id>/download", methods=["GET"])
