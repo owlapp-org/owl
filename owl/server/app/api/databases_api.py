@@ -1,15 +1,9 @@
-from typing import List, Optional
+from typing import Optional
 
 from apiflask import APIBlueprint, abort
-from apiflask.fields import Integer
 from app.errors.errors import ModelNotFoundException, NotAuthorizedError
 from app.models import db
 from app.models.database import Database
-from app.schemas import (
-    DatabaseSchema,
-    QueryDatabaseInputSchema,
-    UpdateDatabaseInputSchema,
-)
 from app.schemas.database_schema import (
     CreateDatabaseIn,
     DatabaseOut,
@@ -18,8 +12,7 @@ from app.schemas.database_schema import (
     RunQuery,
     UpdateDatabaseIn,
 )
-from app.settings import settings
-from flask import jsonify, make_response, request, send_file
+from flask import jsonify, make_response, send_file
 from flask_jwt_extended import get_jwt_identity
 
 bp = APIBlueprint("databases", __name__, tag="Databases")
