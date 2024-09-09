@@ -1,5 +1,6 @@
 from logging import getLogger
 
+from apiflask import APIBlueprint
 from app.constants import ALLOWED_SCRIPT_EXTENSIONS
 from app.lib.fs import is_extension_valid
 from app.models.script import Script
@@ -8,12 +9,12 @@ from app.schemas.script_schema import (
     ScriptOutputSchema,
     UpdateScriptInputSchema,
 )
-from flask import Blueprint, jsonify, make_response, request, send_file
+from flask import jsonify, make_response, request, send_file
 from flask_jwt_extended import get_jwt_identity
 
 logger = getLogger(__name__)
 
-bp = Blueprint("scripts", __name__)
+bp = APIBlueprint("scripts", __name__)
 
 
 @bp.route("/")

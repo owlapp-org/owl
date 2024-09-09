@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import List, Optional
 
+from apiflask import APIBlueprint
 from app.errors.errors import ModelNotFoundException, NotAuthorizedError
 from app.models import db
 from app.models.database import Database
@@ -9,31 +10,41 @@ from app.schemas import (
     QueryDatabaseInputSchema,
     UpdateDatabaseInputSchema,
 )
+from app.schemas.database_schema import CreateDatabaseIn, DatabaseOut
 from app.settings import settings
-from flask import Blueprint, jsonify, make_response, request, send_file
+from flask import jsonify, make_response, request, send_file
 from flask_jwt_extended import get_jwt_identity
 
-bp = Blueprint("databases", __name__)
+bp = APIBlueprint("databases", __name__, tag="Databases")
 
 
 @bp.route("/")
+@bp.output(DatabaseOut(many=True), status_code=200, description="List of databases")
+@bp.doc(security="TokenAuth")
 def get_databases():
-    databases = Database.find_by_owner(id=get_jwt_identity())
-    return [
-        DatabaseSchema.model_validate(database).model_dump() for database in databases
-    ]
+    return Database.find_by_owner(id=get_jwt_identity())
 
 
 @bp.route("/", methods=["POST"])
-def create_database():
-    schema: CreateDatabaseInputSchema = CreateDatabaseInputSchema.model_validate(
-        request.json
-    )
+@bp.input(
+    CreateDatabaseIn,
+    example={
+        "name": "demo-database",
+        "pool_size": 2,
+        "description": "My demo database description.",
+    },
+)
+@bp.output(DatabaseOut, status_code=200, description="created database")
+@bp.doc(security="TokenAuth")
+def create_database(payload: CreateDatabaseIn):
     database = Database(
-        name=schema.name, description=schema.description, owner_id=get_jwt_identity()
+        name=payload.name,
+        pool_size=payload.pool_size,
+        description=payload.description,
+        owner_id=get_jwt_identity(),
     )
     try:
-        return DatabaseSchema.model_validate(database.create()).model_dump()
+        return database.create()
     except Exception as e:
         return make_response(f"Error creating database {str(e)}"), 500
 

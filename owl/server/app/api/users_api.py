@@ -1,10 +1,11 @@
+from apiflask import APIBlueprint
 from app.models import User, db
 from app.schemas.user_schema import UpdateUserInputSchema, UserSchema
-from flask import Blueprint, jsonify, make_response, request
+from flask import jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy.exc import NoResultFound
 
-bp = Blueprint("users", __name__)
+bp = APIBlueprint("users", __name__)
 
 
 @bp.route("/test-access-token")

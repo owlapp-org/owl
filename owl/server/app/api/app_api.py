@@ -1,7 +1,7 @@
+from apiflask import APIBlueprint
 from app.schemas import AppConfigSchema
-from flask import Blueprint
 
-bp = Blueprint("app", __name__)
+bp = APIBlueprint("app", __name__)
 
 
 @bp.route("/config")

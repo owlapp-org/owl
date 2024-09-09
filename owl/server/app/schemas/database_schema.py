@@ -1,7 +1,25 @@
 from typing import Any, Optional
 
-from app.schemas.user_schema import UserSchema
+from apiflask import Schema, fields
+from app.schemas.user_schema import UserOut, UserSchema
 from pydantic import BaseModel, ConfigDict
+
+
+class DatabaseOut(Schema):
+    id = fields.Integer()
+    name = fields.String()
+    pool_size = fields.Integer()
+    owner = fields.Nested(UserOut)
+    description = fields.String()
+
+    class Meta:
+        unknown = "exclude"
+
+
+class CreateDatabaseIn(Schema):
+    name = fields.String()
+    pool_size = fields.Integer()
+    description = fields.String()
 
 
 class DatabaseSchema(BaseModel, extra="ignore"):

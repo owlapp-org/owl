@@ -1,8 +1,9 @@
 import os
 
-from flask import Blueprint, send_from_directory
+from apiflask import APIBlueprint
+from flask import send_from_directory
 
-bp = Blueprint("ui", __name__, static_folder="../static")
+bp = APIBlueprint("ui", __name__, static_folder="../static")
 
 
 @bp.route("/", defaults={"path": ""})

@@ -1,7 +1,17 @@
 from typing import Optional
 
+from apiflask import Schema, fields
 from app.schemas.base import BaseSchema
 from pydantic import ConfigDict, model_validator
+
+
+class UserOut(Schema):
+    id = fields.Integer()
+    name = fields.String()
+    email = fields.Email()
+
+    class Meta:
+        unknown = "exclude"
 
 
 class UserSchema(BaseSchema):

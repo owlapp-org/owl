@@ -1,3 +1,4 @@
+from apiflask import APIBlueprint, APIFlask
 from app.api import (
     app_api,
     auth_api,
@@ -7,12 +8,12 @@ from app.api import (
     ui,
     users_api,
 )
-from flask import Blueprint, Flask, redirect, url_for
+from flask import redirect, url_for
 
-api = Blueprint("/", __name__)
+api = APIBlueprint("/", __name__)
 
 
-def init_app(app: Flask) -> None:
+def init_app(app: APIFlask) -> None:
     api.register_blueprint(auth_api.bp, url_prefix="/auth")
     api.register_blueprint(users_api.bp, url_prefix="/users")
     api.register_blueprint(databases_api.bp, url_prefix="/databases")

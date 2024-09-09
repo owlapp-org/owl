@@ -1,16 +1,17 @@
 from logging import getLogger
 
+from apiflask import APIBlueprint
 from app.constants import ALLOWED_DATAFILE_EXTENSIONS
 from app.lib.fs import is_extension_valid
 from app.models.datafile import DataFile
 from app.schemas.datafile_schema import DataFileOutputSchema, UpdateDataFileInputSchema
-from flask import Blueprint, jsonify, make_response, request, send_file
+from flask import jsonify, make_response, request, send_file
 from flask_jwt_extended import get_jwt_identity
 from pydantic import ValidationError
 
 logger = getLogger(__name__)
 
-bp = Blueprint("files", __name__)
+bp = APIBlueprint("files", __name__)
 
 
 @bp.route("/")
