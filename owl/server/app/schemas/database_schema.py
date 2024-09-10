@@ -116,15 +116,3 @@ class RunOut:
     total_count: Optional[int] = field(default=None)
     start_row: Optional[int] = field(default=None)
     end_row: Optional[int] = field(default=None)
-
-
-class ExecutionResult(BaseModel):
-    database_id: Optional[int] = None
-    query: str
-    statement_type: Optional[str] = "UNKNOWN"
-    data: Optional[list[dict[str, Any]]] = None
-    columns: Optional[list[str]] = None
-    affected_rows: Optional[int] = None
-    total_count: Optional[int] = None
-    start_row: Optional[int] = None
-    end_row: Optional[int] = None

@@ -19,7 +19,6 @@ from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
 from app.models.base import TimestampMixin, db
 from app.models.mixins.user_space_mixin import UserSpaceMixin
-from app.schemas import ExecutionResult
 from app.schemas.database_schema import RunOut
 from app.settings import settings
 from duckdb import DuckDBPyConnection
@@ -233,7 +232,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         start_row: int = 0,
         end_row: int = settings.result_set_hard_limit,
         with_total_count: bool = True,
-    ) -> ExecutionResult:
+    ) -> RunOut:
 
         offset = start_row
         limit = end_row - start_row
@@ -246,7 +245,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         else:
             total_count = None
 
-        return ExecutionResult(
+        return RunOut(
             database_id=self.id,
             query=str(statement),
             statement_type=StatementType.SELECT,
