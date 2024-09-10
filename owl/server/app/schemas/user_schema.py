@@ -3,7 +3,7 @@ from typing import Optional
 
 from apiflask.validators import Email
 from app.schemas.base import BaseSchema
-from marshmallow import EXCLUDE
+from marshmallow import EXCLUDE, ValidationError, post_load
 from marshmallow_dataclass import dataclass
 from pydantic import ConfigDict, model_validator
 
@@ -18,20 +18,12 @@ class UserOut:
         unknown = EXCLUDE
 
 
-class UserSchema(BaseSchema):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    name: str
-    email: str
+class UpdateUserIn:
+    name: Optional[str] = field()
+    password: Optional[str] = field()
 
-
-class UpdateUserInputSchema(BaseSchema, extra="ignore"):
-    model_config = ConfigDict(from_attributes=True)
-    name: Optional[str] = None
-    password: Optional[str] = None
-
-    @model_validator(mode="after")
-    def check_at_least_one_field(self):
-        if not self.name and self.password is None:
-            raise ValueError("No attributes specified to update")
-        return self
+    @post_load
+    def check_at_least_one_argument(self, data, **kwargs):
+        if not any([data.get("name"), data.get("password")]):
+            raise ValidationError("At least one argument must be provided.")
+        return data

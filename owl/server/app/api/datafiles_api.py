@@ -1,13 +1,13 @@
 from logging import getLogger
 
-from apiflask import APIBlueprint
+from apiflask import APIBlueprint, FileSchema, abort
 from app.constants import ALLOWED_DATAFILE_EXTENSIONS
 from app.lib.fs import is_extension_valid
 from app.models.datafile import DataFile
-from app.schemas.datafile_schema import DataFileOutputSchema, UpdateDataFileInputSchema
-from flask import jsonify, make_response, request, send_file
+from app.schemas.base import ExistsOut, MessageOut
+from app.schemas.datafile_schema import DataFileOut, UpdateDataFileIn
+from flask import request, send_file
 from flask_jwt_extended import get_jwt_identity
-from pydantic import ValidationError
 
 logger = getLogger(__name__)
 
@@ -15,91 +15,140 @@ bp = APIBlueprint("files", __name__)
 
 
 @bp.route("/")
+@bp.output(
+    DataFileOut.Schema(many=True),
+    status_code=200,
+    description="List of data files",
+)
+@bp.doc(
+    security="TokenAuth",
+    description="Returns list of data files owned by the authenticated user.",
+)
 def get_datafiles():
-    files = DataFile.find_by_owner(id=get_jwt_identity())
-    return [DataFileOutputSchema.validate_and_dump(file) for file in files]
+    return DataFile.find_by_owner(id=get_jwt_identity())
 
 
 @bp.route("/<int:id>")
+@bp.output(
+    DataFileOut.Schema,
+    status_code=200,
+    description="Data file with the given id",
+)
+@bp.doc(
+    security="TokenAuth",
+    description="Returns data file with the given id that is owned by the authenticated user",
+)
 def get_datafile(id: int):
     if file := DataFile.find_by_id_and_owner(id=id, owner_id=get_jwt_identity()):
-        return DataFileOutputSchema.validate_and_dump(file)
-    else:
-        return make_response("File not found"), 404
+        return file
+
+    return abort(404, "File not found")
 
 
 @bp.route("/<int:id>/exists", methods=["GET"])
+@bp.doc(
+    security="TokenAuth",
+    description="Returns if the file exists or not.",
+)
+@bp.output(
+    ExistsOut.Schema,
+    status_code=200,
+    description="Check if the file with given id exists or not.",
+)
 def check_exists(id: int):
     try:
-        if file := DataFile.find_by_id_and_owner(id=id, owner_id=get_jwt_identity()):
-            return jsonify({"exists": file.file_exists()}), 200
-        else:
-            return jsonify({"exists": False}), 200
+        file = DataFile.find_by_id_and_owner(id=id, owner_id=get_jwt_identity())
+        return ExistsOut(exists=file is not None)
     except Exception as e:
-        return make_response(f"Unable to check. {str(e)}"), 500
+        return abort(500, f"Unable to check. {str(e)}")
 
 
 @bp.route("/<int:id>", methods=["PUT"])
-@bp.route("/<int:id>/rename", methods=["PUT"])
-def update_datafile(id: int):
+@bp.input(
+    UpdateDataFileIn.Schema,
+    arg_name="payload",
+)
+@bp.output(
+    DataFileOut.Schema,
+    status_code=200,
+    description="Returns the updated datafile model",
+)
+@bp.doc(
+    security="TokenAuth",
+    description="Update the datafile and return the updated datafile model.",
+)
+def update_datafile(id: int, payload: UpdateDataFileIn):
     try:
-        input_schema = UpdateDataFileInputSchema.model_validate(request.json)
-    except ValidationError as e:
-        logger.exception(str(e))
-        return make_response("Validation failed %s" % str(e))
-
-    try:
-        print(id)
         datafile = DataFile.find_by_id_and_owner(id=id, owner_id=get_jwt_identity())
     except Exception as e:
-        logger.exception(str(e))
-        return make_response("File not found"), 404
+        logger.exception(e)
+        return abort(404, "File not found")
 
-    datafile.update_datafile(name=input_schema.name)
-
-    return DataFileOutputSchema.validate_and_dump(datafile), 200
+    return datafile.update_datafile(name=payload.name)
 
 
 @bp.route("/upload", methods=["POST"])
+@bp.input(FileSchema)
+@bp.output(
+    DataFileOut.Schema,
+    status_code=200,
+    description=f"""
+    Returns the updated datafile model.
+    Allowed file extensions are {ALLOWED_DATAFILE_EXTENSIONS}""",
+)
+@bp.doc(
+    security="TokenAuth",
+    description="Upload a data file.",
+)
 def upload_datafile():
     if "file" not in request.files:
         logger.error("No file to upload")
-        return make_response("No file to upload"), 404
+        return abort(404, "No file to upload")
 
     file = request.files["file"]
     if not file.filename:
         logger.error("No file to upload")
-        return make_response("No file to upload"), 404
+        return abort(404, "No file to upload")
 
     if not is_extension_valid(file.filename, ALLOWED_DATAFILE_EXTENSIONS):
         logger.error("File extension not allowed")
-        return (
-            make_response(
-                "File extension not allowed. Allowed extensions: %s"
-                % str(ALLOWED_DATAFILE_EXTENSIONS)
-            ),
+        return abort(
             500,
+            "File extension not allowed. Allowed extensions: %s"
+            % str(ALLOWED_DATAFILE_EXTENSIONS),
         )
-
     try:
-        datafile = DataFile.upload_datafile(get_jwt_identity(), file)
-        return DataFileOutputSchema.validate_and_dump(datafile), 200
+        return DataFile.upload_datafile(get_jwt_identity(), file)
     except Exception as e:
-        logger.exception(str(e))
-        return make_response(f"Failed to upload file. {str(e)}"), 500
+        logger.exception(e)
+        return abort(500, f"Failed to upload file. {str(e)}")
 
 
 @bp.route("/<int:id>", methods=["DELETE"])
+@bp.output(
+    MessageOut, status_code=200, description="Message to indicate successful deletion."
+)
+@bp.doc(
+    security="TokenAuth",
+    summary="Delete a datafile",
+    description="Delete a datafile owned by the authenticated user",
+)
 def delete_datafile(id: int):
     try:
         DataFile.delete_by_id(id, owner_id=get_jwt_identity())
     except Exception as e:
-        return make_response(str(e)), 500
+        return abort(500, str(e))
 
-    return jsonify({"message": "File deleted successfully"}), 200
+    return MessageOut(message="File deleted successfully")
 
 
 @bp.route("/<int:id>/download", methods=["GET"])
+@bp.doc(
+    security="TokenAuth",
+    summary="Download datafile",
+    description="Download a datafile owned by the authenticated user",
+)
+@bp.output(FileSchema)
 def download_datafile(id: int):
     try:
         if datafile := DataFile.find_by_id_and_owner(id, owner_id=get_jwt_identity()):
@@ -116,9 +165,9 @@ def download_datafile(id: int):
                 {"Connection": "close"},
             )
         else:
-            return make_response("File not found"), 404
+            return abort(404, "File not found")
     except FileNotFoundError:
-        return make_response("File not found"), 404
+        return abort(404, "File not found")
     except Exception as e:
-        print(str(e))
-        return make_response(str(e)), 500
+        logger.exception(e)
+        return abort(500, str(e))

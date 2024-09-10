@@ -1,48 +1,46 @@
+from dataclasses import field
 from typing import Optional
 
-from app.schemas.base import BaseSchema
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    ValidationInfo,
-    field_validator,
-    model_validator,
-)
+from apiflask.validators import Length
+from marshmallow import ValidationError, post_load
+from marshmallow_dataclass import dataclass
 
 
-class ScriptOutputSchema(BaseSchema, extra="ignore"):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    path: str
-    name: str
-    extension: str
+@dataclass
+class ScriptOut:
+    id: int = field()
+    path: str = field()
+    name: str = field()
+    extension: str = field()
+
+@dataclass
+class ScriptContentOut:
+    content: str = field()
+
+@dataclass
+class CreateScriptIn:
+    name: str = field(metadata={"validate": Length(min=5)})
+    content: Optional[str] = field(default=None)
+
+    @post_load
+    def name_must_end_with_sql(self, data, **kwargs):
+        if self.name.endswith(".sql"):
+            raise ValidationError("File name must end with .sql")
+        return data
 
 
-class CreateScriptInputSchema(BaseModel, extra="ignore"):
-    name: str
-    content: Optional[str] = None
+class UpdateScriptIn:
+    name: str = field(metadata={"validate": Length(min=5)})
+    content: Optional[str] = field(default=None)
 
-    @field_validator("name")
-    @classmethod
-    def name_must_end_with_sql(cls, value: str, info: ValidationInfo):
-        if not value.endswith(".sql"):
-            raise Exception(f"{info.field_name} must end with .sql")
-        return value
+    @post_load
+    def name_must_end_with_sql(self, data, **kwargs):
+        if self.name.endswith(".sql"):
+            raise ValidationError("File name must end with .sql")
+        return data
 
-
-class UpdateScriptInputSchema(BaseModel, extra="ignore"):
-    name: Optional[str] = None
-    content: Optional[str] = None
-
-    @field_validator("name")
-    @classmethod
-    def name_must_end_with_sql(cls, value: str, info: ValidationInfo):
-        if not value.endswith(".sql"):
-            raise Exception(f"{info.field_name} must end with .sql")
-        return value
-
-    @model_validator(mode="after")
-    def check_at_least_one_field(self):
-        if not self.name and self.content is None:
-            raise ValueError("No attributes specified to update")
-        return self
+    @post_load
+    def check_at_least_one_argument(self, data, **kwargs):
+        if not any([data.get("name"), data.get("content")]):
+            raise ValidationError("At least one argument must be provided.")
+        return data

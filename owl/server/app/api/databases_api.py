@@ -25,8 +25,10 @@ logger = getLogger(__name__)
 @bp.output(
     DatabaseOut.Schema(many=True), status_code=200, description="List of databases"
 )
-@bp.doc(security="TokenAuth")
-@bp.doc("Returns list of databases owned by the authenticated user.")
+@bp.doc(
+    security="TokenAuth",
+    description="Returns list of databases owned by the authenticated user.",
+)
 def get_databases():
     return Database.find_by_owner(id=get_jwt_identity())
 

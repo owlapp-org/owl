@@ -18,11 +18,6 @@ namespace UserService {
       return request.get<IUser>("users/me").then((response) => response.data);
     }
   };
-  export const testAccessToken = async () => {
-    return request
-      .get("users/test-access-token")
-      .then((response) => response.data);
-  };
   export const updatePassword = async (password: string): Promise<IUser> => {
     return request
       .put("users/password", {

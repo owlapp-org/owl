@@ -1,13 +1,12 @@
 from dataclasses import field
 from typing import Any, Optional
 
-from apiflask.validators import Length, OneOf, Range
+from apiflask.validators import Length, Range
 from app.constants import StatementType
-from app.schemas.user_schema import UserOut, UserSchema
+from app.schemas.user_schema import UserOut
 from app.settings import settings
 from marshmallow import ValidationError, post_load
 from marshmallow_dataclass import dataclass
-from pydantic import BaseModel, ConfigDict
 
 
 @dataclass

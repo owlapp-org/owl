@@ -1,14 +1,16 @@
-from app.schemas.base import BaseSchema
-from pydantic import BaseModel, ConfigDict
+from dataclasses import field
+
+from marshmallow_dataclass import dataclass
 
 
-class DataFileOutputSchema(BaseSchema, extra="ignore"):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    path: str
-    name: str
-    extension: str
+@dataclass
+class DataFileOut:
+    id: int = field()
+    path: str = field()
+    name: str = field()
+    extension: str = field()
 
 
-class UpdateDataFileInputSchema(BaseModel, extra="ignore"):
-    name: str
+@dataclass
+class UpdateDataFileIn:
+    name: str = field()
