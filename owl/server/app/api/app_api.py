@@ -1,10 +1,14 @@
 from apiflask import APIBlueprint
-from app.schemas import AppConfigSchema
+from app.schemas.app_schema import AppConfigOut
 
 bp = APIBlueprint("app", __name__)
 
 
 @bp.route("/config")
+@bp.output(
+    AppConfigOut.Schema,
+    status_code=200,
+    description="Application configuration params",
+)
 def get_config():
-    config = AppConfigSchema.from_settings()
-    return config.model_dump()
+    return AppConfigOut.from_settings()

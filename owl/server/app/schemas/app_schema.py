@@ -1,15 +1,17 @@
+from dataclasses import field
 from typing import Optional
 
 from app.settings import settings
-from pydantic import BaseModel
+from marshmallow_dataclass import dataclass
 
 
-class AppConfigSchema(BaseModel):
-    google_login: Optional[bool] = False
-    production: Optional[bool] = False
+@dataclass
+class AppConfigOut:
+    google_login: Optional[bool] = field(default=False)
+    production: Optional[bool] = field(default=False)
 
     @classmethod
-    def from_settings(cls) -> "AppConfigSchema":
+    def from_settings(cls) -> "AppConfigOut":
         return cls(
             production=settings.PRODUCTION,
             google_login=settings.GOOGLE_OAUTH_ENABLED,
