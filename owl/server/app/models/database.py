@@ -19,7 +19,7 @@ from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
 from app.models.base import TimestampMixin, db
 from app.models.mixins.user_space_mixin import UserSpaceMixin
-from app.schemas import ExecutionResult, UpdateDatabaseInputSchema
+from app.schemas import ExecutionResult
 from app.schemas.database_schema import RunOut
 from app.settings import settings
 from duckdb import DuckDBPyConnection

@@ -118,31 +118,6 @@ class RunOut:
     end_row: Optional[int] = field(default=None)
 
 
-class DatabaseSchema(BaseModel, extra="ignore"):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    name: str
-    pool_size: int
-    owner: UserSchema
-    description: str
-
-
-class CreateDatabaseInputSchema(BaseModel):
-    name: str
-    pool_size: int
-    description: str
-
-
-class UpdateDatabaseInputSchema(BaseModel, extra="ignore"):
-    name: Optional[str] = None
-    pool_size: Optional[int] = None
-    description: Optional[str] = None
-
-
-class QueryDatabaseInputSchema(BaseModel):
-    query: str
-
-
 class ExecutionResult(BaseModel):
     database_id: Optional[int] = None
     query: str

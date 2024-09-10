@@ -1,7 +1,7 @@
 from logging import getLogger
 from typing import Optional
 
-from apiflask import APIBlueprint, abort
+from apiflask import APIBlueprint, FileSchema, abort
 from app.errors.errors import ModelNotFoundException, NotAuthorizedError
 from app.models import db
 from app.models.database import Database
@@ -160,6 +160,12 @@ def run(payload: RunIn, q: Optional[RunQuery] = None):
 
 
 @bp.route("/<int:id>/download", methods=["GET"])
+@bp.output(FileSchema, content_type="application/octet-stream")
+@bp.doc(
+    security="TokenAuth",
+    summary="Download database file",
+    description="Download binary database file",
+)
 def download_database(id: int):
     try:
         if database := Database.find_by_id_and_owner(id, owner_id=get_jwt_identity()):
@@ -176,9 +182,8 @@ def download_database(id: int):
                 {"Connection": "close"},
             )
         else:
-            return make_response("File not found"), 404
+            return abort(404, "File not found")
     except FileNotFoundError:
-        return make_response("File not found"), 404
+        return abort(404, "File not found")
     except Exception as e:
-        print(str(e))
-        return make_response(str(e)), 500
+        return abort(500, str(e))
