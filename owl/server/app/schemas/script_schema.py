@@ -13,9 +13,11 @@ class ScriptOut:
     name: str = field()
     extension: str = field()
 
+
 @dataclass
 class ScriptContentOut:
     content: str = field()
+
 
 @dataclass
 class CreateScriptIn:
@@ -29,13 +31,14 @@ class CreateScriptIn:
         return data
 
 
+@dataclass
 class UpdateScriptIn:
-    name: str = field(metadata={"validate": Length(min=5)})
-    content: Optional[str] = field(default=None)
+    name: Optional[str] = field(metadata={"required": False})
+    content: Optional[str] = field(metadata={"required": False})
 
     @post_load
     def name_must_end_with_sql(self, data, **kwargs):
-        if self.name.endswith(".sql"):
+        if data.get("name") and not data.get("name").endswith(".sql"):
             raise ValidationError("File name must end with .sql")
         return data
 

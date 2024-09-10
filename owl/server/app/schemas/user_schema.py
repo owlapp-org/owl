@@ -18,6 +18,7 @@ class UserOut:
         unknown = EXCLUDE
 
 
+@dataclass
 class UpdateUserIn:
     name: Optional[str] = field()
     password: Optional[str] = field()

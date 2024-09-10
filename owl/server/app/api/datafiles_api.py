@@ -126,7 +126,9 @@ def upload_datafile():
 
 @bp.route("/<int:id>", methods=["DELETE"])
 @bp.output(
-    MessageOut, status_code=200, description="Message to indicate successful deletion."
+    MessageOut.Schema,
+    status_code=200,
+    description="Message to indicate successful deletion.",
 )
 @bp.doc(
     security="TokenAuth",

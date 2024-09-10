@@ -6,7 +6,7 @@ namespace ScriptService {
     id: number,
     content: string
   ): Promise<IScript> => {
-    return request.put(`scripts/${id}/content`, {
+    return request.put(`scripts/${id}`, {
       content,
     });
   };

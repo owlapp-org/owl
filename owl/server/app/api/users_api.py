@@ -1,13 +1,7 @@
 from apiflask import APIBlueprint, abort
 from app.models import User
 from app.schemas.base import EmailIn
-from app.schemas.user_schema import (
-    UpdateUserIn,
-    UpdateUserInputSchema,
-    UserOut,
-    UserSchema,
-)
-from flask import jsonify, make_response, request
+from app.schemas.user_schema import UpdateUserIn, UserOut
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy.exc import NoResultFound
 

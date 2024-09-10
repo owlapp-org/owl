@@ -83,7 +83,7 @@ def check_exists(id: int):
 )
 def get_script_content(id: int):
     if script := Script.find_by_id_and_owner(id=id, owner_id=get_jwt_identity()):
-        return ScriptOut(content=script.read_file())
+        return ScriptContentOut(content=script.read_file())
     return abort(404, "Script not found")
 
 
