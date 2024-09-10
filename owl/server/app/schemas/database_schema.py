@@ -84,7 +84,7 @@ class RunQuery:
     )
     with_total_count: Optional[bool] = field(
         default=True,
-        metadata={"required": False, "validate": OneOf(["true", "false"])},
+        metadata={"required": False},
     )
 
 

@@ -1,3 +1,4 @@
+from logging import getLogger
 from typing import Optional
 
 from apiflask import APIBlueprint, abort
@@ -16,6 +17,8 @@ from flask import jsonify, make_response, send_file
 from flask_jwt_extended import get_jwt_identity
 
 bp = APIBlueprint("databases", __name__, tag="Databases")
+
+logger = getLogger(__name__)
 
 
 @bp.route("/")
@@ -138,18 +141,21 @@ def run(payload: RunIn, q: Optional[RunQuery] = None):
     q = q or RunQuery()
     try:
         return Database.run(
-            id=id,
+            id=q.database_id,
             owner_id=get_jwt_identity(),
             query=payload.query,
             start_row=q.start_row,
             end_row=q.end_row,
             with_total_count=q.with_total_count,
         )
-    except ModelNotFoundException:
+    except ModelNotFoundException as e:
+        logger.exception(e)
         return abort(404, "Database not found")
     except NotAuthorizedError:
+        logger.exception(e)
         return abort(403, "Not authorized to execute the query on this database")
     except Exception as e:
+        logger.exception(e)
         return abort(500, str(e))
 
 
