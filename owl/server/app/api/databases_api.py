@@ -153,7 +153,7 @@ def run(payload: RunIn, q: Optional[RunQuery] = None):
     except ModelNotFoundException as e:
         logger.exception(e)
         return abort(404, "Database not found")
-    except NotAuthorizedError:
+    except NotAuthorizedError as e:
         logger.exception(e)
         return abort(403, "Not authorized to execute the query on this database")
     except Exception as e:

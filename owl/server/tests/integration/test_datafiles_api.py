@@ -111,7 +111,7 @@ def test_rename_datafile(use_access_token: str, db: Session) -> None:
             assert uploaded_file is not None, "File not found in database"
 
         response = requests.put(
-            api_url(f"files/{id}/rename"),
+            api_url(f"files/{id}"),
             json={
                 "name": "test.csv",
             },

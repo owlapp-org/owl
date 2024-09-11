@@ -5,7 +5,7 @@ from app.schemas.user_schema import UpdateUserIn, UserOut
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy.exc import NoResultFound
 
-bp = APIBlueprint("users", __name__)
+bp = APIBlueprint("users", __name__, tag="Users")
 
 
 @bp.route("/")

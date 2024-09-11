@@ -16,7 +16,7 @@ from flask_jwt_extended import get_jwt_identity
 
 logger = getLogger(__name__)
 
-bp = APIBlueprint("scripts", __name__)
+bp = APIBlueprint("scripts", __name__, tag="Scripts")
 
 
 @bp.route("/")

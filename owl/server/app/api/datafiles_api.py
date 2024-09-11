@@ -11,7 +11,7 @@ from flask_jwt_extended import get_jwt_identity
 
 logger = getLogger(__name__)
 
-bp = APIBlueprint("files", __name__)
+bp = APIBlueprint("files", __name__, tag="Data Files")
 
 
 @bp.route("/")
@@ -88,7 +88,6 @@ def update_datafile(id: int, payload: UpdateDataFileIn):
 
 
 @bp.route("/upload", methods=["POST"])
-@bp.input(FileSchema)
 @bp.output(
     DataFileOut.Schema,
     status_code=200,

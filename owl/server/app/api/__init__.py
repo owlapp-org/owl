@@ -10,7 +10,7 @@ from app.api import (
 )
 from flask import redirect, url_for
 
-api = APIBlueprint("/", __name__)
+api = APIBlueprint("/", __name__, tag="Owl API")
 
 
 def init_app(app: APIFlask) -> None:

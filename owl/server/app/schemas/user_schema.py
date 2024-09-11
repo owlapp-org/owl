@@ -2,10 +2,8 @@ from dataclasses import field
 from typing import Optional
 
 from apiflask.validators import Email
-from app.schemas.base import BaseSchema
 from marshmallow import EXCLUDE, ValidationError, post_load
 from marshmallow_dataclass import dataclass
-from pydantic import ConfigDict, model_validator
 
 
 @dataclass

@@ -125,10 +125,11 @@ def test_execute(use_access_token):
     id = response.json()["id"]
     query = "select 1 as a"
     response = requests.post(
-        api_url(f"databases/{id}/run"),
+        api_url("databases/run"),
         json={
             "query": query,
         },
+        params={"database_id": id},
         headers={"Authorization": f"Bearer {use_access_token}"},
     )
 
@@ -139,10 +140,11 @@ def test_execute(use_access_token):
 
     query = "create table test_table(a int, b string)"
     response = requests.post(
-        api_url(f"databases/{id}/run"),
+        api_url("databases/run"),
         json={
             "query": query,
         },
+        params={"database_id": id},
         headers={"Authorization": f"Bearer {use_access_token}"},
     )
     assert response.status_code == 200, response.text
@@ -150,10 +152,11 @@ def test_execute(use_access_token):
 
     query = "insert into test_table (a, b) values (1, 'a')"
     response = requests.post(
-        api_url(f"databases/{id}/run"),
+        api_url("databases/run"),
         json={
             "query": query,
         },
+        params={"database_id": id},
         headers={"Authorization": f"Bearer {use_access_token}"},
     )
     assert response.status_code == 200, response.text
@@ -162,10 +165,11 @@ def test_execute(use_access_token):
 
     query = "select * from test_table"
     response = requests.post(
-        api_url(f"databases/{id}/run"),
+        api_url("databases/run"),
         json={
             "query": query,
         },
+        params={"database_id": id},
         headers={"Authorization": f"Bearer {use_access_token}"},
     )
     assert response.status_code == 200, response.text

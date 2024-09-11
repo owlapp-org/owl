@@ -1,7 +1,7 @@
 import os
 from logging import getLogger
 
-from apiflask import APIBlueprint, Schema, abort
+from apiflask import APIBlueprint, abort
 from app.auth.oauth import oauth
 from app.models import db
 from app.models.user import User
@@ -9,7 +9,7 @@ from app.schemas.auth_schema import LoginIn, LoginOut
 from flask import make_response, redirect, request, url_for
 from flask_jwt_extended import create_access_token
 
-bp = APIBlueprint("auth", __name__)
+bp = APIBlueprint("auth", __name__, tag="Authentication")
 
 logger = getLogger(__name__)
 

@@ -53,7 +53,7 @@ def test_update_script_content(use_access_token: str, db: Session):
 
         new_content = "select * from new_test"
         response = requests.put(
-            api_url(f"scripts/{id}/content"),
+            api_url(f"scripts/{id}"),
             json={"content": new_content},
             headers={"Authorization": f"Bearer {use_access_token}"},
         )
@@ -156,7 +156,7 @@ def test_rename_script(use_access_token: str, db: Session) -> None:
             assert uploaded_script is not None, "Script not found in database"
 
         response = requests.put(
-            api_url(f"scripts/{id}/rename"),
+            api_url(f"scripts/{id}"),
             json={
                 "name": "test.sql",
             },

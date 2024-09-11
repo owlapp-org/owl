@@ -6,7 +6,9 @@ import LoginForm from "./LoginForm";
 afterEach(cleanup);
 
 vi.mock("@services/authService", () => ({
-  login: vi.fn().mockResolvedValue({ token: "fake-token" }),
+  AuthService: {
+    login: vi.fn().mockResolvedValue({ token: "fake-token" }),
+  },
 }));
 
 describe("LoginForm", () => {

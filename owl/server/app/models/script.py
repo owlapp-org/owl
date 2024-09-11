@@ -3,7 +3,7 @@ from typing import Optional
 
 from app.models.base import TimestampMixin, db
 from app.models.mixins.user_space_mixin import UserSpaceMixin
-from sqlalchemy import Column, ForeignKey, Integer, String, and_, asc
+from sqlalchemy import Column, ForeignKey, Integer, String, and_
 from sqlalchemy.orm import relationship
 from werkzeug.datastructures import FileStorage
 
