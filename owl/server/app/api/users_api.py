@@ -1,59 +1,80 @@
-from app.models import User, db
-from app.schemas.user_schema import UpdateUserInputSchema, UserSchema
-from flask import Blueprint, jsonify, make_response, request
+from apiflask import APIBlueprint, abort
+from app.models import User
+from app.schemas.base import EmailIn
+from app.schemas.user_schema import UpdateUserIn, UserOut
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy.exc import NoResultFound
 
-bp = Blueprint("users", __name__)
-
-
-@bp.route("/test-access-token")
-def test_access_token():
-    return jsonify({}), 200
+bp = APIBlueprint("users", __name__)
 
 
 @bp.route("/")
+@bp.output(UserOut.Schema(many=True), status_code=200, description="List of users")
+@bp.doc(
+    security="TokenAuth",
+    description="Returns the users in the system",
+)
 def get_users():
-    users = User.find_all()
-    return [UserSchema.model_validate(u).model_dump() for u in users]
+    return User.find_all()
 
 
 @bp.route("/me")
+@bp.output(UserOut.Schema, status_code=200, description="Authenticated user")
+@bp.doc(
+    security="TokenAuth",
+    description="Returns the authenticated user",
+)
 def get_me():
     if user := User.find_by_id(id=get_jwt_identity()):
-        return UserSchema.validate_and_dump(user), 200
+        return user
     else:
-        return make_response("Not Found"), 404
+        return abort(404, "Not Found")
 
 
 @bp.route("/<int:id>")
+@bp.output(UserOut.Schema, status_code=200, description="User with given id")
+@bp.doc(
+    security="TokenAuth",
+    description="Returns the user with given id",
+)
 def get_user(id: int):
     try:
-        user = User.find_by_id(id)
+        return User.find_by_id(id)
     except NoResultFound:
-        return jsonify({"error": "User not found."}), 404
+        return abort(404, "User not found.")
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    return UserSchema.model_validate(user).model_dump()
+        return abort(500, str(e))
 
 
 @bp.route("/email/<string:email>")
+@bp.input(EmailIn.Schema, arg_name="email", location="path")
+@bp.output(
+    UserOut.Schema,
+    status_code=200,
+    description="User with given email address",
+)
+@bp.doc(
+    security="TokenAuth",
+    description="Returns the user with given email",
+)
 def get_user_by_email(email: str):
-    if not email:
-        return jsonify({"error": "Email is required."}), 400
-    user = User.find_by_email(email)
-    if not user:
-        return jsonify({"error": "User not found."}), 404
-    return UserSchema.model_validate(user).model_dump()
+    if user := User.find_by_email(email):
+        return user
+    return abort(404, "User not found.")
 
 
-@bp.route("/password", methods=["PUT"])
 @bp.route("/", methods=["PUT"])
-def update_user():
-    input_schema = UpdateUserInputSchema.model_validate(request.json)
+@bp.input(UpdateUserIn.Schema, arg_name="payload")
+@bp.output(
+    UserOut.Schema,
+    status_code=200,
+    description="User model",
+)
+@bp.doc(
+    security="TokenAuth",
+    description="Returns the updated user",
+)
+def update_user(payload: UpdateUserIn):
     if user := User.find_by_id(id=get_jwt_identity()):
-        user.update_user(input_schema.name, input_schema.password)
-    else:
-        return make_response("User not found"), 404
-
-    return UserSchema.validate_and_dump(user), 200
+        user.update_user(payload.name, payload.password)
+    return abort(404, "User not found")

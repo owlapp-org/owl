@@ -1,44 +1,74 @@
+from logging import getLogger
 from typing import Optional
 
+from apiflask import APIBlueprint, FileSchema, abort
 from app.errors.errors import ModelNotFoundException, NotAuthorizedError
 from app.models import db
 from app.models.database import Database
-from app.schemas import (
-    CreateDatabaseInputSchema,
-    DatabaseSchema,
-    QueryDatabaseInputSchema,
-    UpdateDatabaseInputSchema,
+from app.schemas.database_schema import (
+    CreateDatabaseIn,
+    DatabaseOut,
+    RunIn,
+    RunOut,
+    RunQuery,
+    UpdateDatabaseIn,
 )
-from app.settings import settings
-from flask import Blueprint, jsonify, make_response, request, send_file
+from flask import jsonify, make_response, send_file
 from flask_jwt_extended import get_jwt_identity
 
-bp = Blueprint("databases", __name__)
+bp = APIBlueprint("databases", __name__, tag="Databases")
+
+logger = getLogger(__name__)
 
 
 @bp.route("/")
+@bp.output(
+    DatabaseOut.Schema(many=True), status_code=200, description="List of databases"
+)
+@bp.doc(
+    security="TokenAuth",
+    description="Returns list of databases owned by the authenticated user.",
+)
 def get_databases():
-    databases = Database.find_by_owner(id=get_jwt_identity())
-    return [
-        DatabaseSchema.model_validate(database).model_dump() for database in databases
-    ]
+    return Database.find_by_owner(id=get_jwt_identity())
 
 
 @bp.route("/", methods=["POST"])
-def create_database():
-    schema: CreateDatabaseInputSchema = CreateDatabaseInputSchema.model_validate(
-        request.json
-    )
+@bp.input(
+    CreateDatabaseIn.Schema,
+    arg_name="payload",
+    example={
+        "name": "demo-database",
+        "pool_size": 2,
+        "description": "My demo database description.",
+    },
+)
+@bp.output(DatabaseOut.Schema, status_code=200, description="created database")
+@bp.doc(
+    security="TokenAuth",
+    summary="Create a new database",
+    description="Create a new database owned by the authenticated user",
+)
+def create_database(payload: CreateDatabaseIn):
     database = Database(
-        name=schema.name, description=schema.description, owner_id=get_jwt_identity()
+        name=payload.name,
+        pool_size=payload.pool_size,
+        description=payload.description,
+        owner_id=get_jwt_identity(),
     )
     try:
-        return DatabaseSchema.model_validate(database.create()).model_dump()
+        return database.create()
     except Exception as e:
-        return make_response(f"Error creating database {str(e)}"), 500
+        return abort(500, f"Error creating database {str(e)}")
 
 
 @bp.route("/<int:id>", methods=["DELETE"])
+@bp.output(dict, status_code=200)
+@bp.doc(
+    security="TokenAuth",
+    summary="Delete database",
+    description="Delete database by id which is owned by authenticated user",
+)
 def delete_database(id: int):
     try:
         Database.delete_by_id(id, owner_id=get_jwt_identity())
@@ -51,65 +81,93 @@ def delete_database(id: int):
 
 
 @bp.route("/<int:id>")
+@bp.output(
+    DatabaseOut.Schema,
+    status_code=200,
+    description="Database for the given id which belongs to the authenticated user",
+)
+@bp.doc(
+    security="TokenAuth",
+    summary="Get database",
+    description="Returns the database for the given id which belongs to the authenticated user",
+)
 def get_database(id: int):
     database = Database.find_by_id(id)
     if not database:
-        return make_response(f"Database with id {id} not found"), 403
+        return abort(403, f"Database with id {id} not found")
 
-    return DatabaseSchema.model_validate(database).model_dump_json()
+    return database
 
 
 @bp.route("/<int:id>", methods=["PUT"])
-def update_database(id: int):
+@bp.input(
+    UpdateDatabaseIn.Schema,
+    arg_name="payload",
+    example={
+        "pool_size": 2,
+    },
+)
+@bp.output(
+    DatabaseOut.Schema,
+    status_code=200,
+    description="Database for the given id which belongs to the authenticated user",
+)
+@bp.doc(
+    security="TokenAuth",
+    summary="Update database",
+    description="Update the and return the updated database",
+)
+def update_database(id: int, payload: UpdateDatabaseIn):
     if database := Database.find_by_id(id):
-        schema = UpdateDatabaseInputSchema.model_validate(request.json)
-        database.update(schema)
+        database.update(payload.name, payload.pool_size, payload.description)
         db.session.commit()
-        return DatabaseSchema.model_validate(database).model_dump_json()
-    else:
-        return make_response("Database not found"), 404
+        return database
+
+    return abort(404, "Database not found")
 
 
 @bp.route("/run", methods=["POST"])
-@bp.route("/<int:id>/run", methods=["POST"])
-def run(id: Optional[int] = None):
-    schema = QueryDatabaseInputSchema.model_validate(request.json)
-
-    start_row = request.args.get("start_row", default=0, type=int)
-    end_row = request.args.get(
-        "end_row",
-        default=settings.DEFAULT_SELECT_PAGE_SIZE or settings.result_set_hard_limit,
-        type=int,
-    )
-    with_total_count = request.args.get(
-        "with_total_count",
-        default=True,
-        type=bool,
-    )
-
-    owner_id = get_jwt_identity()
+@bp.input(RunIn.Schema, example={"query": "select * from my_table"}, arg_name="payload")
+@bp.input(RunQuery.Schema, location="query", example="database_id=1", arg_name="q")
+@bp.output(
+    RunOut.Schema,
+    status_code=200,
+    description="Execution result with possible metadata",
+)
+@bp.doc(
+    security="TokenAuth",
+    summary="Run query",
+    description="Runs a query and returns result",
+)
+def run(payload: RunIn, q: Optional[RunQuery] = None):
+    q = q or RunQuery()
     try:
-        result = Database.run(
-            id=id,
-            owner_id=owner_id,
-            query=schema.query,
-            start_row=start_row,
-            end_row=end_row,
-            with_total_count=with_total_count,
+        return Database.run(
+            id=q.database_id,
+            owner_id=get_jwt_identity(),
+            query=payload.query,
+            start_row=q.start_row,
+            end_row=q.end_row,
+            with_total_count=q.with_total_count,
         )
-        return result.model_dump(), 200
-    except ModelNotFoundException:
-        make_response("Database not found"), 404
+    except ModelNotFoundException as e:
+        logger.exception(e)
+        return abort(404, "Database not found")
     except NotAuthorizedError:
-        return (
-            make_response("Not authorized to execute the query on this database"),
-            403,
-        )
+        logger.exception(e)
+        return abort(403, "Not authorized to execute the query on this database")
     except Exception as e:
-        return make_response(str(e)), 500
+        logger.exception(e)
+        return abort(500, str(e))
 
 
 @bp.route("/<int:id>/download", methods=["GET"])
+@bp.output(FileSchema, content_type="application/octet-stream")
+@bp.doc(
+    security="TokenAuth",
+    summary="Download database file",
+    description="Download binary database file",
+)
 def download_database(id: int):
     try:
         if database := Database.find_by_id_and_owner(id, owner_id=get_jwt_identity()):
@@ -126,9 +184,8 @@ def download_database(id: int):
                 {"Connection": "close"},
             )
         else:
-            return make_response("File not found"), 404
+            return abort(404, "File not found")
     except FileNotFoundError:
-        return make_response("File not found"), 404
+        return abort(404, "File not found")
     except Exception as e:
-        print(str(e))
-        return make_response(str(e)), 500
+        return abort(500, str(e))

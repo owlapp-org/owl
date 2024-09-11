@@ -6,7 +6,7 @@ namespace ScriptService {
     id: number,
     content: string
   ): Promise<IScript> => {
-    return request.put(`scripts/${id}/content`, {
+    return request.put(`scripts/${id}`, {
       content,
     });
   };
@@ -27,9 +27,9 @@ namespace ScriptService {
   export const fetchAll = async (): Promise<IScript[]> => {
     return request.get("scripts").then((response) => response.data);
   };
-  export const rename = async (id: number, name: string): Promise<IScript> => {
+  export const update = async (id: number, name: string): Promise<IScript> => {
     return request
-      .put(`scripts/${id}/rename`, { name })
+      .put(`scripts/${id}`, { name })
       .then((response) => response.data);
   };
   export const remove = async (id: number): Promise<IScript> => {

@@ -1,5 +1,5 @@
 import { ActionIcon, Flex } from "@mantine/core";
-import { IconBrandGithub, IconMenu2 } from "@tabler/icons-react";
+import { IconApi, IconBrandGithub, IconMenu2 } from "@tabler/icons-react";
 import React from "react";
 
 interface TopNavBarProps {
@@ -35,10 +35,22 @@ const TopNavBar: React.FC<TopNavBarProps> = (props) => {
       <div
         style={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "space-between",
           alignItems: "center",
+          gap: "10px",
         }}
       >
+        <ActionIcon
+          variant="transparent"
+          onClick={() => {
+            window.open(
+              `${window.location.protocol}//${window.location.hostname}:3000/api/docs`,
+              "_blank"
+            );
+          }}
+        >
+          <IconApi size={24} stroke={1} color="var(--mantine-color-gray-7)" />
+        </ActionIcon>
         <ActionIcon
           variant="transparent"
           onClick={() => {

@@ -17,6 +17,8 @@ def init_app(app: Flask) -> None:
 
     apply_jwt_required(app)
 
+    return jwt
+
 
 def apply_jwt_required(app: Flask) -> None:
     exclude_routes = [
@@ -29,6 +31,8 @@ def apply_jwt_required(app: Flask) -> None:
         "ui.serve_ui",
         "ui.serve_assets",
         "redirect_to_ui",
+        "openapi.spec",
+        "openapi.docs",
     ]
     for rule in app.url_map.iter_rules():
         if rule.endpoint not in exclude_routes:

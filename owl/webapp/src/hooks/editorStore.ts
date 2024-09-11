@@ -169,7 +169,7 @@ const createTabStore = () =>
         notifications.show({
           color: "red",
           title: "Error",
-          message: error?.response?.data as string,
+          message: "Failed to execute statement",
         });
       }
     },

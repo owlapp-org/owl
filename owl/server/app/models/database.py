@@ -1,6 +1,7 @@
 import logging
 import os
 import uuid
+from typing import Optional
 
 import duckdb
 import jinja2
@@ -18,7 +19,7 @@ from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
 from app.models.base import TimestampMixin, db
 from app.models.mixins.user_space_mixin import UserSpaceMixin
-from app.schemas import ExecutionResult, UpdateDatabaseInputSchema
+from app.schemas.database_schema import RunOut
 from app.settings import settings
 from duckdb import DuckDBPyConnection
 from flask import json
@@ -103,16 +104,23 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         )
         return self
 
-    def update(self, database: UpdateDatabaseInputSchema) -> "Database":
-        if database.name:
-            self.name = database.name
-        if database.description:
-            self.description = database.description
-        if not database.pool_size or database.pool_size == self.pool_size:
+    def update(
+        self,
+        name: Optional[str] = None,
+        pool_size: Optional[int] = None,
+        description: Optional[str] = None,
+    ) -> "Database":
+        if name:
+            self.name = name
+        if description:
+            self.description = description
+
+        if not pool_size or pool_size == self.pool_size:
             return self
 
+        self.pool_size = pool_size
         if pool := registry.get(self.id):
-            pool.reset_pool_size(database.pool_size)
+            pool.reset_pool_size(pool_size)
 
         return self
 
@@ -145,9 +153,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         return query
 
     @classmethod
-    def run(
-        cls, id: int | None, query: str, owner_id: int, **kwargs
-    ) -> ExecutionResult:
+    def run(cls, id: int | None, query: str, owner_id: int, **kwargs) -> RunOut:
         logger.debug("Received query", extra=query)
 
         query = _.chain(query).trim().trim_end(";").value()
@@ -197,7 +203,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
 
     def run_execute(
         self, conn: DuckDBPyConnection, statement: SqlParseStatement
-    ) -> ExecutionResult:
+    ) -> RunOut:
         statement_type = statement.get_type()
         result = conn.execute(str(statement))
         conn.commit()
@@ -206,14 +212,14 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             StatementType.UPDATE,
             StatementType.DELETE,
         ]:
-            return ExecutionResult(
+            return RunOut(
                 database_id=self.id,
                 query=str(statement),
                 statement_type=statement_type,
                 affected_rows=result.fetchone()[0],
             )
         else:
-            return ExecutionResult(
+            return RunOut(
                 database_id=self.id,
                 query=str(statement),
                 statement_type=statement_type,
@@ -226,7 +232,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         start_row: int = 0,
         end_row: int = settings.result_set_hard_limit,
         with_total_count: bool = True,
-    ) -> ExecutionResult:
+    ) -> RunOut:
 
         offset = start_row
         limit = end_row - start_row
@@ -239,7 +245,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         else:
             total_count = None
 
-        return ExecutionResult(
+        return RunOut(
             database_id=self.id,
             query=str(statement),
             statement_type=StatementType.SELECT,
