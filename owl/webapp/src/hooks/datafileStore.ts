@@ -62,7 +62,7 @@ const useDataFileStore = create<IDataFileState>((set, get) => ({
   },
   rename: async (id: number, name: string) => {
     try {
-      const file = await DataFileService.rename(id, name);
+      const file = await DataFileService.update(id, name);
       set((state) => ({
         datafiles: state.datafiles.map((f) => (f.id === id ? file : f)),
       }));

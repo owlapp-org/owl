@@ -12,6 +12,7 @@ import {
   IconFolders,
   IconUpload,
 } from "@tabler/icons-react";
+import { FileType } from "@ts/enums/filetype_enum";
 import { IDataFile } from "@ts/interfaces/datafile_interface";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
@@ -93,7 +94,7 @@ export default function DataFilesNode() {
   };
 
   const handleRename = (file: IDataFile) => {
-    showRenameFileModal({ file });
+    showRenameFileModal({ file: { ...file, fileType: FileType.DataFile } });
   };
   const data: TreeNodeData[] = [
     {

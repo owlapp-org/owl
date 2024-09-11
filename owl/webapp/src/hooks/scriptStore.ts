@@ -119,7 +119,7 @@ const useScriptStore = create<IScriptState>((set, get) => ({
   },
   rename: async (id: number, name: string) => {
     try {
-      const file = await ScriptService.rename(id, name);
+      const file = await ScriptService.update(id, name);
       set((state) => ({
         scripts: state.scripts.map((s) => (s.id === id ? file : s)),
       }));

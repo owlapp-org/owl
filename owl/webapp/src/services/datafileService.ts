@@ -14,12 +14,12 @@ namespace DataFileService {
   export const fetchAll = async (): Promise<IDataFile[]> =>
     request.get("files").then((response) => response.data);
 
-  export const rename = async (
+  export const update = async (
     id: number,
     name: string
   ): Promise<IDataFile> => {
     return request
-      .put(`files/${id}/rename`, { name })
+      .put(`files/${id}`, { name })
       .then((response) => response.data);
   };
   export const remove = async (id: number): Promise<IDataFile> => {
