@@ -1,3 +1,5 @@
+import { StreamLanguage } from "@codemirror/language";
+import { jinja2 } from "@codemirror/legacy-modes/mode/jinja2";
 import { Prec } from "@codemirror/state";
 import { keymap } from "@codemirror/view";
 import "@components/Editor/styles.css";
@@ -78,7 +80,10 @@ const MacroCode: React.FC<IMacroCodeProps> = ({ store, ...other }) => {
         className="code-mirror"
         value={content}
         height="100%"
-        extensions={[Prec.highest(keymap.of(shortCutKeymap))]}
+        extensions={[
+          StreamLanguage.define(jinja2),
+          Prec.highest(keymap.of(shortCutKeymap)),
+        ]}
         onChange={onChange}
         style={{ flex: 1 }}
       />

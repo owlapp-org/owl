@@ -13,6 +13,7 @@
     "@codemirror/lang-html": "^6.4.9",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/lang-sql": "^6.7.0",
+    "@codemirror/legacy-modes": "^6.4.1",
     "@emotion/react": "latest",
     "@emotion/styled": "latest",
     "@iconify/react": "^5.0.0",
