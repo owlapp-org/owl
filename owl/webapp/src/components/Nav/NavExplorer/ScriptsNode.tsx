@@ -143,7 +143,7 @@ export default function ScriptsNode() {
       children: scripts.map((scriptFile) =>
         toNode(scriptFile, remove, handleRename, (e: any) => {
           e.stopPropagation();
-          addTab(scriptFile.id);
+          addTab(scriptFile.id, FileType.ScriptFile);
         })
       ),
     },

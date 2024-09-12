@@ -1,11 +1,11 @@
-import { IEditorTabState } from "@hooks/editorStore";
+import { IEditorScriptTabState } from "@hooks/editorStore";
 import { IQueryResult } from "@ts/interfaces/database_interface";
 import { StoreApi, UseBoundStore } from "zustand";
 import ResultSetContainer from "./ResultSet";
 
 interface IPanelProps {
   result?: IQueryResult;
-  store: UseBoundStore<StoreApi<IEditorTabState>>;
+  store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
 }
 
 const Panel: React.FC<IPanelProps> = ({ result, store }) => {

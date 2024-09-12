@@ -63,6 +63,15 @@ namespace MacroFileService {
       throw error;
     }
   };
+
+  export const renderContent = async (
+    content: string,
+    command?: string
+  ): Promise<string> => {
+    return request
+      .post("macros/render", { content, command })
+      .then((response) => response.data);
+  };
 }
 
 export default MacroFileService;

@@ -16,6 +16,7 @@
     "@emotion/react": "latest",
     "@emotion/styled": "latest",
     "@iconify/react": "^5.0.0",
+    "@mantine/code-highlight": "^7.12.2",
     "@mantine/core": "^7.11.2",
     "@mantine/dates": "^7.11.2",
     "@mantine/dropzone": "^7.12.0",

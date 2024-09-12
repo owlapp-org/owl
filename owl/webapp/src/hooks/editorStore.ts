@@ -303,7 +303,10 @@ const useEditorStore = create<IEditorState>((set, get) => ({
   addTab: (fileId?: number, fileType: FileType = FileType.ScriptFile) => {
     if (fileId) {
       for (const [id, store] of Object.entries(get().tabs)) {
-        if (store.getState().file.id === fileId) {
+        if (
+          store.getState().file.id === fileId &&
+          store.getState().file.fileType === fileType
+        ) {
           set({ activeTab: id });
           return;
         }
@@ -364,7 +367,6 @@ const useEditorStore = create<IEditorState>((set, get) => ({
         break;
       }
     }
-
     if (!newTabStore) {
       return;
     }

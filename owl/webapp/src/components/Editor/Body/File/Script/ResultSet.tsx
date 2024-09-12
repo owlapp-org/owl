@@ -1,4 +1,4 @@
-import { IEditorTabState } from "@hooks/editorStore";
+import { IEditorScriptTabState } from "@hooks/editorStore";
 import { notifications } from "@mantine/notifications";
 import { IQueryResult } from "@ts/interfaces/database_interface";
 
@@ -9,11 +9,11 @@ import { StoreApi, UseBoundStore, useStore } from "zustand";
 
 interface IResultSetContainerProps {
   result?: IQueryResult;
-  store: UseBoundStore<StoreApi<IEditorTabState>>;
+  store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
 }
 interface IResultSetProps {
   result: IQueryResult;
-  store: UseBoundStore<StoreApi<IEditorTabState>>;
+  store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
 }
 
 const ResultSet: React.FC<IResultSetProps> = ({ result, store }) => {

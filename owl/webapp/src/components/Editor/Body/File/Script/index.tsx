@@ -1,5 +1,8 @@
 import "@components/Editor/styles.css";
 import { IEditorScriptTabState } from "@hooks/editorStore";
+import { CodeHighlight } from "@mantine/code-highlight";
+import { notifications } from "@mantine/notifications";
+import MacroFileService from "@services/macrofileService";
 import { IconBorderAll } from "@tabler/icons-react";
 import { IQueryResult } from "@ts/interfaces/database_interface";
 import { useEffect, useRef, useState } from "react";
@@ -26,7 +29,27 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
   const [queryResult, setQueryResult] = useState<IQueryResult | undefined>(
     undefined
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [isRunLoading, setIsRunLoading] = useState(false);
+  const [isRenderLoading, setIsRenderLoading] = useState(false);
+  const [renderedContent, setRenderedContent] = useState("");
+  const [activePanel, setActivePanel] = useState(0);
+
+  const handleRenderClick = async () => {
+    setIsRenderLoading(true);
+    try {
+      const result: any = await MacroFileService.renderContent(content);
+      setRenderedContent(result["content"]);
+      setActivePanel(2);
+    } catch (err) {
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: `Failed to render. ${err}`,
+      });
+    } finally {
+      setIsRenderLoading(false);
+    }
+  };
 
   const handleExecute = async () => {
     let query = content || "";
@@ -40,10 +63,11 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
     if (!query) {
       return;
     }
-    setIsLoading(true);
+    setIsRunLoading(true);
     const result = await runQuery(query, 0, 25); // todo hardcoded values
     setQueryResult(result);
-    setIsLoading(false);
+    setActivePanel(1);
+    setIsRunLoading(false);
   };
 
   useEffect(() => {
@@ -62,7 +86,9 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
       <ScriptToolbar
         store={store}
         onExecute={handleExecute}
-        isLoading={isLoading}
+        onRender={handleRenderClick}
+        isRunLoading={isRunLoading}
+        isRenderLoading={isRenderLoading}
       />
       <PanelGroup direction="vertical">
         <ResizablePanel defaultSize={60}>
@@ -72,8 +98,31 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
         </ResizablePanel>
         <PanelResizeHandle className="panel-resize-handle" />
         <ResizablePanel maxSize={90} minSize={10}>
-          {queryResult && <Panel result={queryResult} store={store} />}
-          {!queryResult && (
+          {queryResult && activePanel == 1 && (
+            <Panel result={queryResult} store={store} />
+          )}
+          {activePanel == 2 && (
+            <CodeHighlight
+              className="app-code-highlight macro-code-highlight"
+              styles={{
+                root: {
+                  marginTop: "0px !important;",
+                  paddingTop: "0px",
+                },
+              }}
+              style={{
+                marginTop: "0px !important;",
+                padding: "0px",
+                width: "100%",
+                height: "100%",
+                flexGrow: "1",
+              }}
+              code={renderedContent}
+              language="sql"
+              mt="md"
+            />
+          )}
+          {!queryResult && activePanel == 0 && (
             <div
               style={{
                 display: "flex",

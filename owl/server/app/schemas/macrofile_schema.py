@@ -27,6 +27,8 @@ class CreateMacroFileIn:
 
     @post_load
     def name_must_end_with_sql(self, data, **kwargs):
+        if not data.get("name"):
+            return data
         extension = data.get("name").split(".")[-1]
         if extension not in ALLOWED_MACROFILE_EXTENSIONS:
             raise ValidationError("File name must end with .sql")
@@ -40,6 +42,8 @@ class UpdateMacroFileIn:
 
     @post_load
     def name_must_end_with_sql(self, data, **kwargs):
+        if not data.get("name"):
+            return data
         extension = data.get("name").split(".")[-1]
         if extension not in ALLOWED_MACROFILE_EXTENSIONS:
             raise ValidationError("File name must end with .sql")
