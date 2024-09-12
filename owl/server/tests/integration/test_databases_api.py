@@ -52,13 +52,13 @@ def test_delete_database(use_access_token) -> None:
         },
         headers={"Authorization": f"Bearer {use_access_token}"},
     )
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
     id = response.json()["id"]
     response = requests.delete(
         api_url(f"databases/{id}"),
         headers={"Authorization": f"Bearer {use_access_token}"},
     )
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
 
 
 def test_get_databases(use_access_token) -> None:

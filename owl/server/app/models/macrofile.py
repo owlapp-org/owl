@@ -1,8 +1,11 @@
 import logging
+import os
 from typing import Optional
 
+import jinja2
 from app.models.base import TimestampMixin, db
 from app.models.mixins.user_space_mixin import UserSpaceMixin
+from app.settings import settings
 from sqlalchemy import Column, ForeignKey, Integer, String, and_
 from sqlalchemy.orm import relationship
 from werkzeug.datastructures import FileStorage
@@ -85,3 +88,14 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
         db.session.add(self)
         db.session.commit()
         return self
+
+    @classmethod
+    def render_content(cls, owner_id: int, content: str, command: Optional[str] = None):
+        files_path = os.path.join(
+            settings.STORAGE_BASE_PATH, "users", str(owner_id), "files"
+        )
+        if command:
+            content = content + "\n\n" + "{{" + command + "}}"
+
+        query = jinja2.Template(content).render(files=files_path)
+        return query

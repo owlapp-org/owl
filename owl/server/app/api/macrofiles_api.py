@@ -1,17 +1,19 @@
 from logging import getLogger
 
 from apiflask import APIBlueprint, FileSchema, abort
-from app.constants import ALLOWED_MACROFILE_EXTENSIONS, ALLOWED_SCRIPT_EXTENSIONS
+from app.constants import ALLOWED_MACROFILE_EXTENSIONS
 from app.lib.fs import is_extension_valid
 from app.models.macrofile import MacroFile
-from app.schemas.base import MessageOut
+from app.schemas.base import ExistsOut, MessageOut
 from app.schemas.macrofile_schema import (
     CreateMacroFileIn,
     MacroFileContentOut,
     MacroFileOut,
+    RenderContentIn,
+    RenderContentOut,
     UpdateMacroFileIn,
 )
-from flask import jsonify, make_response, request, send_file
+from flask import request, send_file
 from flask_jwt_extended import get_jwt_identity
 
 logger = getLogger(__name__)
@@ -53,7 +55,7 @@ def get_macro_file(id: int):
 
 @bp.route("/<int:id>/exists", methods=["GET"])
 @bp.output(
-    MacroFileOut.Schema,
+    ExistsOut.Schema,
     status_code=200,
     description="Check if the file with given id exists or not.",
 )
@@ -63,14 +65,10 @@ def get_macro_file(id: int):
 )
 def check_exists(id: int):
     try:
-        if macro_file := MacroFile.find_by_id_and_owner(
-            id=id, owner_id=get_jwt_identity()
-        ):
-            return jsonify({"exists": macro_file.file_exists()}), 200
-        else:
-            return jsonify({"exists": False}), 200
+        macro_file = MacroFile.find_by_id_and_owner(id=id, owner_id=get_jwt_identity())
+        return ExistsOut(exists=macro_file is not None)
     except Exception as e:
-        return make_response(f"Unable to check. {str(e)}"), 500
+        return abort(500, f"Unable to check. {str(e)}")
 
 
 @bp.route("/<int:id>/content", methods=["GET"])
@@ -221,3 +219,16 @@ def download_macro_file(id: int):
     except Exception as e:
         logger.exception(e)
         return abort(500, str(e))
+
+
+@bp.route("/render", methods=["POST"])
+@bp.input(RenderContentIn.Schema, arg_name="payload")
+@bp.output(RenderContentOut.Schema)
+@bp.doc(security="TokenAuth", summary="Render given content and command result")
+def render_content(payload: RenderContentIn):
+    rendered_content = MacroFile.render_content(
+        owner_id=get_jwt_identity(),
+        content=payload.content,
+        command=payload.command,
+    )
+    return RenderContentOut(content=rendered_content)

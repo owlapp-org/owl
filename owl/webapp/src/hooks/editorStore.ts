@@ -8,20 +8,30 @@ import IFile from "@ts/interfaces/file_interface";
 import { FileType } from "@ts/enums/filetype_enum";
 import useDataFileStore from "./datafileStore";
 import { IQueryResult } from "@ts/interfaces/database_interface";
-
-export interface IEditorTabOptions {
-  databaseId: string | null;
-}
+import useMacroFileStore from "./macrofileStore";
+import MacroFileService from "@services/macrofileService";
 
 export interface IEditorTabState {
   id: string;
   file: IFile;
-  options: IEditorTabOptions | null;
   content: string;
   setFile: (file: IFile) => void;
   fetchContent: () => Promise<void>;
   save: (name?: string) => void;
   setContent: (content: string) => void;
+  findFileName: () => string | undefined;
+}
+
+export interface IEditorScriptTabOptions {
+  databaseId: string | null;
+}
+
+export interface IEditorScriptTabOptions {
+  databaseId: string | null;
+}
+
+export interface IEditorScriptTabState extends IEditorTabState {
+  options: IEditorScriptTabOptions | null;
   setDatabase: (database: string | null) => void;
   runQuery: (
     query: string,
@@ -29,12 +39,13 @@ export interface IEditorTabState {
     end_row?: number,
     with_total_count?: boolean
   ) => Promise<IQueryResult | undefined>;
-  findFileName: () => string | undefined;
   getDatabaseIdOption: () => string | null;
 }
 
-const createTabStore = () =>
-  create<IEditorTabState>((set, get) => ({
+export interface IEditorMacroFileTabState extends IEditorTabState {}
+
+const createScriptTabStore = () =>
+  create<IEditorScriptTabState>((set, get) => ({
     id: uuidv4(),
     file: {},
     options: null,
@@ -64,28 +75,9 @@ const createTabStore = () =>
     save: async (name?: string) => {
       const file = get().file;
       const content = get().content;
-      if (file.fileType != FileType.ScriptFile) {
-        notifications.show({
-          color: "yellow",
-          title: "Warning",
-          message: "Currently only script files are supported.",
-        });
-        return;
-      } else if (!file.fileType) {
-        notifications.show({
-          color: "red",
-          title: "Error",
-          message: "Unknown file type",
-        });
-        return;
-      }
 
       if (file.id) {
-        switch (file.fileType) {
-          case FileType.ScriptFile:
-            await ScriptService.updateContent(file.id, content || "");
-            return;
-        }
+        await ScriptService.updateContent(file.id, content || "");
       } else if (!name) {
         notifications.show({
           color: "red",
@@ -95,20 +87,16 @@ const createTabStore = () =>
         return;
       } else {
         const filename = name || "New file";
-        switch (file.fileType) {
-          case FileType.ScriptFile:
-            const script = await useScriptStore
-              .getState()
-              .create(filename, content || "");
-            set((state) => ({
-              file: {
-                ...state.file,
-                name: filename,
-                id: script.id,
-              },
-            }));
-            return;
-        }
+        const script = await useScriptStore
+          .getState()
+          .create(filename, content || "");
+        set((state) => ({
+          file: {
+            ...state.file,
+            name: filename,
+            id: script.id,
+          },
+        }));
       }
     },
     setContent: async (content: string) => {
@@ -203,6 +191,96 @@ const createTabStore = () =>
     },
   }));
 
+const createMacroFileTabStore = () =>
+  create<IEditorMacroFileTabState>((set, get) => ({
+    id: uuidv4(),
+    file: {},
+    options: null,
+    content: "",
+    setFile: (file: IFile) => {
+      set({ file });
+    },
+    fetchContent: async () => {
+      const file = get().file;
+      if (!file.id) {
+        return;
+      }
+      try {
+        const content = await MacroFileService.fetchContent(file.id);
+        set({ content });
+        return Promise.resolve();
+      } catch (error) {
+        console.error(error);
+        notifications.show({
+          color: "error",
+          title: "Error",
+          message: "Failed to fetch file content",
+        });
+        return Promise.reject(error);
+      }
+    },
+    save: async (name?: string) => {
+      const file = get().file;
+      const content = get().content;
+      if (!file.fileType) {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: "Unknown file type",
+        });
+        return;
+      }
+
+      if (file.id) {
+        await MacroFileService.updateContent(file.id, content || "");
+      } else if (!name) {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: "Unknown file name",
+        });
+      } else {
+        const filename = name || "New file";
+        const macrofile = await useMacroFileStore
+          .getState()
+          .create(filename, content || "");
+        set((state) => ({
+          file: {
+            ...state.file,
+            name: filename,
+            id: macrofile.id,
+          },
+        }));
+      }
+    },
+    setContent: async (content: string) => {
+      set({ content: content });
+    },
+    findFileName: () => {
+      const file = get().file;
+      if (!file.id || !file.fileType) {
+        return undefined;
+      }
+      switch (file.fileType) {
+        case FileType.ScriptFile: {
+          const { findById: findScriptById } = useScriptStore.getState();
+          const script = findScriptById(file.id);
+          if (script) {
+            return script.name;
+          }
+        }
+        case FileType.DataFile: {
+          const { findById: findDataFileById } = useDataFileStore.getState();
+          const dataFile = findDataFileById(file.id);
+          if (dataFile) {
+            return dataFile.name;
+          }
+        }
+      }
+      return undefined;
+    },
+  }));
+
 export interface IEditorState {
   activeTab: string | null;
   tabs: Record<string, UseBoundStore<StoreApi<IEditorTabState>>>;
@@ -232,6 +310,7 @@ const useEditorStore = create<IEditorState>((set, get) => ({
       }
     }
     let name = undefined;
+    const activeTab = uuidv4();
     if (fileId) {
       switch (fileType) {
         case FileType.ScriptFile: {
@@ -244,6 +323,21 @@ const useEditorStore = create<IEditorState>((set, get) => ({
               title: "Error",
               message: "File not found on scripts",
             });
+            return;
+          }
+          break;
+        }
+        case FileType.MacroFile: {
+          const macrofile = useMacroFileStore.getState().findById(fileId);
+          if (macrofile) {
+            name = macrofile.name;
+          } else {
+            notifications.show({
+              color: "red",
+              title: "Error",
+              message: "File not found on macro files",
+            });
+            return;
           }
           break;
         }
@@ -258,8 +352,23 @@ const useEditorStore = create<IEditorState>((set, get) => ({
       }
     }
 
-    const activeTab = uuidv4();
-    const newTabStore = createTabStore();
+    let newTabStore: UseBoundStore<StoreApi<IEditorTabState>> | undefined =
+      undefined;
+    switch (fileType) {
+      case FileType.ScriptFile: {
+        newTabStore = createScriptTabStore();
+        break;
+      }
+      case FileType.MacroFile: {
+        newTabStore = createMacroFileTabStore();
+        break;
+      }
+    }
+
+    if (!newTabStore) {
+      return;
+    }
+
     newTabStore.setState({
       id: activeTab,
       file: { id: fileId, fileType, name },

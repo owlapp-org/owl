@@ -1,6 +1,6 @@
 import { useCreateDatabaseModalStore } from "@components/modals/CreateDatabaseModal/useCreateDatabaseModalStore";
 import useDatabaseStore from "@hooks/databaseStore";
-import { IEditorTabState } from "@hooks/editorStore";
+import { IEditorScriptTabState } from "@hooks/editorStore";
 import { ActionIcon, Button, Divider, Flex, Select } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons-react";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
@@ -8,7 +8,7 @@ import { useShallow } from "zustand/react/shallow";
 
 interface IScriptToolbarProps {
   isLoading: boolean;
-  store: UseBoundStore<StoreApi<IEditorTabState>>;
+  store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
   onExecute: () => void;
 }
 

@@ -1,5 +1,5 @@
 import "@components/Editor/styles.css";
-import { IEditorTabState } from "@hooks/editorStore";
+import { IEditorScriptTabState } from "@hooks/editorStore";
 import { IconBorderAll } from "@tabler/icons-react";
 import { IQueryResult } from "@ts/interfaces/database_interface";
 import { useEffect, useRef, useState } from "react";
@@ -14,7 +14,7 @@ import Panel from "./Panel";
 import ScriptToolbar from "./ScriptToolbar";
 
 interface IScriptProps {
-  store: UseBoundStore<StoreApi<IEditorTabState>>;
+  store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
 }
 
 const Script: React.FC<IScriptProps> = ({ store }) => {

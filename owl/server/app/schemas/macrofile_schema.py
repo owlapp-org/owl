@@ -2,6 +2,7 @@ from dataclasses import field
 from typing import Optional
 
 from apiflask.validators import Length
+from app.constants import ALLOWED_MACROFILE_EXTENSIONS
 from marshmallow import ValidationError, post_load
 from marshmallow_dataclass import dataclass
 
@@ -26,7 +27,8 @@ class CreateMacroFileIn:
 
     @post_load
     def name_must_end_with_sql(self, data, **kwargs):
-        if self.name.endswith(".sql"):
+        extension = data.get("name").split(".")[-1]
+        if extension not in ALLOWED_MACROFILE_EXTENSIONS:
             raise ValidationError("File name must end with .sql")
         return data
 
@@ -38,12 +40,18 @@ class UpdateMacroFileIn:
 
     @post_load
     def name_must_end_with_sql(self, data, **kwargs):
-        if data.get("name") and not data.get("name").endswith(".sql"):
+        extension = data.get("name").split(".")[-1]
+        if extension not in ALLOWED_MACROFILE_EXTENSIONS:
             raise ValidationError("File name must end with .sql")
         return data
 
-    @post_load
-    def check_at_least_one_argument(self, data, **kwargs):
-        if not any([data.get("name"), data.get("content")]):
-            raise ValidationError("At least one argument must be provided.")
-        return data
+
+@dataclass
+class RenderContentIn:
+    content: str = field()
+    command: Optional[str] = field()
+
+
+@dataclass
+class RenderContentOut:
+    content: str = field()

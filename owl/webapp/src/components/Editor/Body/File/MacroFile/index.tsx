@@ -1,5 +1,5 @@
 import "@components/Editor/styles.css";
-import { IEditorTabState } from "@hooks/editorStore";
+import { IEditorMacroFileTabState } from "@hooks/editorStore";
 import { useEffect, useState } from "react";
 import {
   PanelGroup,
@@ -8,12 +8,13 @@ import {
 } from "react-resizable-panels";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import MacroCode from "./MacroCode";
+import MacroFilePanel from "./MacroFilePanel";
 
-interface IScriptProps {
-  store: UseBoundStore<StoreApi<IEditorTabState>>;
+interface IMacroFileProps {
+  store: UseBoundStore<StoreApi<IEditorMacroFileTabState>>;
 }
 
-const Script: React.FC<IScriptProps> = ({ store }) => {
+const MacroFile: React.FC<IMacroFileProps> = ({ store }) => {
   const { content } = useStore(store, (state) => ({
     content: state.content,
   }));
@@ -39,10 +40,12 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
           </div>
         </ResizablePanel>
         <PanelResizeHandle className="panel-resize-handle" />
-        <ResizablePanel maxSize={90} minSize={10}></ResizablePanel>
+        <ResizablePanel maxSize={90} minSize={10}>
+          <MacroFilePanel store={store} />
+        </ResizablePanel>
       </PanelGroup>
     </div>
   );
 };
 
-export default Script;
+export default MacroFile;

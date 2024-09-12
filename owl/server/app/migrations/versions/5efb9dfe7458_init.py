@@ -128,9 +128,9 @@ def upgrade() -> None:
         sa.UniqueConstraint("path", "owner_id", name="_scripts_path_owner_uc"),
     )
 
-    # Create the macros table
+    # Create the macro_files table
     op.create_table(
-        "macros",
+        "macro_files",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("path", sa.String(), nullable=False),
         sa.Column("owner_id", sa.Integer(), nullable=False),
@@ -157,4 +157,4 @@ def downgrade() -> None:
     op.drop_table("users")
     op.drop_table("data_files")
     op.drop_table("scripts")
-    op.drop_table("macros")
+    op.drop_table("macro_files")

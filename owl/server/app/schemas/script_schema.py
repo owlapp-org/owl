@@ -26,7 +26,7 @@ class CreateScriptIn:
 
     @post_load
     def name_must_end_with_sql(self, data, **kwargs):
-        if self.name.endswith(".sql"):
+        if not data.get("name").endswith(".sql"):
             raise ValidationError("File name must end with .sql")
         return data
 

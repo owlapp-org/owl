@@ -3,6 +3,7 @@ import { notifications } from "@mantine/notifications";
 import { FileType } from "@ts/enums/filetype_enum";
 import React from "react";
 import { StoreApi, UseBoundStore } from "zustand";
+import MacroFile from "./MacroFile";
 import Script from "./Script";
 
 const File: React.FC<{
@@ -12,6 +13,8 @@ const File: React.FC<{
   switch (fileType) {
     case FileType.ScriptFile:
       return <Script store={store} />;
+    case FileType.MacroFile:
+      return <MacroFile store={store} />;
     case FileType.DataFile:
       notifications.show({
         color: "red",

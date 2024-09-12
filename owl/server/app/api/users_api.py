@@ -57,8 +57,8 @@ def get_user(id: int):
     security="TokenAuth",
     description="Returns the user with given email",
 )
-def get_user_by_email(email: str):
-    if user := User.find_by_email(email):
+def get_user_by_email(email: EmailIn):
+    if user := User.find_by_email(email.email):
         return user
     return abort(404, "User not found.")
 
@@ -76,5 +76,5 @@ def get_user_by_email(email: str):
 )
 def update_user(payload: UpdateUserIn):
     if user := User.find_by_id(id=get_jwt_identity()):
-        user.update_user(payload.name, payload.password)
+        return user.update_user(payload.name, payload.password)
     return abort(404, "User not found")

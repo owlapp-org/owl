@@ -25,7 +25,7 @@ namespace MacroFileService {
       .then((response) => response.data);
   };
   export const fetchAll = async (): Promise<IMacroFile[]> => {
-    return request.get("scripts").then((response) => response.data);
+    return request.get("macros").then((response) => response.data);
   };
   export const update = async (
     id: number,
@@ -43,7 +43,7 @@ namespace MacroFileService {
     content?: string
   ): Promise<IMacroFile> => {
     return request
-      .post("scripts", { name, content })
+      .post("macros", { name, content })
       .then((response) => response.data);
   };
   export const download = async (id: number, name: string): Promise<void> => {

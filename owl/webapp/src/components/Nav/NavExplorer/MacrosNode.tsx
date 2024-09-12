@@ -3,7 +3,7 @@ import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useR
 import ScriptMenu from "@components/ScriptMenu";
 import TreeNode from "@components/TreeNode";
 import useEditorStore from "@hooks/editorStore";
-import useScriptStore from "@hooks/scriptStore";
+import useMacroFileStore from "@hooks/macrofileStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
@@ -51,8 +51,8 @@ function toNode(
   };
 }
 
-export default function ScriptsNode() {
-  const { scripts, fetchAll, remove, upload } = useScriptStore();
+export default function MacroFilesNode() {
+  const { macrofiles, fetchAll, remove, upload } = useMacroFileStore();
   const openRef = useRef<() => void>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { addTab } = useEditorStore();
@@ -138,10 +138,10 @@ export default function ScriptsNode() {
           </div>
         ),
       },
-      children: scripts.map((scriptFile) =>
-        toNode(scriptFile, remove, handleRename, (e: any) => {
+      children: macrofiles.map((macrofile) =>
+        toNode(macrofile, remove, handleRename, (e: any) => {
           e.stopPropagation();
-          addTab(scriptFile.id);
+          addTab(macrofile.id, FileType.MacroFile);
         })
       ),
     },
