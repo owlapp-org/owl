@@ -1,4 +1,4 @@
-import { useCreateScriptModalStore } from "@components/modals/CreateScriptModal/useCreateScriptModalStore";
+import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import useEditorStore, { IEditorTabState } from "@hooks/editorStore";
 import { Divider, Loader, Menu, Tabs } from "@mantine/core";
@@ -34,7 +34,7 @@ const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
     e.preventDefault();
     setIsContextMenuOpen(true);
   };
-  const { showModal: showCreateScriptModal } = useCreateScriptModalStore();
+  const { showModal: showCreateFileModal } = useCreateFileModalStore();
 
   useEffect(() => {
     file.name && setTitle(file.name);
@@ -46,7 +46,7 @@ const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
     } else {
       switch (file.fileType) {
         case FileType.ScriptFile: {
-          showCreateScriptModal({ tabId });
+          showCreateFileModal({ fileType: FileType.ScriptFile, tabId });
         }
       }
     }

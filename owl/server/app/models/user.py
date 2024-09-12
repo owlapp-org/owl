@@ -20,6 +20,14 @@ class User(TimestampMixin, db.Model):
         single_parent=True,
     )
 
+    macro_files = relationship(
+        "MacroFile",
+        back_populates="owner",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        single_parent=True,
+    )
+
     data_files = relationship(
         "DataFile",
         back_populates="owner",

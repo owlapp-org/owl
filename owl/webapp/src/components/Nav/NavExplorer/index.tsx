@@ -1,9 +1,10 @@
 import CreateDatabaseModal from "@components/modals/CreateDatabaseModal/CreateDatabaseModal";
-import CreateScriptModal from "@components/modals/CreateScriptModal/CreateScriptModal";
+import CreateScriptModal from "@components/modals/CreateFileModal/CreateFileModal";
 import RenameFileModal from "@components/modals/RenameFileModal/RenameFileModal";
 import UpdateDatabaseModal from "@components/modals/UpdateDatabaseModal/UpdateDatabaseModal";
 import DatabasesNode from "./DatabasesNode";
 import DataFilesNode from "./DataFilesNode";
+import MacrosNode from "./MacrosNode";
 import ScriptsNode from "./ScriptsNode";
 import "./styles.css";
 
@@ -21,6 +22,7 @@ export default function NavExplorer() {
       <DatabasesNode />
       <DataFilesNode />
       <ScriptsNode />
+      <MacrosNode />
       {/* -- modals -- */}
       <CreateDatabaseModal />
       <UpdateDatabaseModal />

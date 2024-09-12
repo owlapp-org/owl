@@ -8,8 +8,8 @@ import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
 import {
-  IconCodeDots,
-  IconFileTypeSql,
+  IconCube,
+  IconFile3d,
   IconPlus,
   IconUpload,
 } from "@tabler/icons-react";
@@ -32,7 +32,7 @@ function toNode(
       onClick,
       icon: (
         <div>
-          <IconFileTypeSql
+          <IconFile3d
             stroke={1}
             size={18}
             color="var(--mantine-color-gray-8)"
@@ -57,7 +57,7 @@ export default function ScriptsNode() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { addTab } = useEditorStore();
   const { showModal: showRenameFileModal } = useRenameFileModalStore();
-  const { showModal: showCreateScriptModal } = useCreateFileModalStore();
+  const { showModal: showCreateFileModal } = useCreateFileModalStore();
 
   useEffect(() => {
     fetchAll();
@@ -83,26 +83,24 @@ export default function ScriptsNode() {
     }
   };
   const handleRename = (file: IScript) => {
-    showRenameFileModal({ file: { ...file, fileType: FileType.ScriptFile } });
+    showRenameFileModal({ file: { ...file, fileType: FileType.MacroFile } });
   };
   const handleCreate = async () => {
     setIsLoading(true);
     try {
-      await showCreateScriptModal({
-        fileType: FileType.ScriptFile,
-      });
+      await showCreateFileModal({ fileType: FileType.MacroFile });
     } finally {
       setIsLoading(false);
     }
   };
   const data: TreeNodeData[] = [
     {
-      label: "Scripts",
-      value: "scripts",
+      label: "Macros",
+      value: "macros",
       nodeProps: {
         icon: (
           <div>
-            <IconCodeDots stroke={1} color="var(--mantine-color-blue-8)" />
+            <IconCube stroke={1} color="var(--mantine-color-blue-8)" />
           </div>
         ),
         actions: (

@@ -21,7 +21,6 @@ interface IContentProps {
 
 import { getSelectedLines } from "@components/Editor/lib";
 import { IEditorTabState } from "@hooks/editorStore";
-import useScriptStore from "@hooks/scriptStore";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -43,8 +42,6 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
         save: state.save,
       }))
     );
-    const { setIsCreateModalOpen: setIsCreateScriptModalOpen } =
-      useScriptStore();
 
     const onChange = useMemo(
       () =>
@@ -58,7 +55,7 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
         if (fileId) {
           await save(name);
         } else {
-          setIsCreateScriptModalOpen(true);
+          // setIsCreateScriptModalOpen(true);
         }
       },
       [fileId]
