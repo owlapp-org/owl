@@ -1,5 +1,5 @@
-import { validateFileName } from "@components/Editor/lib/validations";
 import useEditorStore from "@hooks/editorStore";
+import { FileExtensions } from "@lib/validations";
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import IFile from "@ts/interfaces/file_interface";
 import { IScript } from "@ts/interfaces/script_interface";
@@ -22,10 +22,13 @@ const CreateFileModal: FC = () => {
   }, [open]);
 
   const handleCreateFile = async () => {
-    if (!validateFileName(name, fileType)) {
-      return;
+    try {
+      setIsLoading(true);
+      FileExtensions.validate(name, fileType);
+      await onSave(name);
+    } finally {
+      setIsLoading(false);
     }
-    onSave(name);
   };
 
   const setTabFile = (file: IFile) => {
