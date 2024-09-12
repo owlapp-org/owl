@@ -20,7 +20,9 @@ interface IContentProps {
 }
 
 import { getSelectedLines, getSelection } from "@components/Editor/lib";
+import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { IEditorTabState } from "@hooks/editorStore";
+import { notifications } from "@mantine/notifications";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -31,18 +33,20 @@ export interface ExtendedReactCodeMirrorRef extends ReactCodeMirrorRef {
   getSelection?: () => string;
 }
 
-const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
+const ScriptCode = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
   function Code({ store, onExecute, ...other }, ref) {
     const codeMirrorRef = useRef<ReactCodeMirrorRef>(null);
-    const { fileId, content, setContent, save } = useStore(
+    const { fileId, fileType, content, setContent, save } = useStore(
       store,
       useShallow((state) => ({
         fileId: state.file.id,
+        fileType: state.file.fileType,
         content: state.content,
         setContent: state.setContent,
         save: state.save,
       }))
     );
+    const { showModal: showCreateFileModal } = useCreateFileModalStore();
 
     const onChange = useMemo(
       () =>
@@ -56,7 +60,18 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
         if (fileId) {
           await save(name);
         } else {
-          // setIsCreateScriptModalOpen(true);
+          if (!fileType) {
+            notifications.show({
+              color: "red",
+              title: "Error",
+              message: "Unknown file type",
+            });
+            return;
+          }
+          showCreateFileModal({
+            content: content,
+            fileType: fileType,
+          });
         }
       },
       [fileId]
@@ -128,4 +143,4 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
   }
 );
 
-export default memo(Code);
+export default memo(ScriptCode);

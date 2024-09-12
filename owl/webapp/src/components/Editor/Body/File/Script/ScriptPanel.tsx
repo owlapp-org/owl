@@ -12,7 +12,7 @@ interface IPanelProps {
   store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
 }
 
-const Panel: React.FC<IPanelProps> = ({
+const ScriptPanel: React.FC<IPanelProps> = ({
   result,
   store,
   active = 0,
@@ -78,4 +78,4 @@ const Panel: React.FC<IPanelProps> = ({
   );
 };
 
-export default Panel;
+export default ScriptPanel;

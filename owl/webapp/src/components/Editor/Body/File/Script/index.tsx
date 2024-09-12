@@ -10,8 +10,8 @@ import {
   Panel as ResizablePanel,
 } from "react-resizable-panels";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
-import Code, { ExtendedReactCodeMirrorRef } from "./Code";
-import Panel from "./Panel";
+import Code, { ExtendedReactCodeMirrorRef } from "./ScriptCode";
+import Panel from "./ScriptPanel";
 import ScriptToolbar from "./ScriptToolbar";
 
 interface IScriptProps {

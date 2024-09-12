@@ -8,10 +8,10 @@ import { debounce } from "lodash";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 
 interface IMacroCodeProps {
-  store: UseBoundStore<StoreApi<IEditorTabState>>;
+  store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
 }
 
-import { IEditorTabState } from "@hooks/editorStore";
+import { IEditorScriptTabState } from "@hooks/editorStore";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";

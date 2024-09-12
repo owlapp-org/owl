@@ -12,7 +12,7 @@ import { useCreateFileModalStore } from "./useCreateFileModalStore";
 const CreateFileModal: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
-  const { tabId, open, fileType, destroy } = useCreateFileModalStore();
+  const { tabId, open, fileType, content, destroy } = useCreateFileModalStore();
   const { create: createScript } = useScriptStore();
   const { create: createMacroFile } = useMacroFileStore();
   const { findTabById } = useEditorStore();
@@ -23,9 +23,7 @@ const CreateFileModal: FC = () => {
   };
 
   useEffect(() => {
-    if (open) {
-      setName("");
-    }
+    open && setName("");
   }, [open]);
 
   const handleCreateScriptFile = async (): Promise<IScript | undefined> => {
@@ -37,7 +35,7 @@ const CreateFileModal: FC = () => {
       });
       return;
     }
-    return await createScript(name);
+    return await createScript(name, content);
   };
 
   const handleCreateMacroFile = async (): Promise<IMacroFile | undefined> => {
@@ -49,7 +47,7 @@ const CreateFileModal: FC = () => {
       });
       return;
     }
-    return await createMacroFile(name);
+    return await createMacroFile(name, content);
   };
 
   const setTabFile = (file: IScript | IMacroFile) => {
