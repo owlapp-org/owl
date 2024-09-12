@@ -20,7 +20,7 @@ export const validateFileName = (
       return true;
     }
     case FileType.MacroFile: {
-      if (!name.endsWith(".j2") && name.endsWith(".jinja")) {
+      if (!name.endsWith(".j2") && !name.endsWith(".jinja")) {
         notify &&
           notifications.show({
             title: "Warning",
