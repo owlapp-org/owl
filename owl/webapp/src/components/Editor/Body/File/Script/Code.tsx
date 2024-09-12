@@ -19,7 +19,7 @@ interface IContentProps {
   onExecute: () => void;
 }
 
-import { getSelectedLines } from "@components/Editor/lib";
+import { getSelectedLines, getSelection } from "@components/Editor/lib";
 import { IEditorTabState } from "@hooks/editorStore";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
@@ -28,6 +28,7 @@ import { useShallow } from "zustand/react/shallow";
 // Define a custom type that extends ReactCodeMirrorRef
 export interface ExtendedReactCodeMirrorRef extends ReactCodeMirrorRef {
   getSelectedLines?: () => string[];
+  getSelection?: () => string;
 }
 
 const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
@@ -86,6 +87,13 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
           return getSelectedLines(view);
         }
         return [];
+      },
+      getSelection: () => {
+        const view = codeMirrorRef.current?.view;
+        if (view) {
+          return getSelection(view);
+        }
+        return "";
       },
     }));
     useEffect(() => {

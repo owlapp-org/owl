@@ -1,9 +1,7 @@
 import "@components/Editor/styles.css";
 import { IEditorScriptTabState } from "@hooks/editorStore";
-import { CodeHighlight } from "@mantine/code-highlight";
 import { notifications } from "@mantine/notifications";
 import MacroFileService from "@services/macrofileService";
-import { IconBorderAll } from "@tabler/icons-react";
 import { IQueryResult } from "@ts/interfaces/database_interface";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -34,10 +32,22 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
   const [renderedContent, setRenderedContent] = useState("");
   const [activePanel, setActivePanel] = useState(0);
 
+  const selectionOrContent = (): string => {
+    let text = content || "";
+    if (codeRef.current) {
+      const selection = codeRef.current?.getSelection?.() ?? "";
+      if (selection) {
+        text = selection;
+      }
+    }
+    return text.trim();
+  };
+
   const handleRenderClick = async () => {
-    setIsRenderLoading(true);
     try {
-      const result: any = await MacroFileService.renderContent(content);
+      setIsRenderLoading(true);
+      const text = selectionOrContent();
+      const result: any = await MacroFileService.renderContent(text);
       setRenderedContent(result["content"]);
       setActivePanel(2);
     } catch (err) {
@@ -52,14 +62,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
   };
 
   const handleExecute = async () => {
-    let query = content || "";
-    if (codeRef.current) {
-      const selected = (codeRef.current?.getSelectedLines?.() ?? []).join("\n");
-      if (selected) {
-        query = selected;
-      }
-    }
-    query = query.trim();
+    const query = selectionOrContent();
     if (!query) {
       return;
     }
@@ -98,53 +101,12 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
         </ResizablePanel>
         <PanelResizeHandle className="panel-resize-handle" />
         <ResizablePanel maxSize={90} minSize={10}>
-          {queryResult && activePanel == 1 && (
-            <Panel result={queryResult} store={store} />
-          )}
-          {activePanel == 2 && (
-            <CodeHighlight
-              className="app-code-highlight macro-code-highlight"
-              styles={{
-                root: {
-                  marginTop: "0px !important;",
-                  paddingTop: "0px",
-                },
-              }}
-              style={{
-                marginTop: "0px !important;",
-                padding: "0px",
-                width: "100%",
-                height: "100%",
-                flexGrow: "1",
-              }}
-              code={renderedContent}
-              language="sql"
-              mt="md"
-            />
-          )}
-          {!queryResult && activePanel == 0 && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                width: "100%",
-                height: "100%",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <div>
-                <IconBorderAll
-                  size={48}
-                  stroke={1}
-                  color="var(--mantine-color-gray-2)"
-                />
-              </div>
-              <div style={{ color: "var(--mantine-color-gray-4)" }}>
-                Results will be shown here
-              </div>
-            </div>
-          )}
+          <Panel
+            renderedContent={renderedContent}
+            result={queryResult}
+            store={store}
+            active={activePanel}
+          />
         </ResizablePanel>
       </PanelGroup>
     </div>

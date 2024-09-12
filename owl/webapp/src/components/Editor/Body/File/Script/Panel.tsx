@@ -1,14 +1,23 @@
 import { IEditorScriptTabState } from "@hooks/editorStore";
+import { CodeHighlight } from "@mantine/code-highlight";
+import { IconBorderAll } from "@tabler/icons-react";
 import { IQueryResult } from "@ts/interfaces/database_interface";
 import { StoreApi, UseBoundStore } from "zustand";
 import ResultSetContainer from "./ResultSet";
 
 interface IPanelProps {
+  active?: number;
   result?: IQueryResult;
+  renderedContent?: string | null;
   store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
 }
 
-const Panel: React.FC<IPanelProps> = ({ result, store }) => {
+const Panel: React.FC<IPanelProps> = ({
+  result,
+  store,
+  active = 0,
+  renderedContent = null,
+}) => {
   return (
     <div
       style={{
@@ -18,7 +27,53 @@ const Panel: React.FC<IPanelProps> = ({ result, store }) => {
         width: "100%",
       }}
     >
-      <ResultSetContainer result={result} store={store} />
+      {active == 0 && !result && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            height: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div>
+            <IconBorderAll
+              size={48}
+              stroke={1}
+              color="var(--mantine-color-gray-2)"
+            />
+          </div>
+          <div style={{ color: "var(--mantine-color-gray-4)" }}>
+            Results will be shown here
+          </div>
+        </div>
+      )}
+      {active == 1 && result && (
+        <ResultSetContainer result={result} store={store} />
+      )}
+      {active == 2 && renderedContent !== null && (
+        <CodeHighlight
+          className="app-code-highlight macro-code-highlight"
+          styles={{
+            root: {
+              marginTop: "0px !important;",
+              paddingTop: "0px",
+            },
+          }}
+          style={{
+            marginTop: "0px !important;",
+            padding: "0px",
+            width: "100%",
+            height: "100%",
+            flexGrow: "1",
+          }}
+          code={renderedContent}
+          language="sql"
+          mt="md"
+        />
+      )}
     </div>
   );
 };

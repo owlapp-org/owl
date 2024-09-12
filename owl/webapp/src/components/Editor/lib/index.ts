@@ -20,3 +20,19 @@ export const getSelectedLines = (view: EditorView): string[] => {
 
   return selectedLines;
 };
+
+export const getSelection = (view: EditorView): string => {
+  const state = view.state;
+  const selection = state.selection.main;
+  const doc = state.doc;
+
+  // If no text is selected (cursor is on a single line), return an empty string
+  if (selection.from === selection.to) {
+    return "";
+  }
+
+  // Extract the selected text from the document
+  const selectedText = doc.sliceString(selection.from, selection.to);
+
+  return selectedText;
+};
