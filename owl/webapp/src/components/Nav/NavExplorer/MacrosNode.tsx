@@ -88,7 +88,7 @@ export default function MacroFilesNode() {
   const handleCreate = async () => {
     setIsLoading(true);
     try {
-      await showCreateFileModal({ fileType: FileType.MacroFile });
+      addTab(null, FileType.MacroFile);
     } finally {
       setIsLoading(false);
     }

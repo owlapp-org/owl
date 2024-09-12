@@ -286,7 +286,7 @@ export interface IEditorState {
   tabs: Record<string, UseBoundStore<StoreApi<IEditorTabState>>>;
   setActiveTab(id: string | null): void;
   getTabCount(): number;
-  addTab: (fileId?: number, fileType?: FileType) => void;
+  addTab: (fileId?: number | null, fileType?: FileType) => void;
   closeTab: (id: string) => void;
   closeAllTabs: () => void;
   closeOtherTabs: (id: string) => void;
@@ -300,7 +300,10 @@ const useEditorStore = create<IEditorState>((set, get) => ({
   tabs: {},
   setActiveTab: (activeTab: string) => set({ activeTab }),
   getTabCount: () => Object.keys(get().tabs).length,
-  addTab: (fileId?: number, fileType: FileType = FileType.ScriptFile) => {
+  addTab: (
+    fileId?: number | null,
+    fileType: FileType = FileType.ScriptFile
+  ) => {
     if (fileId) {
       for (const [id, store] of Object.entries(get().tabs)) {
         if (

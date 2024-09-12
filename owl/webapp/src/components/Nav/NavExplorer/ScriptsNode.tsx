@@ -7,12 +7,7 @@ import useScriptStore from "@hooks/scriptStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
-import {
-  IconCodeDots,
-  IconFileTypeSql,
-  IconPlus,
-  IconUpload,
-} from "@tabler/icons-react";
+import { IconCodeDots, IconFileTypeSql, IconUpload } from "@tabler/icons-react";
 import { FileType } from "@ts/enums/filetype_enum";
 import { IScript } from "@ts/interfaces/script_interface";
 import { useEffect, useRef, useState } from "react";
@@ -85,16 +80,6 @@ export default function ScriptsNode() {
   const handleRename = (file: IScript) => {
     showRenameFileModal({ file: { ...file, fileType: FileType.ScriptFile } });
   };
-  const handleCreate = async () => {
-    setIsLoading(true);
-    try {
-      await showCreateScriptModal({
-        fileType: FileType.ScriptFile,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
   const data: TreeNodeData[] = [
     {
       label: "Scripts",
@@ -113,18 +98,6 @@ export default function ScriptsNode() {
               alignItems: "center",
             }}
           >
-            <ActionIcon
-              className="root-node-action-icon"
-              loading={isLoading}
-              disabled={isLoading}
-              variant="transparent"
-              onClick={async (event) => {
-                event.stopPropagation();
-                await handleCreate();
-              }}
-            >
-              <IconPlus stroke={1} />
-            </ActionIcon>
             <ActionIcon
               className="root-node-action-icon"
               loading={isLoading}
