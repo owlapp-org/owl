@@ -2,6 +2,7 @@
     margin-top: 0px !important;
 }
 
+.app-code-highlight .mantine-CodeHighlight-copy:hover,
 .app-code-highlight .mantine-CodeHighlight-copy {
     margin-left: 10px !important;
     background: transparent !important;
@@ -13,5 +14,5 @@
 }
 
 :where([data-mantine-color-scheme='light']) .app-code-highlight {
-    --code-background: var(--mantine-color-orange-0) !important;
+    --code-background: #FFF9F1 !important;
 }
