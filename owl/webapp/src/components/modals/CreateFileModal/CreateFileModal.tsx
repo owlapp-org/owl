@@ -1,10 +1,7 @@
+import { validateFileName } from "@components/Editor/lib/validations";
 import useEditorStore from "@hooks/editorStore";
-import useMacroFileStore from "@hooks/macrofileStore";
-import useScriptStore from "@hooks/scriptStore";
 import { Button, Group, Modal, TextInput } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { FileType } from "@ts/enums/filetype_enum";
-import { IMacroFile } from "@ts/interfaces/macrofile_interface";
+import IFile from "@ts/interfaces/file_interface";
 import { IScript } from "@ts/interfaces/script_interface";
 import { FC, useEffect, useState } from "react";
 import { useCreateFileModalStore } from "./useCreateFileModalStore";
@@ -12,9 +9,7 @@ import { useCreateFileModalStore } from "./useCreateFileModalStore";
 const CreateFileModal: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
-  const { tabId, open, fileType, content, destroy } = useCreateFileModalStore();
-  const { create: createScript } = useScriptStore();
-  const { create: createMacroFile } = useMacroFileStore();
+  const { tabId, open, fileType, onSave, destroy } = useCreateFileModalStore();
   const { findTabById } = useEditorStore();
 
   const resetAndDestroy = () => {
@@ -26,31 +21,14 @@ const CreateFileModal: FC = () => {
     open && setName("");
   }, [open]);
 
-  const handleCreateScriptFile = async (): Promise<IScript | undefined> => {
-    if (!name.endsWith(".sql")) {
-      notifications.show({
-        title: "Warning",
-        message: "Only 'sql' file extension is allowed.",
-        color: "yellow",
-      });
+  const handleCreateFile = async () => {
+    if (!validateFileName(name, fileType)) {
       return;
     }
-    return await createScript(name, content);
+    onSave(name);
   };
 
-  const handleCreateMacroFile = async (): Promise<IMacroFile | undefined> => {
-    if (!(name.endsWith(".j2") || name.endsWith(".jinja"))) {
-      notifications.show({
-        title: "Warning",
-        message: "Only ('j2', 'jinja') file extensions are allowed.",
-        color: "yellow",
-      });
-      return;
-    }
-    return await createMacroFile(name, content);
-  };
-
-  const setTabFile = (file: IScript | IMacroFile) => {
+  const setTabFile = (file: IFile) => {
     if (tabId) {
       const tabStore = findTabById(tabId);
       if (tabStore) {
@@ -67,16 +45,7 @@ const CreateFileModal: FC = () => {
     setIsLoading(true);
     let file: IScript | undefined = undefined;
     try {
-      switch (fileType) {
-        case FileType.ScriptFile: {
-          file = await handleCreateScriptFile();
-          break;
-        }
-        case FileType.MacroFile: {
-          file = await handleCreateMacroFile();
-          break;
-        }
-      }
+      handleCreateFile();
       file && fileType && setTabFile(file);
     } catch (err) {
       console.error(err);

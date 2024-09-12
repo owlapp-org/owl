@@ -11,22 +11,26 @@ interface IMacroCodeProps {
   store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
 }
 
+import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { IEditorScriptTabState } from "@hooks/editorStore";
+import { FileType } from "@ts/enums/filetype_enum";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
 const MacroCode: React.FC<IMacroCodeProps> = ({ store, ...other }) => {
   const codeMirrorRef = useRef<ReactCodeMirrorRef>(null);
-  const { fileId, content, setContent, save } = useStore(
+  const { file, fileId, content, setContent, save } = useStore(
     store,
     useShallow((state) => ({
+      file: state.file,
       fileId: state.file.id,
       content: state.content,
       setContent: state.setContent,
       save: state.save,
     }))
   );
+  const { showModal: showCreateFileModal } = useCreateFileModalStore();
 
   const onChange = useMemo(
     () =>
@@ -40,7 +44,10 @@ const MacroCode: React.FC<IMacroCodeProps> = ({ store, ...other }) => {
       if (fileId) {
         await save(name);
       } else {
-        // setIsCreateScriptModalOpen(true);
+        showCreateFileModal({
+          fileType: FileType.MacroFile,
+          onSave: save,
+        });
       }
     },
     [fileId]

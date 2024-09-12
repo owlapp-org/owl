@@ -7,7 +7,7 @@ interface ICreateFileModalState {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   tabId?: string;
   fileType: FileType | null;
-  content: string;
+  onSave: (name: string) => void;
   showModal: (
     options: Omit<
       ICreateFileModalState,
@@ -26,7 +26,7 @@ export const useCreateFileModalStore = create<ICreateFileModalState>(
     size: "md",
     tabId: undefined,
     fileType: null,
-    content: "",
+    onSave: (name: string) => {},
     showModal: (options) => set({ ...options, open: true }),
     closeModal: () => set({ open: false }),
     reset: () => set({ open: false, title: "Create File" }),

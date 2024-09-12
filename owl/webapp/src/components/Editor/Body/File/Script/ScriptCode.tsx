@@ -23,6 +23,7 @@ import { getSelectedLines, getSelection } from "@components/Editor/lib";
 import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { IEditorTabState } from "@hooks/editorStore";
 import { notifications } from "@mantine/notifications";
+import { FileType } from "@ts/enums/filetype_enum";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -69,8 +70,8 @@ const ScriptCode = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
             return;
           }
           showCreateFileModal({
-            content: content,
-            fileType: fileType,
+            fileType: FileType.MacroFile,
+            onSave: save,
           });
         }
       },
