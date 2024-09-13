@@ -46,7 +46,7 @@ const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
     } else {
       switch (file.fileType) {
         case FileType.ScriptFile: {
-          showCreateFileModal({ fileType: FileType.ScriptFile, tabId });
+          showCreateFileModal({ onSave: save, fileType: FileType.ScriptFile });
         }
       }
     }
@@ -62,7 +62,7 @@ const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
       return;
     }
     setIsLoading(true);
-    showRenameFileModal({ file: { ...file, fileType: FileType.ScriptFile } });
+    showRenameFileModal({ file: { ...file } });
     setIsLoading(false);
   };
 
