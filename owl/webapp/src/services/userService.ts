@@ -33,9 +33,7 @@ namespace UserService {
     name && (payload = { ...payload, name });
     password && (payload = { ...payload, password });
 
-    return request
-      .put("users/password", payload)
-      .then((response) => response.data);
+    return request.put("users", payload).then((response) => response.data);
   };
 }
 
