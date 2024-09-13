@@ -4,14 +4,14 @@ from apiflask import APIBlueprint, FileSchema, abort
 from app.constants import ALLOWED_SCRIPT_EXTENSIONS
 from app.lib.fs import is_extension_valid
 from app.models.script import Script
-from app.schemas.base import MessageOut
+from app.schemas.base import ExistsOut, MessageOut
 from app.schemas.script_schema import (
     CreateScriptIn,
     ScriptContentOut,
     ScriptOut,
     UpdateScriptIn,
 )
-from flask import jsonify, make_response, request, send_file
+from flask import request, send_file
 from flask_jwt_extended import get_jwt_identity
 
 logger = getLogger(__name__)
@@ -53,7 +53,7 @@ def get_script(id: int):
 
 @bp.route("/<int:id>/exists", methods=["GET"])
 @bp.output(
-    ScriptOut.Schema,
+    ExistsOut.Schema,
     status_code=200,
     description="Check if the file with given id exists or not.",
 )
@@ -63,12 +63,10 @@ def get_script(id: int):
 )
 def check_exists(id: int):
     try:
-        if script := Script.find_by_id_and_owner(id=id, owner_id=get_jwt_identity()):
-            return jsonify({"exists": script.file_exists()}), 200
-        else:
-            return jsonify({"exists": False}), 200
+        script = Script.find_by_id_and_owner(id=id, owner_id=get_jwt_identity())
+        return ExistsOut(exists=script is not None)
     except Exception as e:
-        return make_response(f"Unable to check. {str(e)}"), 500
+        return abort(500, f"Unable to check. {str(e)}")
 
 
 @bp.route("/<int:id>/content", methods=["GET"])

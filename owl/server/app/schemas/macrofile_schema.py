@@ -2,12 +2,13 @@ from dataclasses import field
 from typing import Optional
 
 from apiflask.validators import Length
+from app.constants import ALLOWED_MACROFILE_EXTENSIONS
 from marshmallow import ValidationError, post_load
 from marshmallow_dataclass import dataclass
 
 
 @dataclass
-class ScriptOut:
+class MacroFileOut:
     id: int = field()
     path: str = field()
     name: str = field()
@@ -15,29 +16,46 @@ class ScriptOut:
 
 
 @dataclass
-class ScriptContentOut:
+class MacroFileContentOut:
     content: str = field()
 
 
 @dataclass
-class CreateScriptIn:
+class CreateMacroFileIn:
     name: str = field(metadata={"validate": Length(min=5)})
     content: Optional[str] = field(default=None)
 
     @post_load
     def name_must_end_with_sql(self, data, **kwargs):
-        if not data.get("name").endswith(".sql"):
+        if not data.get("name"):
+            return data
+        extension = data.get("name").split(".")[-1]
+        if extension not in ALLOWED_MACROFILE_EXTENSIONS:
             raise ValidationError("File name must end with .sql")
         return data
 
 
 @dataclass
-class UpdateScriptIn:
+class UpdateMacroFileIn:
     name: Optional[str] = field(metadata={"required": False})
     content: Optional[str] = field(metadata={"required": False})
 
     @post_load
     def name_must_end_with_sql(self, data, **kwargs):
-        if data.get("name") and not data.get("name").endswith(".sql"):
+        if not data.get("name"):
+            return data
+        extension = data.get("name").split(".")[-1]
+        if extension not in ALLOWED_MACROFILE_EXTENSIONS:
             raise ValidationError("File name must end with .sql")
         return data
+
+
+@dataclass
+class RenderContentIn:
+    content: str = field()
+    command: Optional[str] = field()
+
+
+@dataclass
+class RenderContentOut:
+    content: str = field()

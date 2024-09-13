@@ -30,21 +30,20 @@ namespace DatabaseService {
     request.delete(`databases/${id}`);
 
   export const run = async (
-    id: number | string | null | undefined,
+    database_id: number | string | null | undefined,
     query: string,
     start_row?: number,
     end_row?: number,
     with_total_count: boolean = true
   ): Promise<IQueryResult> => {
-    const url = id == null ? "databases/run" : `databases/${id}/run`;
     return request
       .post(
-        url,
+        "databases/run",
         {
           query,
         },
         {
-          params: { start_row, end_row, with_total_count },
+          params: { start_row, end_row, with_total_count, database_id },
         }
       )
       .then((response) => response.data);

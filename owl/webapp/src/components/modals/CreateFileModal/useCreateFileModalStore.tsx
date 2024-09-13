@@ -1,13 +1,16 @@
+import { FileType } from "@ts/enums/filetype_enum";
 import { create } from "zustand";
 
-interface ICreateScriptModalState {
+interface ICreateFileModalState {
   open: boolean;
   title?: string;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   tabId?: string;
+  fileType: FileType | null;
+  onSave: (name: string) => void;
   showModal: (
     options: Omit<
-      ICreateScriptModalState,
+      ICreateFileModalState,
       "showModal" | "open" | "reset" | "destroy" | "closeModal"
     >
   ) => void;
@@ -16,15 +19,17 @@ interface ICreateScriptModalState {
   destroy: () => void;
 }
 
-export const useCreateScriptModalStore = create<ICreateScriptModalState>(
+export const useCreateFileModalStore = create<ICreateFileModalState>(
   (set, get) => ({
     open: false,
-    title: "Create Script",
+    title: "Create File",
     size: "md",
     tabId: undefined,
+    fileType: null,
+    onSave: (name: string) => {},
     showModal: (options) => set({ ...options, open: true }),
     closeModal: () => set({ open: false }),
-    reset: () => set({ open: false, title: "Create Script" }),
+    reset: () => set({ open: false, title: "Create File" }),
     destroy: () => {
       const state = get();
       state.closeModal();

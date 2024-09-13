@@ -2,13 +2,12 @@ import { create } from "zustand";
 
 import { notifications } from "@mantine/notifications";
 import { IScript } from "@ts/interfaces/script_interface";
-import ScriptService from "@services/scriptService";
+import MacroFileService from "@services/macrofileService";
 import useEditorStore from "./editorStore";
+import { IMacroFile } from "@ts/interfaces/macrofile_interface";
 
-interface IScriptState {
-  scripts: IScript[];
-  isCreateModalOpen: boolean;
-  isRenameModalOpen: boolean;
+interface IMacroFileState {
+  macrofiles: IMacroFile[];
   create: (name: string, content?: string) => Promise<IScript>;
   updateContent: (id: number, content: string) => void;
   fetchContent: (id: number) => Promise<string>;
@@ -19,16 +18,14 @@ interface IScriptState {
   findById: (id: number) => IScript | undefined;
 }
 
-const useScriptStore = create<IScriptState>((set, get) => ({
-  scripts: [],
-  isCreateModalOpen: false,
-  isRenameModalOpen: false,
+const useMacroFileStore = create<IMacroFileState>((set, get) => ({
+  macrofiles: [],
   updateContent: async (id: number, content: string) => {
-    return ScriptService.updateContent(id, content);
+    return MacroFileService.updateContent(id, content);
   },
   fetchContent: async (id: number) => {
     try {
-      const content = await ScriptService.fetchContent(id);
+      const content = await MacroFileService.fetchContent(id);
       return content;
     } catch (e) {
       notifications.show({
@@ -41,8 +38,8 @@ const useScriptStore = create<IScriptState>((set, get) => ({
   },
   fetchAll: async () => {
     try {
-      const files = await ScriptService.fetchAll();
-      set({ scripts: files });
+      const files = await MacroFileService.fetchAll();
+      set({ macrofiles: files });
     } catch (error) {
       console.error("Failed to fetch script files", error);
       throw error;
@@ -50,8 +47,8 @@ const useScriptStore = create<IScriptState>((set, get) => ({
   },
   create: async (name: string, content?: string) => {
     try {
-      const script = await ScriptService.create(name, content);
-      set((state) => ({ scripts: [...state.scripts, script] }));
+      const script = await MacroFileService.create(name, content);
+      set((state) => ({ macrofiles: [...state.macrofiles, script] }));
       notifications.show({
         title: "Success",
         message: `Script file created successfully`,
@@ -69,8 +66,8 @@ const useScriptStore = create<IScriptState>((set, get) => ({
   },
   upload: async (data: FormData) => {
     try {
-      const file = await ScriptService.upload(data);
-      set((state) => ({ scripts: [...state.scripts, file] }));
+      const file = await MacroFileService.upload(data);
+      set((state) => ({ macrofiles: [...state.macrofiles, file] }));
       notifications.show({
         title: "Success",
         message: `Script file uploaded successfully`,
@@ -86,11 +83,11 @@ const useScriptStore = create<IScriptState>((set, get) => ({
   },
   remove: async (id: number) => {
     try {
-      await ScriptService.remove(id);
+      await MacroFileService.remove(id);
       set((state) => ({
-        scripts: state.scripts.filter((s) => s.id !== id),
+        macrofiles: state.macrofiles.filter((mf) => mf.id !== id),
       }));
-      // if the script is open, close it
+      // if the macro file is open, close it
       const editorTab = Object.entries(useEditorStore.getState().tabs).find(
         ([_, tab]) => tab.getState().file.id === id
       );
@@ -100,22 +97,22 @@ const useScriptStore = create<IScriptState>((set, get) => ({
       }
       notifications.show({
         title: "Success",
-        message: `Script file deleted successfully`,
+        message: `Macro file deleted successfully`,
       });
     } catch (error) {
-      console.error("Failed to delete script", error);
+      console.error("Failed to delete macro", error);
       notifications.show({
         color: "red",
         title: "Error",
-        message: `Failed to delete script file: ${error}`,
+        message: `Failed to delete macro file: ${error}`,
       });
     }
   },
   rename: async (id: number, name: string) => {
     try {
-      const file = await ScriptService.update(id, name);
+      const file = await MacroFileService.update(id, name);
       set((state) => ({
-        scripts: state.scripts.map((s) => (s.id === id ? file : s)),
+        macrofiles: state.macrofiles.map((mf) => (mf.id === id ? file : mf)),
       }));
 
       const editorTab = Object.entries(useEditorStore.getState().tabs).find(
@@ -146,13 +143,13 @@ const useScriptStore = create<IScriptState>((set, get) => ({
     }
   },
   findById: (id: number) => {
-    const scripts = get().scripts;
-    for (let i = 0; i < scripts.length; i++) {
-      if (scripts[i].id === id) {
-        return scripts[i];
+    const macrofiles = get().macrofiles;
+    for (let i = 0; i < macrofiles.length; i++) {
+      if (macrofiles[i].id === id) {
+        return macrofiles[i];
       }
     }
   },
 }));
 
-export default useScriptStore;
+export default useMacroFileStore;

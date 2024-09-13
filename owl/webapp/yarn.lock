@@ -374,7 +374,33 @@
     "@codemirror/view" "^6.27.0"
     "@lezer/common" "^1.1.0"
 
-"@codemirror/lang-javascript@^6.2.2":
+"@codemirror/lang-css@^6.0.0":
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/@codemirror/lang-css/-/lang-css-6.3.0.tgz#607628559f2471b385c6070ec795072a55cffc0b"
+  integrity sha512-CyR4rUNG9OYcXDZwMPvJdtb6PHbBDKUc/6Na2BIwZ6dKab1JQqKa4di+RNRY9Myn7JB81vayKwJeQ7jEdmNVDA==
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@lezer/common" "^1.0.2"
+    "@lezer/css" "^1.1.7"
+
+"@codemirror/lang-html@^6.4.9":
+  version "6.4.9"
+  resolved "https://registry.yarnpkg.com/@codemirror/lang-html/-/lang-html-6.4.9.tgz#d586f2cc9c341391ae07d1d7c545990dfa069727"
+  integrity sha512-aQv37pIMSlueybId/2PVSP6NPnmurFDVmZwzc7jszd2KAF8qd4VBbvNYPXWQq90WIARjsdVkPbw29pszmHws3Q==
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/lang-css" "^6.0.0"
+    "@codemirror/lang-javascript" "^6.0.0"
+    "@codemirror/language" "^6.4.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.17.0"
+    "@lezer/common" "^1.0.0"
+    "@lezer/css" "^1.1.0"
+    "@lezer/html" "^1.3.0"
+
+"@codemirror/lang-javascript@^6.0.0", "@codemirror/lang-javascript@^6.2.2":
   version "6.2.2"
   resolved "https://registry.npmjs.org/@codemirror/lang-javascript/-/lang-javascript-6.2.2.tgz"
   integrity sha512-VGQfY+FCc285AhWuwjYxQyUQcYurWlxdKYT4bqwr3Twnd5wP5WSeu52t4tvvuWmljT4EmgEgZCqSieokhtY8hg==
@@ -399,7 +425,7 @@
     "@lezer/highlight" "^1.0.0"
     "@lezer/lr" "^1.0.0"
 
-"@codemirror/language@^6.0.0", "@codemirror/language@^6.6.0":
+"@codemirror/language@^6.0.0", "@codemirror/language@^6.4.0", "@codemirror/language@^6.6.0":
   version "6.10.2"
   resolved "https://registry.npmjs.org/@codemirror/language/-/language-6.10.2.tgz"
   integrity sha512-kgbTYTo0Au6dCSc/TFy7fK3fpJmgHDv1sG1KNQKJXVi+xBTEeBPY/M30YXiU6mMXeH+YIDLsbrT4ZwNRdtF+SA==
@@ -410,6 +436,13 @@
     "@lezer/highlight" "^1.0.0"
     "@lezer/lr" "^1.0.0"
     style-mod "^4.0.0"
+
+"@codemirror/legacy-modes@^6.4.1":
+  version "6.4.1"
+  resolved "https://registry.yarnpkg.com/@codemirror/legacy-modes/-/legacy-modes-6.4.1.tgz#fae7b03cad1beada637fd3c12c568a3a7f63fe89"
+  integrity sha512-vdg3XY7OAs5uLDx2Iw+cGfnwtd7kM+Et/eMsqAGTfT/JKiVBQZXosTzjEbWAi/FrY6DcQIz8mQjBozFHZEUWQA==
+  dependencies:
+    "@codemirror/language" "^6.0.0"
 
 "@codemirror/lint@^6.0.0":
   version "6.8.1"
@@ -1019,10 +1052,19 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@lezer/common@^1.0.0", "@lezer/common@^1.1.0", "@lezer/common@^1.2.0":
+"@lezer/common@^1.0.0", "@lezer/common@^1.0.2", "@lezer/common@^1.1.0", "@lezer/common@^1.2.0":
   version "1.2.1"
   resolved "https://registry.npmjs.org/@lezer/common/-/common-1.2.1.tgz"
   integrity sha512-yemX0ZD2xS/73llMZIK6KplkjIjf2EvAHcinDi/TfJ9hS25G0388+ClHt6/3but0oOxinTcQHJLDXh6w1crzFQ==
+
+"@lezer/css@^1.1.0", "@lezer/css@^1.1.7":
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/@lezer/css/-/css-1.1.9.tgz#404563d361422c5a1fe917295f1527ee94845ed1"
+  integrity sha512-TYwgljcDv+YrV0MZFFvYFQHCfGgbPMR6nuqLabBdmZoFH3EP1gvw8t0vae326Ne3PszQkbXfVBjCnf3ZVCr0bA==
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
 
 "@lezer/highlight@^1.0.0", "@lezer/highlight@^1.1.3":
   version "1.2.0"
@@ -1030,6 +1072,15 @@
   integrity sha512-WrS5Mw51sGrpqjlh3d4/fOwpEV2Hd3YOkp9DBt4k8XZQcoTHZFB7sx030A6OcahF4J1nDQAa3jXlTVVYH50IFA==
   dependencies:
     "@lezer/common" "^1.0.0"
+
+"@lezer/html@^1.3.0":
+  version "1.3.10"
+  resolved "https://registry.yarnpkg.com/@lezer/html/-/html-1.3.10.tgz#1be9a029a6fe835c823b20a98a449a630416b2af"
+  integrity sha512-dqpT8nISx/p9Do3AchvYGV3qYc4/rKr3IBZxlHmpIKam56P47RSHkSF5f13Vu9hebS1jM0HmtJIwLbWz1VIY6w==
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
 
 "@lezer/javascript@^1.0.0":
   version "1.4.17"
@@ -1046,6 +1097,14 @@
   integrity sha512-CHsKq8DMKBf9b3yXPDIU4DbH+ZJd/sJdYOW2llbW/HudP5u0VS6Bfq1hLYfgU7uAYGFIyGGQIsSOXGPEErZiJw==
   dependencies:
     "@lezer/common" "^1.0.0"
+
+"@mantine/code-highlight@^7.12.2":
+  version "7.12.2"
+  resolved "https://registry.yarnpkg.com/@mantine/code-highlight/-/code-highlight-7.12.2.tgz#bbcb38ef045fa71c1a9260fb2cde282ed0c87d52"
+  integrity sha512-eVVA6ZmtV2qV60qiQW3wvFbs0ryCmzrCJaqU4GV0D+6lGVn8mwbbo36+Jt4Qz/6FrswPD99ALRBlOwHDJe0P8A==
+  dependencies:
+    clsx "^2.1.1"
+    highlight.js "^11.9.0"
 
 "@mantine/core@^7.11.2":
   version "7.11.2"
@@ -3061,6 +3120,11 @@ headers-polyfill@^4.0.2:
   version "4.0.3"
   resolved "https://registry.npmjs.org/headers-polyfill/-/headers-polyfill-4.0.3.tgz"
   integrity sha512-IScLbePpkvO846sIwOtOTDjutRMWdXdJmXdMvk6gCBHxFO8d+QKOQedyZSxFTTFYRSmlgSTDtXqqq4pcenBXLQ==
+
+highlight.js@^11.9.0:
+  version "11.10.0"
+  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-11.10.0.tgz#6e3600dc4b33d6dc23d5bd94fbf72405f5892b92"
+  integrity sha512-SYVnVFswQER+zu1laSya563s+F8VDGt7o35d4utbamowvUNLLMovFqwCLSocpZTz3MgaSRA1IbqRWZv97dtErQ==
 
 hoist-non-react-statics@^1.2.0:
   version "1.2.0"

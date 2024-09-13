@@ -8,7 +8,6 @@ import {
   forwardRef,
   memo,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -19,9 +18,11 @@ interface IContentProps {
   onExecute: () => void;
 }
 
-import { getSelectedLines } from "@components/Editor/lib";
+import { getSelectedLines, getSelection } from "@components/Editor/lib";
+import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { IEditorTabState } from "@hooks/editorStore";
-import useScriptStore from "@hooks/scriptStore";
+import { notifications } from "@mantine/notifications";
+import { FileType } from "@ts/enums/filetype_enum";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -29,36 +30,50 @@ import { useShallow } from "zustand/react/shallow";
 // Define a custom type that extends ReactCodeMirrorRef
 export interface ExtendedReactCodeMirrorRef extends ReactCodeMirrorRef {
   getSelectedLines?: () => string[];
+  getSelection?: () => string;
 }
 
-const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
+const ScriptCode = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
   function Code({ store, onExecute, ...other }, ref) {
     const codeMirrorRef = useRef<ReactCodeMirrorRef>(null);
-    const { fileId, content, setContent, save } = useStore(
+    const { fileId, fileType, content, setContent, save } = useStore(
       store,
       useShallow((state) => ({
         fileId: state.file.id,
+        fileType: state.file.fileType,
         content: state.content,
         setContent: state.setContent,
         save: state.save,
       }))
     );
-    const { setIsCreateModalOpen: setIsCreateScriptModalOpen } =
-      useScriptStore();
+    const { showModal: showCreateFileModal } = useCreateFileModalStore();
 
     const onChange = useMemo(
       () =>
         debounce((newContent: string) => {
           setContent(newContent);
+          fileId && save();
         }, 200),
       [setContent]
     );
+
     const handleSave = useCallback(
       async (name?: string) => {
         if (fileId) {
           await save(name);
         } else {
-          setIsCreateScriptModalOpen(true);
+          if (!fileType) {
+            notifications.show({
+              color: "red",
+              title: "Error",
+              message: "Unknown file type",
+            });
+            return;
+          }
+          showCreateFileModal({
+            fileType: FileType.MacroFile,
+            onSave: save,
+          });
         }
       },
       [fileId]
@@ -90,23 +105,14 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
         }
         return [];
       },
+      getSelection: () => {
+        const view = codeMirrorRef.current?.view;
+        if (view) {
+          return getSelection(view);
+        }
+        return "";
+      },
     }));
-    useEffect(() => {
-      if (fileId) {
-        const debouncedSave = debounce(() => {
-          save();
-        }, 500);
-
-        const intervalId = setInterval(() => {
-          debouncedSave();
-        }, 500);
-
-        return () => {
-          clearInterval(intervalId);
-        };
-      }
-    }, [fileId, save]);
-
     return (
       <div id="code" style={{ height: "100%" }} {...other}>
         <CodeMirror
@@ -123,4 +129,4 @@ const Code = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
   }
 );
 
-export default memo(Code);
+export default memo(ScriptCode);

@@ -1,4 +1,5 @@
 import useDataFileStore from "@hooks/datafileStore";
+import useMacroFileStore from "@hooks/macrofileStore";
 import useScriptStore from "@hooks/scriptStore";
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -12,6 +13,7 @@ const RenameFileModal: FC = () => {
   const { file, open, destroy } = useRenameFileModalStore();
   const { rename: renameDataFile } = useDataFileStore();
   const { rename: renameScript } = useScriptStore();
+  const { rename: renameMacroFile } = useMacroFileStore();
 
   useEffect(() => {
     open && file && setName(file.name || "");
@@ -32,6 +34,9 @@ const RenameFileModal: FC = () => {
       }
       case FileType.DataFile: {
         return renameDataFile(file.id, name);
+      }
+      case FileType.MacroFile: {
+        return renameMacroFile(file.id, name);
       }
       default: {
         notifications.show({

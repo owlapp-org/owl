@@ -56,7 +56,12 @@ services:
     build:
       context: . # Set build context to the root of the project
       dockerfile: Dockerfile # Ensure this path is correct]
-    command: ["sh", "-c", "./wait-for-flask.sh flask 5000 pytest -s -x"]
+    command:
+      [
+        "sh",
+        "-c",
+        "./wait-for-flask.sh flask 5000 pytest -s -x -o log_cli=true -o log_cli_level=DEBUG",
+      ]
     depends_on:
       - postgres
       - migrate
@@ -67,6 +72,7 @@ services:
       OWL_ENV_FILE: ".env.test"
       STORAGE_BASE_PATH: "/app/storage"
       FLASK_API_URL: "http://flask:5000" # Add this if your tests need to access the Flask service
+      LOG_LEVEL: "DEBUG"
 
   bandit:
     build:

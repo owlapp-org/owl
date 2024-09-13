@@ -81,7 +81,7 @@ def test_update_password(use_user):
     assert response.status_code == 200, response.text
     access_token = response.json()["access_token"]
     response = requests.put(
-        api_url("users/password"),
+        api_url("users"),
         json={"password": "test1"},
         headers={"Authorization": f"Bearer {access_token}"},
     )

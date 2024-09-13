@@ -1,33 +1,39 @@
+import MacroFileMenu from "@components/MacroFileMenu";
 import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
-import ScriptMenu from "@components/ScriptMenu";
 import TreeNode from "@components/TreeNode";
 import useEditorStore from "@hooks/editorStore";
-import useScriptStore from "@hooks/scriptStore";
+import useMacroFileStore from "@hooks/macrofileStore";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
-import { IconCodeDots, IconFileTypeSql, IconUpload } from "@tabler/icons-react";
+import {
+  IconCube,
+  IconFile3d,
+  IconPlus,
+  IconUpload,
+} from "@tabler/icons-react";
 import { FileType } from "@ts/enums/filetype_enum";
+import { IMacroFile } from "@ts/interfaces/macrofile_interface";
 import { IScript } from "@ts/interfaces/script_interface";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 import "./styles.upload.css";
 
 function toNode(
-  script: IScript,
+  macrofile: IMacroFile,
   onDelete: (id: number) => void,
   onRename: (file: IScript) => void,
   onClick: (e: any) => void
 ): TreeNodeData {
   return {
-    label: script.name,
-    value: `${script.id}`,
+    label: macrofile.name,
+    value: `${macrofile.id}`,
     nodeProps: {
       onClick,
       icon: (
         <div>
-          <IconFileTypeSql
+          <IconFile3d
             stroke={1}
             size={18}
             color="var(--mantine-color-gray-8)"
@@ -35,8 +41,8 @@ function toNode(
         </div>
       ),
       actions: (
-        <ScriptMenu
-          script={script}
+        <MacroFileMenu
+          macrofile={macrofile}
           onDelete={onDelete}
           onRename={onRename}
           className="menu-icon"
@@ -46,13 +52,12 @@ function toNode(
   };
 }
 
-export default function ScriptsNode() {
-  const { scripts, fetchAll, remove, upload } = useScriptStore();
+export default function MacroFilesNode() {
+  const { macrofiles, fetchAll, remove, upload } = useMacroFileStore();
   const openRef = useRef<() => void>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { addTab } = useEditorStore();
   const { showModal: showRenameFileModal } = useRenameFileModalStore();
-  const { showModal: showCreateScriptModal } = useCreateFileModalStore();
 
   useEffect(() => {
     fetchAll();
@@ -78,16 +83,24 @@ export default function ScriptsNode() {
     }
   };
   const handleRename = (file: IScript) => {
-    showRenameFileModal({ file: { ...file, fileType: FileType.ScriptFile } });
+    showRenameFileModal({ file: { ...file, fileType: FileType.MacroFile } });
+  };
+  const handleCreate = async () => {
+    setIsLoading(true);
+    try {
+      addTab(null, FileType.MacroFile);
+    } finally {
+      setIsLoading(false);
+    }
   };
   const data: TreeNodeData[] = [
     {
-      label: "Scripts",
-      value: "scripts",
+      label: "Macros",
+      value: "macros",
       nodeProps: {
         icon: (
           <div>
-            <IconCodeDots stroke={1} color="var(--mantine-color-blue-8)" />
+            <IconCube stroke={1} color="var(--mantine-color-blue-8)" />
           </div>
         ),
         actions: (
@@ -103,6 +116,18 @@ export default function ScriptsNode() {
               loading={isLoading}
               disabled={isLoading}
               variant="transparent"
+              onClick={async (event) => {
+                event.stopPropagation();
+                await handleCreate();
+              }}
+            >
+              <IconPlus stroke={1} />
+            </ActionIcon>
+            <ActionIcon
+              className="root-node-action-icon"
+              loading={isLoading}
+              disabled={isLoading}
+              variant="transparent"
               onClick={(event) => {
                 event.stopPropagation();
                 openRef.current?.();
@@ -113,10 +138,10 @@ export default function ScriptsNode() {
           </div>
         ),
       },
-      children: scripts.map((scriptFile) =>
-        toNode(scriptFile, remove, handleRename, (e: any) => {
+      children: macrofiles.map((macrofile) =>
+        toNode(macrofile, remove, handleRename, (e: any) => {
           e.stopPropagation();
-          addTab(scriptFile.id, FileType.ScriptFile);
+          addTab(macrofile.id, FileType.MacroFile);
         })
       ),
     },

@@ -145,25 +145,38 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             raise e
 
     @classmethod
-    def resolve_query_template(cls, query: str, owner_id: int) -> str:
+    def resolve_query_template(
+        cls, query: str, owner_id: int, macro_files: list = None
+    ) -> str:
+        from app.models import MacroFile
+
+        macro_files: list[MacroFile] = macro_files or []
+        combined_macro_files_content = "\n".join([c.read_file() for c in macro_files])
+
         files_path = os.path.join(
             settings.STORAGE_BASE_PATH, "users", str(owner_id), "files"
         )
-        query = jinja2.Template(query).render(files=files_path)
+        content = combined_macro_files_content + "\n" + query
+        query = jinja2.Template(content).render(files=files_path)
         return query
 
     @classmethod
-    def run(cls, id: int | None, query: str, owner_id: int, **kwargs) -> RunOut:
-        logger.debug("Received query", extra=query)
-
+    def run(
+        cls,
+        id: int | None,
+        query: str,
+        owner_id: int,
+        macro_files: list = None,
+        **kwargs,
+    ) -> RunOut:
+        logger.debug("Received query", extra={"query": query})
         query = _.chain(query).trim().trim_end(";").value()
-        query = cls.resolve_query_template(validate_query(query), owner_id)
+        query = cls.resolve_query_template(validate_query(query), owner_id, macro_files)
 
         statements = sqlparse.parse(query)
         if len(statements) == 0:
             raise QueryParseError(f"Failed to parse query {query}")
         if len(statements) > 1:
-            print(statements)
             raise MultipleStatementsNotAllowedError("Multiple statements not allowed")
 
         statement = statements[0]
@@ -202,7 +215,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
                 return database.run_execute(conn=conn, statement=statement)
 
     def run_execute(
-        self, conn: DuckDBPyConnection, statement: SqlParseStatement
+        self, conn: DuckDBPyConnection, statement: SqlParseStatement, **kwargs
     ) -> RunOut:
         statement_type = statement.get_type()
         result = conn.execute(str(statement))
@@ -232,6 +245,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         start_row: int = 0,
         end_row: int = settings.result_set_hard_limit,
         with_total_count: bool = True,
+        **kwargs,
     ) -> RunOut:
 
         offset = start_row

@@ -1,16 +1,15 @@
 import useEditorStore from "@hooks/editorStore";
-import useScriptStore from "@hooks/scriptStore";
+import { FileExtensions } from "@lib/validations";
 import { Button, Group, Modal, TextInput } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { FileType } from "@ts/enums/filetype_enum";
+import IFile from "@ts/interfaces/file_interface";
+import { IScript } from "@ts/interfaces/script_interface";
 import { FC, useEffect, useState } from "react";
-import { useCreateScriptModalStore } from "./useCreateScriptModalStore";
+import { useCreateFileModalStore } from "./useCreateFileModalStore";
 
-const CreateScriptModal: FC = () => {
+const CreateFileModal: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
-  const { tabId, open, destroy } = useCreateScriptModalStore();
-  const { create } = useScriptStore();
+  const { tabId, open, fileType, onSave, destroy } = useCreateFileModalStore();
   const { findTabById } = useEditorStore();
 
   const resetAndDestroy = () => {
@@ -19,35 +18,40 @@ const CreateScriptModal: FC = () => {
   };
 
   useEffect(() => {
-    if (open) {
-      setName("");
-    }
+    open && setName("");
   }, [open]);
 
-  const handleSubmit = async () => {
-    if (!name.endsWith(".sql")) {
-      notifications.show({
-        title: "Warning",
-        message: "Only 'sql' file extension is allowed.",
-        color: "yellow",
-      });
-      return;
-    }
-    setIsLoading(true);
+  const handleCreateFile = async () => {
     try {
       setIsLoading(true);
-      const script = await create(name);
-      if (tabId) {
-        const tabStore = findTabById(tabId);
-        if (tabStore) {
-          tabStore?.getState().setFile({
-            id: script.id,
-            name: script.name,
-            fileType: FileType.ScriptFile,
-          });
-        }
+      FileExtensions.validate(name, fileType);
+      await onSave(name);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const setTabFile = (file: IFile) => {
+    if (tabId) {
+      const tabStore = findTabById(tabId);
+      if (tabStore) {
+        tabStore?.getState().setFile({
+          id: file.id,
+          name: file.name,
+          fileType: fileType!,
+        });
       }
-    } catch (error) {
+    }
+  };
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    let file: IScript | undefined = undefined;
+    try {
+      handleCreateFile();
+      file && fileType && setTabFile(file);
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsLoading(false);
       resetAndDestroy();
@@ -55,7 +59,7 @@ const CreateScriptModal: FC = () => {
   };
 
   return (
-    <Modal opened={open} onClose={destroy} title="New Script">
+    <Modal opened={open} onClose={destroy} title="New File">
       <div style={{ display: "flex", flexDirection: "column" }}>
         <TextInput
           label="File Name"
@@ -82,4 +86,4 @@ const CreateScriptModal: FC = () => {
   );
 };
 
-export default CreateScriptModal;
+export default CreateFileModal;
