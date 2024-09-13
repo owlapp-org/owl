@@ -21,7 +21,7 @@ namespace UserService {
   export const updatePassword = async (password: string): Promise<IUser> => {
     return request
       .put("users/password", {
-        password: password,
+        password,
       })
       .then((response) => response.data);
   };
