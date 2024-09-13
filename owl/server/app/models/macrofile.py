@@ -90,12 +90,22 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
         return self
 
     @classmethod
-    def render_content(cls, owner_id: int, content: str, command: Optional[str] = None):
+    def render_content(
+        cls,
+        owner_id: int,
+        content: str,
+        command: Optional[str] = None,
+    ):
         files_path = os.path.join(
             settings.STORAGE_BASE_PATH, "users", str(owner_id), "files"
         )
         if command:
             content = content + "\n\n" + "{{" + command + "}}"
+
+        macro_files = cls.find_by_owner(owner_id)
+        macro_files_combined_content = "\n".join([m.read_file() for m in macro_files])
+
+        content = macro_files_combined_content + "\n" + content
 
         query = jinja2.Template(content).render(files=files_path)
         return query
