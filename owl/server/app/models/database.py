@@ -17,6 +17,8 @@ from app.errors.errors import (
 )
 from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
+from app.macros.index import default_macros
+from app.macros.macros import gen__read_script_file
 from app.models.base import TimestampMixin, db
 from app.models.mixins.user_space_mixin import UserSpaceMixin
 from app.schemas.database_schema import RunOut
@@ -156,9 +158,24 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         files_path = os.path.join(
             settings.STORAGE_BASE_PATH, "users", str(owner_id), "files"
         )
-        content = combined_macro_files_content + "\n" + query
-        query = jinja2.Template(content).render(files=files_path)
-        return query
+
+        template_base = "\n".join(
+            [
+                default_macros(),
+                combined_macro_files_content,
+            ]
+        )
+
+        text = "\n".join([template_base, query])
+        # todo 1- max_depth / quick win
+        # todo 2- dag implementation / better solution
+        for _ in range(3):
+            text = "\n".join([template_base, text])
+            text = jinja2.Template(text).render(
+                files=files_path,
+                read_script_file=gen__read_script_file(owner_id=owner_id),
+            )
+        return text
 
     @classmethod
     def run(

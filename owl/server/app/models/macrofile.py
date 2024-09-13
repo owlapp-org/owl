@@ -3,6 +3,8 @@ import os
 from typing import Optional
 
 import jinja2
+from app.macros.index import default_macros
+from app.macros.macros import gen__read_script_file
 from app.models.base import TimestampMixin, db
 from app.models.mixins.user_space_mixin import UserSpaceMixin
 from app.settings import settings
@@ -105,7 +107,15 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
         macro_files = cls.find_by_owner(owner_id)
         macro_files_combined_content = "\n".join([m.read_file() for m in macro_files])
 
-        content = macro_files_combined_content + "\n" + content
-
-        query = jinja2.Template(content).render(files=files_path)
+        content = "\n".join(
+            [
+                default_macros(),
+                macro_files_combined_content,
+                content,
+            ]
+        )
+        query = jinja2.Template(content).render(
+            files=files_path,
+            read_script_file=gen__read_script_file(owner_id=owner_id),
+        )
         return query
