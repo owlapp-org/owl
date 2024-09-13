@@ -52,7 +52,7 @@ const ScriptCode = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
       () =>
         debounce((newContent: string) => {
           setContent(newContent);
-          save();
+          fileId && save();
         }, 200),
       [setContent]
     );

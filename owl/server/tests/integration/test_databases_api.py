@@ -175,3 +175,37 @@ def test_execute(use_access_token):
     assert response.status_code == 200, response.text
     assert response.json()["statement_type"] == "SELECT"
     assert response.json()["data"] == [{"a": 1, "b": "a"}]
+
+
+def test_run_with_macros(use_access_token):
+    macro_file_name = "macro-test.j2"
+    macro_file_content = """
+        {% macro greet(name) %}
+            'Hello, {{ name }}!'
+        {% endmacro %}
+    """
+    response = requests.post(
+        api_url("macros"),
+        json={"name": macro_file_name, "content": macro_file_content},
+        headers={"Authorization": f"Bearer {use_access_token}"},
+    )
+    assert response.status_code == 200, response.text
+    id = response.json()["id"]
+    response = requests.get(
+        api_url(f"macros/{id}/exists"),
+        headers={"Authorization": f"Bearer {use_access_token}"},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["exists"]
+
+    query = "select {{ greet('Alice') }} as demo_col"
+    response = requests.post(
+        api_url("databases/run"),
+        json={
+            "query": query,
+        },
+        headers={"Authorization": f"Bearer {use_access_token}"},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["statement_type"] == "SELECT"
+    assert "Hello, Alice!" in response.json()["data"][0]["demo_col"]
