@@ -8,7 +8,6 @@ import {
   forwardRef,
   memo,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -53,9 +52,11 @@ const ScriptCode = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
       () =>
         debounce((newContent: string) => {
           setContent(newContent);
+          save();
         }, 200),
       [setContent]
     );
+
     const handleSave = useCallback(
       async (name?: string) => {
         if (fileId) {
@@ -112,22 +113,6 @@ const ScriptCode = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
         return "";
       },
     }));
-    useEffect(() => {
-      if (fileId) {
-        const debouncedSave = debounce(() => {
-          save();
-        }, 500);
-
-        const intervalId = setInterval(() => {
-          debouncedSave();
-        }, 500);
-
-        return () => {
-          clearInterval(intervalId);
-        };
-      }
-    }, [fileId, save]);
-
     return (
       <div id="code" style={{ height: "100%" }} {...other}>
         <CodeMirror

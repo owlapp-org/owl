@@ -5,7 +5,7 @@ import { keymap } from "@codemirror/view";
 import "@components/Editor/styles.css";
 import CodeMirror from "@uiw/react-codemirror";
 import { debounce } from "lodash";
-import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { memo, useCallback, useMemo, useRef } from "react";
 
 interface IMacroCodeProps {
   store: UseBoundStore<StoreApi<IEditorMacroFileTabState>>;
@@ -35,9 +35,11 @@ const MacroCode: React.FC<IMacroCodeProps> = ({ store, ...other }) => {
     () =>
       debounce((newContent: string) => {
         setContent(newContent);
+        save();
       }, 200),
     [setContent]
   );
+
   const handleSave = useCallback(
     async (name?: string) => {
       if (fileId) {
@@ -63,21 +65,6 @@ const MacroCode: React.FC<IMacroCodeProps> = ({ store, ...other }) => {
     ],
     [handleSave]
   );
-  useEffect(() => {
-    if (fileId) {
-      const debouncedSave = debounce(() => {
-        save();
-      }, 500);
-
-      const intervalId = setInterval(() => {
-        debouncedSave();
-      }, 500);
-
-      return () => {
-        clearInterval(intervalId);
-      };
-    }
-  }, [fileId, save]);
 
   return (
     <div id="code" style={{ height: "100%" }} {...other}>
