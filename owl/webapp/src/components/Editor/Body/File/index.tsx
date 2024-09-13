@@ -1,4 +1,7 @@
-import { IEditorScriptTabState } from "@hooks/editorStore";
+import {
+  IEditorMacroFileTabState,
+  IEditorScriptTabState,
+} from "@hooks/editorStore";
 import { notifications } from "@mantine/notifications";
 import { FileType } from "@ts/enums/filetype_enum";
 import React from "react";
@@ -9,13 +12,23 @@ import "./styles.css";
 
 const File: React.FC<{
   fileType?: FileType;
-  store: UseBoundStore<StoreApi<IEditorScriptTabState | IEditorScriptTabState>>;
+  store: UseBoundStore<
+    StoreApi<IEditorScriptTabState | IEditorMacroFileTabState>
+  >;
 }> = React.memo(({ fileType, store }) => {
   switch (fileType) {
     case FileType.ScriptFile:
-      return <Script store={store} />;
+      return (
+        <Script
+          store={store as UseBoundStore<StoreApi<IEditorScriptTabState>>}
+        />
+      );
     case FileType.MacroFile:
-      return <MacroFile store={store} />;
+      return (
+        <MacroFile
+          store={store as UseBoundStore<StoreApi<IEditorMacroFileTabState>>}
+        />
+      );
     case FileType.DataFile:
       notifications.show({
         color: "red",
@@ -24,7 +37,11 @@ const File: React.FC<{
       });
       return null;
     default:
-      return <Script store={store} />;
+      return (
+        <Script
+          store={store as UseBoundStore<StoreApi<IEditorScriptTabState>>}
+        />
+      );
   }
 });
 

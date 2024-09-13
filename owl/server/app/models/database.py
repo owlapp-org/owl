@@ -145,11 +145,19 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             raise e
 
     @classmethod
-    def resolve_query_template(cls, query: str, owner_id: int) -> str:
+    def resolve_query_template(
+        cls, query: str, owner_id: int, macro_files: list = None
+    ) -> str:
+        from app.models import MacroFile
+
+        macro_files: list[MacroFile] = macro_files or []
+        combined_macro_files_content = "\n".join([c.read_file() for c in macro_files])
+
         files_path = os.path.join(
             settings.STORAGE_BASE_PATH, "users", str(owner_id), "files"
         )
-        query = jinja2.Template(query).render(files=files_path)
+        content = combined_macro_files_content + "\n" + query
+        query = jinja2.Template(content).render(files=files_path)
         return query
 
     @classmethod

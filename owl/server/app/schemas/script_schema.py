@@ -41,9 +41,3 @@ class UpdateScriptIn:
         if data.get("name") and not data.get("name").endswith(".sql"):
             raise ValidationError("File name must end with .sql")
         return data
-
-    @post_load
-    def check_at_least_one_argument(self, data, **kwargs):
-        if not any([data.get("name"), data.get("content")]):
-            raise ValidationError("At least one argument must be provided.")
-        return data

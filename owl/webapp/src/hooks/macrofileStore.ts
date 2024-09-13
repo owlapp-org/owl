@@ -87,7 +87,7 @@ const useMacroFileStore = create<IMacroFileState>((set, get) => ({
       set((state) => ({
         macrofiles: state.macrofiles.filter((mf) => mf.id !== id),
       }));
-      // if the script is open, close it
+      // if the macro file is open, close it
       const editorTab = Object.entries(useEditorStore.getState().tabs).find(
         ([_, tab]) => tab.getState().file.id === id
       );
@@ -97,14 +97,14 @@ const useMacroFileStore = create<IMacroFileState>((set, get) => ({
       }
       notifications.show({
         title: "Success",
-        message: `Script file deleted successfully`,
+        message: `Macro file deleted successfully`,
       });
     } catch (error) {
-      console.error("Failed to delete script", error);
+      console.error("Failed to delete macro", error);
       notifications.show({
         color: "red",
         title: "Error",
-        message: `Failed to delete script file: ${error}`,
+        message: `Failed to delete macro file: ${error}`,
       });
     }
   },
