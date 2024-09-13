@@ -35,7 +35,7 @@ const MacroCode: React.FC<IMacroCodeProps> = ({ store, ...other }) => {
     () =>
       debounce((newContent: string) => {
         setContent(newContent);
-        save();
+        fileId && save();
       }, 200),
     [setContent]
   );
