@@ -77,7 +77,7 @@ const Panel: React.FC<IMacroFilePanelProps> = ({ store }) => {
           aria-label="Run"
           variant="transparent"
           miw={40}
-          disabled={!command}
+          disabled={!content}
           onClick={handleRenderClick}
           loading={isLoading}
         >
@@ -90,7 +90,6 @@ const Panel: React.FC<IMacroFilePanelProps> = ({ store }) => {
           flexDirection: "column",
           height: "100%",
           width: "100%",
-          // justifyContent: "center",
         }}
       >
         <div

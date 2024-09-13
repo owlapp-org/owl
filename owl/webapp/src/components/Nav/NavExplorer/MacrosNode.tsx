@@ -1,6 +1,6 @@
+import MacroFileMenu from "@components/MacroFileMenu";
 import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
-import ScriptMenu from "@components/ScriptMenu";
 import TreeNode from "@components/TreeNode";
 import useEditorStore from "@hooks/editorStore";
 import useMacroFileStore from "@hooks/macrofileStore";
@@ -14,20 +14,21 @@ import {
   IconUpload,
 } from "@tabler/icons-react";
 import { FileType } from "@ts/enums/filetype_enum";
+import { IMacroFile } from "@ts/interfaces/macrofile_interface";
 import { IScript } from "@ts/interfaces/script_interface";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 import "./styles.upload.css";
 
 function toNode(
-  script: IScript,
+  macrofile: IMacroFile,
   onDelete: (id: number) => void,
   onRename: (file: IScript) => void,
   onClick: (e: any) => void
 ): TreeNodeData {
   return {
-    label: script.name,
-    value: `${script.id}`,
+    label: macrofile.name,
+    value: `${macrofile.id}`,
     nodeProps: {
       onClick,
       icon: (
@@ -40,8 +41,8 @@ function toNode(
         </div>
       ),
       actions: (
-        <ScriptMenu
-          script={script}
+        <MacroFileMenu
+          macrofile={macrofile}
           onDelete={onDelete}
           onRename={onRename}
           className="menu-icon"
@@ -57,7 +58,6 @@ export default function MacroFilesNode() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { addTab } = useEditorStore();
   const { showModal: showRenameFileModal } = useRenameFileModalStore();
-  const { showModal: showCreateFileModal } = useCreateFileModalStore();
 
   useEffect(() => {
     fetchAll();
