@@ -113,5 +113,10 @@ class Settings(BaseSettings, extra="ignore"):
         default=None,
     )
 
+    MAX_MACRO_RESOLVE_DEPTH: Optional[int] = Field(
+        default=10,
+        description="Maximum iterations to resolve macros. This is a temporary solution and will be replaced in the future.",
+    )
+
 
 settings = Settings()

@@ -167,14 +167,15 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         )
 
         text = "\n".join([template_base, query])
-        # todo 1- max_depth / quick win
         # todo 2- dag implementation / better solution
-        for _ in range(3):
+        for _ in range(settings.MAX_MACRO_RESOLVE_DEPTH):
             text = "\n".join([template_base, text])
             text = jinja2.Template(text).render(
                 files=files_path,
                 read_script_file=gen__read_script_file(owner_id=owner_id),
             )
+            if "{{" not in text:
+                break
         return text
 
     @classmethod
