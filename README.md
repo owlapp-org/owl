@@ -71,4 +71,38 @@ select * from '{{files}}/addresses.csv'
 ```
 `{{files}}` are the base path of the uploaded files.
 
+### Macros
+
+You can create macros and use default macros on the sql scripts. Example to default macros are;
+
+- `{{files}}` which resolves to data files base path
+- `{{ref('script_name_without_extension')}}` which resolves to a sub-query that is the content of the script.
+
+```sql
+
+-- Example to {{files}}
+select * from '{{files}}/addresses.csv''
+-- Assuming you have a uploaded a data file named `addresses.csv`
+-- Above script will resolve to the path of that file and will be something like;
+-- select * from 'path/to/data-files/addresses.csv''
+
+-- Example to {{ref}}
+-- * Given that you have defined a macro like this in the `Macros` section in any file.:
+{% macro greet(name) %}
+  'Hello, {{ name }}!'
+{% endmacro %}
+-- * Given you have script file named 'demo.sql' which contains the following.
+select {{ greet('Alice')}} as Greet, t.* from '{{files}}/addresses.csv' as t
+
+-- * Given you have another script which contains the following SQL expression.
+select * from {{ref('demo')}}
+
+-- This will resolve to
+select * from
+    (select
+  'Hello, Alice!'
+ as Greet, t.* from 'path/to/data-files/addresses.csv' as t)
+```
+
+
 
