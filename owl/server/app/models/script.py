@@ -29,6 +29,15 @@ class Script(TimestampMixin, UserSpaceMixin["Script"], db.Model):
         return cls.query.filter(cls.owner_id == id).order_by(cls.path).all()
 
     @classmethod
+    def find_by_filename(cls, owner_id: int, filename: str) -> Optional["Script"]:
+        return cls.query.filter(
+            and_(
+                cls.owner_id == owner_id,
+                cls.path.like(f"%/{filename}"),
+            )
+        ).one_or_none()
+
+    @classmethod
     def find_by_id_and_owner(cls, id: int, owner_id: int) -> Optional["Script"]:
         return cls.query.filter(
             and_(cls.id == id, cls.owner_id == owner_id)

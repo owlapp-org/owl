@@ -70,8 +70,9 @@ class UserSpaceMixin(Generic[T]):
 
         return self
 
-    def read_file(self) -> str:
-        with open(self.absolute_path(), "r") as f:
+    def read_file(self, filename: str = None) -> str:
+        abs_path = self.absolute_path(filename) if filename else self.absolute_path()
+        with open(abs_path, "r") as f:
             return f.read()
 
     def write_file(self, content: str) -> T:
