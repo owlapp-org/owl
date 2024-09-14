@@ -1,11 +1,12 @@
 import { Button } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
+import { IconCodeDots, IconCube } from "@tabler/icons-react";
 
 export interface IZeroTabsProps {
-  onNewTab: () => void;
+  onNewScriptTab: () => void;
+  onNewMacroTab: () => void;
 }
 
-const ZeroTabs = ({ onNewTab }: IZeroTabsProps) => {
+const ZeroTabs = ({ onNewScriptTab, onNewMacroTab }: IZeroTabsProps) => {
   return (
     <div
       style={{
@@ -20,16 +21,41 @@ const ZeroTabs = ({ onNewTab }: IZeroTabsProps) => {
       <div
         style={{
           display: "flex",
-          width: "40%",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "20%",
+          height: "100",
+          gap: "10px",
         }}
       >
         <Button
-          onClick={onNewTab}
+          onClick={onNewScriptTab}
           fullWidth
           variant="outline"
-          rightSection={<IconPlus size={24} stroke={1} />}
+          rightSection={
+            <IconCodeDots
+              stroke={1}
+              height={24}
+              color="var(--mantine-color-blue-8)"
+            />
+          }
         >
           New Query
+        </Button>
+        <Button
+          onClick={onNewMacroTab}
+          fullWidth
+          variant="outline"
+          rightSection={
+            <IconCube
+              stroke={1}
+              height={24}
+              color="var(--mantine-color-blue-8)"
+            />
+          }
+        >
+          New Macro
         </Button>
       </div>
     </div>

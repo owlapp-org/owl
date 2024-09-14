@@ -2,6 +2,7 @@ import useDatabaseStore from "@hooks/databaseStore";
 import useEditorStore from "@hooks/editorStore";
 import { ActionIcon, Tabs } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
+import { FileType } from "@ts/enums/filetype_enum";
 import { useEffect } from "react";
 import EditorBody from "./Body/EditorBody";
 import EditorTab from "./EditorTab";
@@ -21,13 +22,15 @@ export default function Editor() {
     fetchAll();
   }, [fetchAll]);
 
-  const handleAddTab = () => {
-    // todo: script or text
-    addTab();
-  };
-
   if (getTabCount() == 0) {
-    return <ZeroTabs onNewTab={handleAddTab} />;
+    return (
+      <ZeroTabs
+        onNewScriptTab={() => addTab()}
+        onNewMacroTab={() => {
+          addTab(null, FileType.MacroFile);
+        }}
+      />
+    );
   }
 
   return (
@@ -40,7 +43,7 @@ export default function Editor() {
         {Object.entries(tabs).map(([id, store], index) => (
           <EditorTab key={id} index={index} store={store} id={id} />
         ))}
-        <ActionIcon variant="transparent" onClick={handleAddTab}>
+        <ActionIcon variant="transparent" onClick={() => addTab()}>
           <IconPlus size={20} stroke={1} />
         </ActionIcon>
       </Tabs.List>
