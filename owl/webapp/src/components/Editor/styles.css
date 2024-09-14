@@ -55,3 +55,9 @@
   font-weight: 400 !important;
   font-size: 1rem;
 }
+
+
+.cm-gutters {
+  background-color: var(--mantine-color-gray-0) !important;
+  color: var(--mantine-color-gray-5) !important;
+}
