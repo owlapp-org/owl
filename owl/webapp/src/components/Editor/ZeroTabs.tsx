@@ -36,8 +36,8 @@ const ZeroTabs = ({ onNewScriptTab, onNewMacroTab }: IZeroTabsProps) => {
           rightSection={
             <IconCodeDots
               stroke={1}
-              height={24}
-              color="var(--mantine-color-blue-8)"
+              height={22}
+              color="var(--mantine-color-blue-4)"
             />
           }
         >
@@ -50,8 +50,8 @@ const ZeroTabs = ({ onNewScriptTab, onNewMacroTab }: IZeroTabsProps) => {
           rightSection={
             <IconCube
               stroke={1}
-              height={24}
-              color="var(--mantine-color-blue-8)"
+              height={22}
+              color="var(--mantine-color-blue-4)"
             />
           }
         >
