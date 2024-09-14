@@ -1,4 +1,5 @@
 from app.models.base import db
+from app.models.dashboard_file import DashboardFile
 from app.models.database import Database
 from app.models.datafile import DataFile
 from app.models.macrofile import MacroFile
