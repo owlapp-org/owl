@@ -97,7 +97,7 @@ select {{ greet('Alice')}} as Greet, t.* from '{{files}}/addresses.csv' as t
 -- * Given you have another script which contains the following SQL expression.
 select * from {{ref('demo')}}
 
--- This will resolve to
+-- * This will resolve to
 select * from
     (select
   'Hello, Alice!'
