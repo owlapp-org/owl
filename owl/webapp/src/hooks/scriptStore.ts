@@ -4,6 +4,9 @@ import { notifications } from "@mantine/notifications";
 import { IScript } from "@ts/interfaces/script_interface";
 import ScriptService from "@services/scriptService";
 import useEditorStore from "./editorStore";
+import { FileService } from "@services/services";
+
+export const service = new FileService<IScript>("scripts");
 
 interface IScriptState {
   scripts: IScript[];
@@ -24,11 +27,11 @@ const useScriptStore = create<IScriptState>((set, get) => ({
   isCreateModalOpen: false,
   isRenameModalOpen: false,
   updateContent: async (id: number, content: string) => {
-    return ScriptService.updateContent(id, content);
+    return service.updateContent(id, content);
   },
   fetchContent: async (id: number) => {
     try {
-      const content = await ScriptService.fetchContent(id);
+      const content = await service.fetchContent(id);
       return content;
     } catch (e) {
       notifications.show({
@@ -41,7 +44,7 @@ const useScriptStore = create<IScriptState>((set, get) => ({
   },
   fetchAll: async () => {
     try {
-      const files = await ScriptService.fetchAll();
+      const files = await service.fetchAll();
       set({ scripts: files });
     } catch (error) {
       console.error("Failed to fetch script files", error);
@@ -50,7 +53,7 @@ const useScriptStore = create<IScriptState>((set, get) => ({
   },
   create: async (name: string, content?: string) => {
     try {
-      const script = await ScriptService.create(name, content);
+      const script = await service.create({ name, content });
       set((state) => ({ scripts: [...state.scripts, script] }));
       notifications.show({
         title: "Success",
@@ -69,7 +72,7 @@ const useScriptStore = create<IScriptState>((set, get) => ({
   },
   upload: async (data: FormData) => {
     try {
-      const file = await ScriptService.upload(data);
+      const file = await service.upload(data);
       set((state) => ({ scripts: [...state.scripts, file] }));
       notifications.show({
         title: "Success",
@@ -86,7 +89,7 @@ const useScriptStore = create<IScriptState>((set, get) => ({
   },
   remove: async (id: number) => {
     try {
-      await ScriptService.remove(id);
+      await service.remove(id);
       set((state) => ({
         scripts: state.scripts.filter((s) => s.id !== id),
       }));

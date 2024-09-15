@@ -26,10 +26,6 @@ export interface IEditorScriptTabOptions {
   databaseId: string | null;
 }
 
-export interface IEditorScriptTabOptions {
-  databaseId: string | null;
-}
-
 export interface IEditorScriptTabState extends IEditorTabState {
   options: IEditorScriptTabOptions | null;
   setDatabase: (database: string | null) => void;
