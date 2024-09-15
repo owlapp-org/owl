@@ -28,8 +28,8 @@ class User(TimestampMixin, db.Model):
         single_parent=True,
     )
 
-    dashboard_files = relationship(
-        "DashboardFile",
+    dashboards = relationship(
+        "Dashboard",
         back_populates="owner",
         lazy="dynamic",
         cascade="all, delete-orphan",

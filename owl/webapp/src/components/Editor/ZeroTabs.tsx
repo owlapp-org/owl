@@ -1,5 +1,9 @@
 import { Button } from "@mantine/core";
-import { IconCodeDots, IconCube } from "@tabler/icons-react";
+import {
+  IconCodeDots,
+  IconCube,
+  IconReportAnalytics,
+} from "@tabler/icons-react";
 
 export interface IZeroTabsProps {
   onNewScriptTab: () => void;
@@ -30,10 +34,15 @@ const ZeroTabs = ({ onNewScriptTab, onNewMacroTab }: IZeroTabsProps) => {
         }}
       >
         <Button
+          styles={{
+            inner: {
+              justifyContent: "start",
+            },
+          }}
           onClick={onNewScriptTab}
           fullWidth
           variant="outline"
-          rightSection={
+          leftSection={
             <IconCodeDots
               stroke={1}
               height={22}
@@ -44,10 +53,15 @@ const ZeroTabs = ({ onNewScriptTab, onNewMacroTab }: IZeroTabsProps) => {
           New Query
         </Button>
         <Button
+          styles={{
+            inner: {
+              justifyContent: "start",
+            },
+          }}
           onClick={onNewMacroTab}
           fullWidth
           variant="outline"
-          rightSection={
+          leftSection={
             <IconCube
               stroke={1}
               height={22}
@@ -56,6 +70,25 @@ const ZeroTabs = ({ onNewScriptTab, onNewMacroTab }: IZeroTabsProps) => {
           }
         >
           New Macro
+        </Button>
+        <Button
+          styles={{
+            inner: {
+              justifyContent: "start",
+            },
+          }}
+          onClick={onNewMacroTab}
+          fullWidth
+          variant="outline"
+          leftSection={
+            <IconReportAnalytics
+              stroke={1}
+              height={22}
+              color="var(--mantine-color-blue-4)"
+            />
+          }
+        >
+          New Dashboard
         </Button>
       </div>
     </div>

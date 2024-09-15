@@ -3,4 +3,5 @@ export enum FileType {
   DataFile,
   ScriptFile,
   MacroFile,
+  DashboardFile,
 }

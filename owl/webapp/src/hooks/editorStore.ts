@@ -43,6 +43,7 @@ export interface IEditorScriptTabState extends IEditorTabState {
 }
 
 export interface IEditorMacroFileTabState extends IEditorTabState {}
+export interface IEditorDashboardFileTabState extends IEditorTabState {}
 
 const createScriptTabStore = () =>
   create<IEditorScriptTabState>((set, get) => ({
