@@ -1,9 +1,8 @@
 import MacroFileMenu from "@components/MacroFileMenu";
-import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import TreeNode from "@components/TreeNode";
 import useEditorStore from "@hooks/editorStore";
-import useMacroFileStore from "@hooks/macrofileStore";
+import { useMacroFileStore } from "@hooks/hooks";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
@@ -53,7 +52,7 @@ function toNode(
 }
 
 export default function MacroFilesNode() {
-  const { macrofiles, fetchAll, remove, upload } = useMacroFileStore();
+  const { items, fetchAll, remove, upload } = useMacroFileStore();
   const openRef = useRef<() => void>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { addTab } = useEditorStore();
@@ -61,6 +60,7 @@ export default function MacroFilesNode() {
 
   useEffect(() => {
     fetchAll();
+    console.log(items);
   }, [fetchAll]);
 
   const handleDrop = async (files: FileWithPath[]) => {
@@ -138,7 +138,7 @@ export default function MacroFilesNode() {
           </div>
         ),
       },
-      children: macrofiles.map((macrofile) =>
+      children: items.map((macrofile) =>
         toNode(macrofile, remove, handleRename, (e: any) => {
           e.stopPropagation();
           addTab(macrofile.id, FileType.MacroFile);

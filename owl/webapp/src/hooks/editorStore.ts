@@ -8,8 +8,9 @@ import IFile from "@ts/interfaces/file_interface";
 import { FileType } from "@ts/enums/filetype_enum";
 import useDataFileStore from "./datafileStore";
 import { IQueryResult } from "@ts/interfaces/database_interface";
-import useMacroFileStore from "./macrofileStore";
 import MacroFileService from "@services/macrofileService";
+import { notify } from "@lib/notify";
+import { getStoreWithFileType, IFileState, useMacroFileStore } from "./hooks";
 
 export interface IEditorTabState {
   id: string;
@@ -243,7 +244,7 @@ const createMacroFileTabStore = () =>
         const filename = name || "New file";
         const macrofile = await useMacroFileStore
           .getState()
-          .create(filename, content || "");
+          .create({ filename, content });
         set((state) => ({
           file: {
             ...state.file,
@@ -282,11 +283,12 @@ const createMacroFileTabStore = () =>
   }));
 
 export interface IEditorState {
-  activeTab: string | null;
+  activeTabId: string | null;
   tabs: Record<string, UseBoundStore<StoreApi<IEditorTabState>>>;
   setActiveTab(id: string | null): void;
+  activateTab: (fileType: FileType, fileId?: number | null) => void;
   getTabCount(): number;
-  addTab: (fileId?: number | null, fileType?: FileType) => void;
+  addTab: (fileType?: FileType, fileId?: number | null) => void;
   closeTab: (id: string) => void;
   closeAllTabs: () => void;
   closeOtherTabs: (id: string) => void;
@@ -296,65 +298,41 @@ export interface IEditorState {
 }
 
 const useEditorStore = create<IEditorState>((set, get) => ({
-  activeTab: null,
+  activeTabId: null,
   tabs: {},
-  setActiveTab: (activeTab: string) => set({ activeTab }),
+  setActiveTab: (activeTabId: string) => set({ activeTabId }),
   getTabCount: () => Object.keys(get().tabs).length,
-  addTab: (
-    fileId?: number | null,
-    fileType: FileType = FileType.ScriptFile
+  activateTab: (
+    fileType: FileType = FileType.ScriptFile,
+    fileId?: number | null
   ) => {
-    if (fileId) {
-      for (const [id, store] of Object.entries(get().tabs)) {
-        if (
-          store.getState().file.id === fileId &&
-          store.getState().file.fileType === fileType
-        ) {
-          set({ activeTab: id });
-          return;
-        }
+    if (!fileId) return;
+    for (const [id, store] of Object.entries(get().tabs)) {
+      if (
+        store.getState().file.id === fileId &&
+        store.getState().file.fileType === fileType
+      ) {
+        set({ activeTabId: id });
+        return;
       }
     }
+  },
+  addTab: (
+    fileType: FileType = FileType.ScriptFile,
+    fileId?: number | null
+  ) => {
+    get().activateTab(fileType, fileId);
     let name = undefined;
     const activeTab = uuidv4();
+
     if (fileId) {
-      switch (fileType) {
-        case FileType.ScriptFile: {
-          const script = useScriptStore.getState().findById(fileId);
-          if (script) {
-            name = script.name;
-          } else {
-            notifications.show({
-              color: "red",
-              title: "Error",
-              message: "File not found on scripts",
-            });
-            return;
-          }
-          break;
-        }
-        case FileType.MacroFile: {
-          const macrofile = useMacroFileStore.getState().findById(fileId);
-          if (macrofile) {
-            name = macrofile.name;
-          } else {
-            notifications.show({
-              color: "red",
-              title: "Error",
-              message: "File not found on macro files",
-            });
-            return;
-          }
-          break;
-        }
-        default: {
-          notifications.show({
-            color: "red",
-            title: "Error",
-            message: "Unsupported file type",
-          });
-          break;
-        }
+      try {
+        const store = getStoreWithFileType(fileType);
+        const state = store.getState() as IFileState<any>;
+        const { name: itemName } = state.findById(fileId);
+        name = itemName;
+      } catch (e) {
+        notify.error(`Internal error: ${e}`);
       }
     }
 
