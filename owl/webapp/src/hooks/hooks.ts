@@ -2,6 +2,7 @@ import { create, StoreApi, UseBoundStore } from "zustand";
 
 import { notifications } from "@mantine/notifications";
 import ApiService, {
+  databaseService,
   FileService,
   macroFileService,
   scriptService,
@@ -161,6 +162,7 @@ export const createFileStore = <T>(
 
 export const useScriptStore = createFileStore(scriptService);
 export const useMacroFileStore = createFileStore(macroFileService);
+export const useDatabaseStore = createBaseStore(databaseService);
 
 export const getStoreWithFileType = (
   fileType: FileType

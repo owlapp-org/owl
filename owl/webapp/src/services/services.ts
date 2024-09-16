@@ -1,5 +1,5 @@
 import request from "@lib/request";
-import { IMacroFile } from "@ts/interfaces/interfaces";
+import { IDatabase, IMacroFile } from "@ts/interfaces/interfaces";
 import { IScript } from "@ts/interfaces/script_interface";
 
 export default class ApiService<T> {
@@ -29,8 +29,42 @@ export default class ApiService<T> {
       .then((response) => response.data);
   }
 }
+type ConstructorWithDomain<T = {}> = new (domain: string, ...args: any[]) => {
+  domain: string;
+} & T;
 
-export class FileService<T> extends ApiService<T> {
+function UploadDownloadMixin<T extends ConstructorWithDomain>(Base: T) {
+  return class extends Base {
+    upload(data: Record<string, any>): Promise<T> {
+      return request
+        .post(`${this.domain}/upload`, data, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => response.data);
+    }
+    async download(id: number, name: string): Promise<void> {
+      try {
+        const response = await request.get(`${this.domain}/${id}/download`, {
+          responseType: "blob",
+        });
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `${name}`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } catch (error) {
+        console.error("Error downloading the file:", error);
+        throw error;
+      }
+    }
+  };
+}
+
+export class FileService<T> extends UploadDownloadMixin(ApiService)<T> {
   constructor(domain: string) {
     super(domain);
   }
@@ -76,3 +110,4 @@ export class FileService<T> extends ApiService<T> {
 
 export const macroFileService = new FileService<IMacroFile>("macros");
 export const scriptService = new FileService<IScript>("scripts");
+export const databaseService = new ApiService<IDatabase>("databases");
