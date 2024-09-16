@@ -7,7 +7,6 @@ import ApiService, {
   scriptService,
 } from "@services/services";
 import { FileType } from "@ts/enums/filetype_enum";
-import MacroFile from "@components/Editor/Body/File/MacroFile";
 import { IMacroFile } from "@ts/interfaces/interfaces";
 import { IScript } from "@ts/interfaces/script_interface";
 
@@ -166,7 +165,7 @@ export const useMacroFileStore = createFileStore(macroFileService);
 export const getStoreWithFileType = (
   fileType: FileType
 ):
-  | UseBoundStore<StoreApi<IScript>>
+  | UseBoundStore<StoreApi<IFileState<IScript>>>
   | UseBoundStore<StoreApi<IFileState<IMacroFile>>> => {
   switch (fileType) {
     case FileType.ScriptFile:
