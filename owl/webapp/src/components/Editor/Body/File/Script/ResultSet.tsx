@@ -1,5 +1,5 @@
 import { notifications } from "@mantine/notifications";
-import { IQueryResult } from "@ts/interfaces/database_interface";
+import { IQueryResult } from "@ts/interfaces/interfaces";
 
 import "@components/Editor/styles.css";
 import { databaseService } from "@services/services";

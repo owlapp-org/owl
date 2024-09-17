@@ -1,5 +1,6 @@
 import { notifications } from "@mantine/notifications";
 import { FileType } from "@ts/enums/filetype_enum";
+import { notify } from "./notify";
 
 export namespace FileExtensions {
   export const getBy = (fileType: FileType): string[] => {
@@ -8,6 +9,8 @@ export namespace FileExtensions {
         return ["sql"];
       case FileType.MacroFile:
         return ["j2", "jinja"];
+      case FileType.DashboardFile:
+        return ["yml", "yaml"];
     }
     return [];
   };
@@ -17,34 +20,23 @@ export namespace FileExtensions {
   export const validate = (
     filename: string,
     fileType: FileType | null,
-    notify: boolean = true
+    showNotification: boolean = true
   ): boolean => {
-    if (notify && !fileType) {
-      notifications.show({
-        title: "Error",
-        message: "Unknown file type",
-        color: "red",
-      });
+    if (showNotification && !fileType) {
+      notify.error("Unknown file type");
       return false;
     }
     if (!fileType) {
-      notifications.show({
-        title: "Error",
-        message: "Unknown file type",
-        color: "red",
-      });
+      notify.error("Unknown file type");
       return false;
     }
     if (FileExtensions.isValid(filename, fileType)) {
       return true;
     } else {
-      notifications.show({
-        title: "Error",
-        message:
-          "File type is not supported. Valid file types are: " +
-          FileExtensions.getBy(fileType!).join(", "),
-        color: "red",
-      });
+      notify.error(
+        "File type is not supported. Valid file types are: " +
+          FileExtensions.getBy(fileType!).join(", ")
+      );
       return false;
     }
   };

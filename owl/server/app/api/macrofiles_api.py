@@ -4,13 +4,11 @@ from apiflask import APIBlueprint, FileSchema, abort
 from app.constants import ALLOWED_MACROFILE_EXTENSIONS
 from app.lib.fs import is_extension_valid
 from app.models.macrofile import MacroFile
-from app.schemas.base import ExistsOut, MessageOut
+from app.schemas.base import ExistsOut, MessageOut, RenderContentIn, RenderContentOut
 from app.schemas.macrofile_schema import (
     CreateMacroFileIn,
     MacroFileContentOut,
     MacroFileOut,
-    RenderContentIn,
-    RenderContentOut,
     UpdateMacroFileIn,
 )
 from flask import request, send_file

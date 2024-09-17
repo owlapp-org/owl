@@ -1,8 +1,8 @@
 import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import useEditorStore, { IEditorTabState } from "@hooks/editorStore";
+import { notify } from "@lib/notify";
 import { Divider, Loader, Menu, Tabs } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { IconDeviceFloppy, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
@@ -50,11 +50,7 @@ const EditorTab = <T,>({ id, store, index }: IEditorTabProps<T>) => {
 
   const handleRename = () => {
     if (!file.id) {
-      notifications.show({
-        color: "warning",
-        title: "Error",
-        message: "File not saved",
-      });
+      notify.warn("File not saved");
       return;
     }
     setIsLoading(true);

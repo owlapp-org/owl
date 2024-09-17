@@ -3,6 +3,7 @@ import { create, StoreApi, UseBoundStore } from "zustand";
 import { notifications } from "@mantine/notifications";
 import {
   ApiService,
+  dashboardService,
   databaseService,
   dataFileService,
   FileService,
@@ -10,7 +11,11 @@ import {
   scriptService,
 } from "@services/services";
 import { FileType } from "@ts/enums/filetype_enum";
-import { IMacroFile } from "@ts/interfaces/interfaces";
+import {
+  IDashboardFile,
+  IFileModel,
+  IMacroFile,
+} from "@ts/interfaces/interfaces";
 import { IScript } from "@ts/interfaces/interfaces";
 import { notify } from "@lib/notify";
 
@@ -31,7 +36,7 @@ export interface IState<T> {
   remove: (id: number) => void;
 }
 
-export interface IFileState<T> extends IState<T> {
+export interface IFileState<T extends IFileModel> extends IState<T> {
   fetchContent: (id: number) => Promise<string>;
   upload: (data: FormData) => void;
   rename: (id: number, name: string) => Promise<T>;
@@ -121,7 +126,7 @@ export const createBaseStore = <T>(
 ): UseBoundStore<StoreApi<IState<T>>> =>
   create<IState<T>>((set, get) => baseActions(service, set, get));
 
-export const createFileStore = <T>(
+export const createFileStore = <T extends IFileModel>(
   service: FileService<T>
 ): UseBoundStore<StoreApi<IFileState<T>>> =>
   create<IFileState<T>>((set, get) => ({
@@ -177,19 +182,21 @@ export const createFileStore = <T>(
 export const useScriptStore = createFileStore(scriptService);
 export const useMacroFileStore = createFileStore(macroFileService);
 export const useDataFileStore = createFileStore(dataFileService);
-export const useDashboardStore = createFileStore(dataFileService);
+export const useDashboardStore = createFileStore(dashboardService);
 export const useDatabaseStore = createBaseStore(databaseService);
 
-export const getStoreWithFileType = (
+export const getStoreWithFileType = <T extends IFileModel>(
   fileType: FileType
-):
-  | UseBoundStore<StoreApi<IFileState<IScript>>>
-  | UseBoundStore<StoreApi<IFileState<IMacroFile>>> => {
+): UseBoundStore<StoreApi<IFileState<T>>> => {
   switch (fileType) {
     case FileType.ScriptFile:
-      return useScriptStore;
+      return useScriptStore as UseBoundStore<StoreApi<IFileState<T>>>;
     case FileType.MacroFile:
-      return useMacroFileStore;
+      return useMacroFileStore as UseBoundStore<StoreApi<IFileState<T>>>;
+    case FileType.DashboardFile:
+      return useDashboardStore as UseBoundStore<StoreApi<IFileState<T>>>;
   }
-  throw new Error("FileType not supported");
+  const message = `FileType not supported: ${fileType}`;
+  notify.error(message);
+  throw new Error(message);
 };

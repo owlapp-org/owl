@@ -6,6 +6,10 @@ export namespace notify {
   export const info = show;
   export const error = (message: string) => {
     notifications.show({ color: "red", title: "Error", message });
-    console.error("No files selected");
+    console.error(message);
+  };
+  export const warn = (message: string) => {
+    notifications.show({ color: "yellow", title: "Warning", message });
+    console.warn(message);
   };
 }

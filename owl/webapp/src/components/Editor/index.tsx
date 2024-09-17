@@ -29,6 +29,9 @@ export default function Editor() {
         onNewMacroTab={() => {
           addTab(FileType.MacroFile, null);
         }}
+        onNewDashboardTab={() => {
+          addTab(FileType.DashboardFile, null);
+        }}
       />
     );
   }

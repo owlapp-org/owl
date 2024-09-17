@@ -5,6 +5,7 @@ import { FileType } from "@ts/enums/filetype_enum";
 import { notify } from "@lib/notify";
 import { getStoreWithFileType, IFileState } from "./hooks";
 import {
+  dashboardService,
   FileService,
   macroFileService,
   scriptService,
@@ -133,7 +134,6 @@ const useEditorStore = create<IEditorState<IFileModel>>((set, get) => ({
     fileType: FileType = FileType.ScriptFile,
     fileId?: number | null
   ) => {
-    console.log(fileType, fileId);
     const { activateTab } = get();
     if (activateTab(fileType, fileId)) {
       return;
@@ -162,6 +162,10 @@ const useEditorStore = create<IEditorState<IFileModel>>((set, get) => ({
       }
       case FileType.MacroFile: {
         newTabStore = createTabStore(macroFileService);
+        break;
+      }
+      case FileType.DashboardFile: {
+        newTabStore = createTabStore(dashboardService);
         break;
       }
       default:

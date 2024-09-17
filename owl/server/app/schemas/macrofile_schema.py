@@ -48,14 +48,3 @@ class UpdateMacroFileIn:
         if extension not in ALLOWED_MACROFILE_EXTENSIONS:
             raise ValidationError("File name must end with .sql")
         return data
-
-
-@dataclass
-class RenderContentIn:
-    content: str = field()
-    command: Optional[str] = field()
-
-
-@dataclass
-class RenderContentOut:
-    content: str = field()

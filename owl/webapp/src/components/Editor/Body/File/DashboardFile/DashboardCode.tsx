@@ -1,5 +1,6 @@
 import { StreamLanguage } from "@codemirror/language";
-import { jinja2 } from "@codemirror/legacy-modes/mode/jinja2";
+import { yaml } from "@codemirror/legacy-modes/mode/yaml";
+
 import { Prec } from "@codemirror/state";
 import { keymap } from "@codemirror/view";
 import "@components/Editor/styles.css";
@@ -7,18 +8,22 @@ import CodeMirror from "@uiw/react-codemirror";
 import { debounce } from "lodash";
 import { memo, useCallback, useMemo, useRef } from "react";
 
-interface IMacroCodeProps {
-  store: UseBoundStore<StoreApi<IEditorMacroFileTabState>>;
+interface IDashboardCodeProps<T extends IFileModel> {
+  store: UseBoundStore<StoreApi<IEditorTabState<T>>>;
 }
 
 import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
-import { IEditorMacroFileTabState } from "@hooks/editorStore";
+import { IEditorTabState } from "@hooks/editorStore";
 import { FileType } from "@ts/enums/filetype_enum";
+import { IFileModel } from "@ts/interfaces/interfaces";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
-const MacroCode: React.FC<IMacroCodeProps> = ({ store, ...other }) => {
+const DashboardCode = <T extends IFileModel>({
+  store,
+  ...other
+}: IDashboardCodeProps<T>) => {
   const codeMirrorRef = useRef<ReactCodeMirrorRef>(null);
   const { fileId, content, setContent, save } = useStore(
     store,
@@ -74,7 +79,7 @@ const MacroCode: React.FC<IMacroCodeProps> = ({ store, ...other }) => {
         value={content}
         height="100%"
         extensions={[
-          StreamLanguage.define(jinja2),
+          StreamLanguage.define(yaml),
           Prec.highest(keymap.of(shortCutKeymap)),
         ]}
         onChange={onChange}
@@ -84,4 +89,4 @@ const MacroCode: React.FC<IMacroCodeProps> = ({ store, ...other }) => {
   );
 };
 
-export default memo(MacroCode);
+export default memo(DashboardCode);

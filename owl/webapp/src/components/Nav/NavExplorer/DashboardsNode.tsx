@@ -2,7 +2,7 @@ import FileMenu from "@components/DataFileMenu";
 import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import TreeNode from "@components/TreeNode";
 import useEditorStore from "@hooks/editorStore";
-import { useMacroFileStore } from "@hooks/hooks";
+import { useDashboardStore } from "@hooks/hooks";
 import { notify } from "@lib/notify";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath } from "@mantine/dropzone";
@@ -51,7 +51,7 @@ function toNode(
 }
 
 export default function DashboardsNode() {
-  const { items: dashboards, fetchAll, remove, upload } = useMacroFileStore();
+  const { items: dashboards, fetchAll, remove, upload } = useDashboardStore();
   const openRef = useRef<() => void>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { addTab } = useEditorStore();
@@ -89,7 +89,7 @@ export default function DashboardsNode() {
   const handleCreate = async () => {
     setIsLoading(true);
     try {
-      addTab(FileType.MacroFile, null);
+      addTab(FileType.DashboardFile, null);
     } finally {
       setIsLoading(false);
     }
@@ -145,7 +145,7 @@ export default function DashboardsNode() {
       children: dashboards.map((dashboard) =>
         toNode(dashboard, handleDelete, handleRename, (e: any) => {
           e.stopPropagation();
-          addTab(dashboard.id, FileType.DashboardFile);
+          addTab(FileType.DashboardFile, dashboard.id);
         })
       ),
     },

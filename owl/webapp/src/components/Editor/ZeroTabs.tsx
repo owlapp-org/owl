@@ -8,9 +8,14 @@ import {
 export interface IZeroTabsProps {
   onNewScriptTab: () => void;
   onNewMacroTab: () => void;
+  onNewDashboardTab: () => void;
 }
 
-const ZeroTabs = ({ onNewScriptTab, onNewMacroTab }: IZeroTabsProps) => {
+const ZeroTabs = ({
+  onNewScriptTab,
+  onNewMacroTab,
+  onNewDashboardTab,
+}: IZeroTabsProps) => {
   return (
     <div
       style={{
@@ -77,7 +82,7 @@ const ZeroTabs = ({ onNewScriptTab, onNewMacroTab }: IZeroTabsProps) => {
               justifyContent: "start",
             },
           }}
-          onClick={onNewMacroTab}
+          onClick={onNewDashboardTab}
           fullWidth
           variant="outline"
           leftSection={

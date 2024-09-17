@@ -1,27 +1,27 @@
 import "@components/Editor/styles.css";
-import { IEditorMacroFileTabState } from "@hooks/editorStore";
+import { IEditorTabState } from "@hooks/editorStore";
+import { Tabs } from "@mantine/core";
+import { IFileModel } from "@ts/interfaces/interfaces";
 import { useEffect, useState } from "react";
-import {
-  PanelGroup,
-  PanelResizeHandle,
-  Panel as ResizablePanel,
-} from "react-resizable-panels";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
-import MacroCode from "./MacroCode";
-import MacroFilePanel from "./MacroFilePanel";
+import DashboardCode from "./DashboardCode";
+import DashboardRenderer from "./DashboardRenderer";
 
-interface IMacroFileProps {
-  store: UseBoundStore<StoreApi<IEditorMacroFileTabState>>;
+interface IDashboardFileProps<T extends IFileModel> {
+  store: UseBoundStore<StoreApi<IEditorTabState<T>>>;
 }
 
-const MacroFile: React.FC<IMacroFileProps> = ({ store }) => {
+const DashboardFile = <T extends IFileModel>({
+  store,
+  ...other
+}: IDashboardFileProps<T>) => {
   const { content } = useStore(store, (state) => ({
     content: state.content,
   }));
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    console.log("Script.index");
+    console.log("DashboardFile.index");
   });
 
   return (
@@ -33,19 +33,46 @@ const MacroFile: React.FC<IMacroFileProps> = ({ store }) => {
         width: "100%",
       }}
     >
-      <PanelGroup direction="vertical">
-        <ResizablePanel defaultSize={60}>
+      <Tabs
+        defaultValue="gallery"
+        style={{
+          height: "calc(100% - 32px)",
+          width: "100%",
+        }}
+        inverted
+      >
+        <Tabs.Panel
+          value="gallery"
+          style={{
+            height: "100%",
+            width: "100%",
+          }}
+        >
           <div style={{ flex: 1, overflow: "hidden", height: "100%" }}>
-            <MacroCode store={store} />
+            <DashboardCode store={store} />
           </div>
-        </ResizablePanel>
-        <PanelResizeHandle className="panel-resize-handle" />
-        <ResizablePanel maxSize={90} minSize={10}>
-          <MacroFilePanel store={store} />
-        </ResizablePanel>
-      </PanelGroup>
+        </Tabs.Panel>
+        <Tabs.Panel
+          value="messages"
+          style={{
+            height: "100%",
+            width: "100%",
+          }}
+        >
+          <DashboardRenderer code={""} />
+        </Tabs.Panel>
+
+        <Tabs.List
+          style={{
+            justifyContent: "start",
+          }}
+        >
+          <Tabs.Tab value="gallery">Code</Tabs.Tab>
+          <Tabs.Tab value="messages">Result</Tabs.Tab>
+        </Tabs.List>
+      </Tabs>
     </div>
   );
 };
 
-export default MacroFile;
+export default DashboardFile;

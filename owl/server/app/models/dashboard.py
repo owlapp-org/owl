@@ -85,3 +85,7 @@ class Dashboard(TimestampMixin, UserSpaceMixin["Dashboard"], db.Model):
         db.session.add(self)
         db.session.commit()
         return self
+
+    @classmethod
+    def render_content(cls, owner_id: int, content: str) -> str:
+        pass
