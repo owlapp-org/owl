@@ -5,12 +5,6 @@ import UserService from "@services/userService";
 import Cookies from "js-cookie";
 import { create } from "zustand";
 
-export interface IUser {
-  access_token: string;
-  email: string;
-  name: string;
-}
-
 interface IUserState {
   access_token: string | undefined;
   name: string;

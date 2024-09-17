@@ -1,8 +1,8 @@
 // src/components/DatabaseMenu.tsx
 import { useAlertDialog } from "@contexts/AlertDialogContext";
+import { notify } from "@lib/notify";
 import { ActionIcon, Menu } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import DataFileService from "@services/datafileService";
+import { dataFileService } from "@services/services";
 import {
   IconCopy,
   IconDotsVertical,
@@ -10,7 +10,7 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { IDataFile } from "@ts/interfaces/datafile_interface";
+import { IDataFile } from "@ts/interfaces/interfaces";
 
 interface IDataFileMenuProps {
   file: IDataFile;
@@ -38,21 +38,14 @@ export default function FileMenu({
 
   const handleCopyPath = async () => {
     await navigator.clipboard.writeText(`'{{files}}/${file.name}'`);
-    notifications.show({
-      title: "Success",
-      message: "Copied file path",
-    });
+    notify.info("Copied file path");
   };
   const handleDownload = async () => {
     const { id, name } = file;
     try {
-      await DataFileService.download(id, name);
+      await dataFileService.download(id, name);
     } catch (error) {
-      notifications.show({
-        color: "red",
-        title: "Error",
-        message: `Error downloading file. ${error}`,
-      });
+      notify.error(`Error downloading file. ${error}`);
     }
   };
 

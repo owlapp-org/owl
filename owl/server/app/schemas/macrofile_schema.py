@@ -22,7 +22,7 @@ class MacroFileContentOut:
 
 @dataclass
 class CreateMacroFileIn:
-    name: str = field(metadata={"validate": Length(min=5)})
+    name: str = field(metadata={"validate": Length(min=4)})
     content: Optional[str] = field(default=None)
 
     @post_load

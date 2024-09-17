@@ -5,25 +5,25 @@ import { useShallow } from "zustand/react/shallow";
 import ContentLoading from "./ContentLoading";
 import File from "./File";
 
-interface IEditorBodyProps {
-  store: UseBoundStore<StoreApi<IEditorTabState>>;
+interface IEditorBodyProps<T> {
+  store: UseBoundStore<StoreApi<IEditorTabState<T>>>;
 }
 
-const EditorBody: React.FC<IEditorBodyProps> = ({ store }) => {
+const EditorBody = <T,>({ store }: IEditorBodyProps<T>): React.ReactElement => {
   const [isContentLoading, setIsContentLoading] = useState(false);
-  const { fileId, fileType, fetchContent } = useStore(
+  const { fileId, fileType, fetchAndSetContent } = useStore(
     store,
     useShallow((state) => ({
       fileId: state.file.id,
       fileType: state.file.fileType,
-      fetchContent: state.fetchContent,
+      fetchAndSetContent: state.fetchAndSetContent,
     }))
   );
 
   useEffect(() => {
     if (fileId) {
       setIsContentLoading(true);
-      fetchContent().finally(() => setIsContentLoading(false));
+      fetchAndSetContent().finally(() => setIsContentLoading(false));
     }
   }, [fileId]);
 

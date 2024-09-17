@@ -1,8 +1,9 @@
 import "@components/Editor/styles.css";
-import { IEditorScriptTabState } from "@hooks/editorStore";
-import { notifications } from "@mantine/notifications";
-import MacroFileService from "@services/macrofileService";
+import { IEditorTabState } from "@hooks/editorStore";
+import { notify } from "@lib/notify";
+import { databaseService, macroFileService } from "@services/services";
 import { IQueryResult } from "@ts/interfaces/database_interface";
+import { IScript } from "@ts/interfaces/interfaces";
 import { useEffect, useRef, useState } from "react";
 import {
   PanelGroup,
@@ -15,15 +16,16 @@ import Panel from "./ScriptPanel";
 import ScriptToolbar from "./ScriptToolbar";
 
 interface IScriptProps {
-  store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
+  store: UseBoundStore<StoreApi<IEditorTabState<IScript>>>;
 }
 
 const Script: React.FC<IScriptProps> = ({ store }) => {
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
-  const { content, runQuery } = useStore(store, (state) => ({
+  const { content, databaseId } = useStore(store, (state) => ({
     content: state.content,
-    runQuery: state.runQuery,
+    databaseId: state.getOption("databaseId"),
   }));
+
   const [queryResult, setQueryResult] = useState<IQueryResult | undefined>(
     undefined
   );
@@ -47,15 +49,11 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
     try {
       setIsRenderLoading(true);
       const text = selectionOrContent();
-      const result: any = await MacroFileService.renderContent(text);
+      const result: any = await macroFileService.renderContent(text);
       setRenderedContent(result["content"]);
       setActivePanel(2);
     } catch (err) {
-      notifications.show({
-        color: "red",
-        title: "Error",
-        message: `Failed to render. ${err}`,
-      });
+      notify.error(`Failed to render. ${err}`);
     } finally {
       setIsRenderLoading(false);
     }
@@ -63,11 +61,10 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
 
   const handleExecute = async () => {
     const query = selectionOrContent();
-    if (!query) {
-      return;
-    }
+    if (!query) return;
     setIsRunLoading(true);
-    const result = await runQuery(query, 0, 25); // todo hardcoded values
+    // todo hardcoded values
+    const result = await databaseService.run(databaseId, query, 0, 25);
     setQueryResult(result);
     setActivePanel(1);
     setIsRunLoading(false);

@@ -2,14 +2,14 @@
 import { useAlertDialog } from "@contexts/AlertDialogContext";
 import { ActionIcon, Menu } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import DatabaseService from "@services/databaseService";
+import { databaseService } from "@services/services";
 import {
   IconDotsVertical,
   IconDownload,
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { IDatabase } from "@ts/interfaces/database_interface";
+import { IDatabase } from "@ts/interfaces/interfaces";
 
 interface IDatabaseMenuProps {
   database: IDatabase;
@@ -38,7 +38,7 @@ export default function DatabaseMenu({
   const handleDownload = async () => {
     const { id, name } = database;
     try {
-      await DatabaseService.download(id, name);
+      await databaseService.download(id, name);
     } catch (error) {
       notifications.show({
         color: "red",

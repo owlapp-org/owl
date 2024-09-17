@@ -1,10 +1,10 @@
 import FileMenu from "@components/DataFileMenu";
 import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import TreeNode from "@components/TreeNode";
-import useDataFileStore from "@hooks/datafileStore";
+import { useDataFileStore } from "@hooks/hooks";
+import { notify } from "@lib/notify";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath, MIME_TYPES } from "@mantine/dropzone";
-import { notifications } from "@mantine/notifications";
 import {
   IconFile,
   IconFileTypeCsv,
@@ -13,7 +13,7 @@ import {
   IconUpload,
 } from "@tabler/icons-react";
 import { FileType } from "@ts/enums/filetype_enum";
-import { IDataFile } from "@ts/interfaces/datafile_interface";
+import { IDataFile } from "@ts/interfaces/interfaces";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 
@@ -63,7 +63,7 @@ function toNode(
 }
 
 export default function DataFilesNode() {
-  const { datafiles, fetchAll, remove, upload } = useDataFileStore();
+  const { items: datafiles, fetchAll, remove, upload } = useDataFileStore();
   const openRef = useRef<() => void>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { showModal: showRenameFileModal } = useRenameFileModalStore();
@@ -74,12 +74,7 @@ export default function DataFilesNode() {
 
   const handleDrop = async (files: FileWithPath[]) => {
     if (files.length === 0) {
-      console.log("No files selected");
-      notifications.show({
-        title: "Error",
-        color: "red",
-        message: "No files selected",
-      });
+      notify.error("No files selected");
       return;
     }
     setIsLoading(true);

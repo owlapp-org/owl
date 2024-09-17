@@ -26,7 +26,9 @@ export const useCreateFileModalStore = create<ICreateFileModalState>(
     size: "md",
     tabId: undefined,
     fileType: null,
-    onSave: (name: string) => {},
+    onSave: (name: string) => {
+      throw new Error("Not Implemented");
+    },
     showModal: (options) => set({ ...options, open: true }),
     closeModal: () => set({ open: false }),
     reset: () => set({ open: false, title: "Create File" }),
