@@ -1,4 +1,4 @@
-import MacroFileMenu from "@components/MacroFileMenu";
+import FileMenu from "@components/FileMenu";
 import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import TreeNode from "@components/TreeNode";
 import useEditorStore from "@hooks/editorStore";
@@ -39,8 +39,8 @@ function toNode(
         </div>
       ),
       actions: (
-        <MacroFileMenu
-          macrofile={macrofile}
+        <FileMenu
+          file={macrofile}
           onDelete={onDelete}
           onRename={onRename}
           className="menu-icon"

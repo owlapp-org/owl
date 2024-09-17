@@ -1,11 +1,11 @@
-import MacroFileMenu from "@components/MacroFileMenu";
+import FileMenu from "@components/DataFileMenu";
 import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import TreeNode from "@components/TreeNode";
 import useEditorStore from "@hooks/editorStore";
-import useMacroFileStore from "@hooks/macrofileStore";
+import { useMacroFileStore } from "@hooks/hooks";
+import { notify } from "@lib/notify";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath } from "@mantine/dropzone";
-import { notifications } from "@mantine/notifications";
 import {
   IconFile3d,
   IconPlus,
@@ -13,21 +13,20 @@ import {
   IconUpload,
 } from "@tabler/icons-react";
 import { FileType } from "@ts/enums/filetype_enum";
-import { IMacroFile } from "@ts/interfaces/macrofile_interface";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IDashboardFile, IScript } from "@ts/interfaces/interfaces";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 import "./styles.upload.css";
 
 function toNode(
-  macrofile: IMacroFile,
+  dashboardFile: IDashboardFile,
   onDelete: (id: number) => void,
   onRename: (file: IScript) => void,
   onClick: (e: any) => void
 ): TreeNodeData {
   return {
-    label: macrofile.name,
-    value: `${macrofile.id}`,
+    label: dashboardFile.name,
+    value: `${dashboardFile.id}`,
     nodeProps: {
       onClick,
       icon: (
@@ -40,8 +39,8 @@ function toNode(
         </div>
       ),
       actions: (
-        <MacroFileMenu
-          macrofile={macrofile}
+        <FileMenu
+          file={dashboardFile}
           onDelete={onDelete}
           onRename={onRename}
           className="menu-icon"
@@ -51,24 +50,25 @@ function toNode(
   };
 }
 
-export default function MacroFilesNode() {
-  const { macrofiles, fetchAll, remove, upload } = useMacroFileStore();
+export default function DashboardsNode() {
+  const { items: dashboards, fetchAll, remove, upload } = useMacroFileStore();
   const openRef = useRef<() => void>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { addTab } = useEditorStore();
   const { showModal: showRenameFileModal } = useRenameFileModalStore();
+  const { closeTabByFile } = useEditorStore();
 
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
+  const handleDelete = async (id: number) => {
+    await remove(id);
+    closeTabByFile(id, FileType.DashboardFile);
+  };
   const handleDrop = async (files: FileWithPath[]) => {
     if (files.length === 0) {
-      notifications.show({
-        title: "Error",
-        color: "red",
-        message: "No script file selected",
-      });
+      notify.error("No script file selected");
       return;
     }
     setIsLoading(true);
@@ -82,12 +82,14 @@ export default function MacroFilesNode() {
     }
   };
   const handleRename = (file: IScript) => {
-    showRenameFileModal({ file: { ...file, fileType: FileType.MacroFile } });
+    showRenameFileModal({
+      file: { ...file, fileType: FileType.DashboardFile },
+    });
   };
   const handleCreate = async () => {
     setIsLoading(true);
     try {
-      addTab(null, FileType.MacroFile);
+      addTab(FileType.MacroFile, null);
     } finally {
       setIsLoading(false);
     }
@@ -140,10 +142,10 @@ export default function MacroFilesNode() {
           </div>
         ),
       },
-      children: macrofiles.map((macrofile) =>
-        toNode(macrofile, remove, handleRename, (e: any) => {
+      children: dashboards.map((dashboard) =>
+        toNode(dashboard, handleDelete, handleRename, (e: any) => {
           e.stopPropagation();
-          addTab(macrofile.id, FileType.MacroFile);
+          addTab(dashboard.id, FileType.DashboardFile);
         })
       ),
     },

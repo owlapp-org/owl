@@ -43,7 +43,7 @@ export default interface IFile {
   fileType?: FileType;
 }
 
-export interface IMacroFile {
+export interface IFileModel {
   id: number;
   path: string;
   owner: IUser;
@@ -51,18 +51,7 @@ export interface IMacroFile {
   extension: string;
 }
 
-export interface IScript {
-  id: number;
-  path: string;
-  owner: IUser;
-  name: string;
-  extension: string;
-}
-
-export interface IDataFile {
-  id: number;
-  path: string;
-  owner: IUser;
-  name: string;
-  extension: string;
-}
+export interface IMacroFile extends IFileModel {}
+export interface IScript extends IFileModel {}
+export interface IDataFile extends IFileModel {}
+export interface IDashboardFile extends IFileModel {}

@@ -177,6 +177,7 @@ export const createFileStore = <T>(
 export const useScriptStore = createFileStore(scriptService);
 export const useMacroFileStore = createFileStore(macroFileService);
 export const useDataFileStore = createFileStore(dataFileService);
+export const useDashboardStore = createFileStore(dataFileService);
 export const useDatabaseStore = createBaseStore(databaseService);
 
 export const getStoreWithFileType = (

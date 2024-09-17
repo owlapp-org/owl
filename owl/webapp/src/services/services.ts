@@ -1,5 +1,10 @@
 import request from "@lib/request";
-import { IDatabase, IMacroFile, IQueryResult } from "@ts/interfaces/interfaces";
+import {
+  IDashboardFile,
+  IDatabase,
+  IMacroFile,
+  IQueryResult,
+} from "@ts/interfaces/interfaces";
 import { IScript } from "@ts/interfaces/interfaces";
 
 // ApiService class for basic CRUD operations
@@ -122,6 +127,12 @@ export class MacroFileService<T> extends FileService<T> {
   }
 }
 
+export class DashboardService<T> extends MacroFileService<T> {
+  constructor(domain: string) {
+    super(domain);
+  }
+}
+
 export class DatabaseService<T> extends ApiService<T> {
   private uploader: Uploader;
   private downloader: Downloader;
@@ -162,4 +173,7 @@ export class DatabaseService<T> extends ApiService<T> {
 export const scriptService = new FileService<IScript>("scripts");
 export const dataFileService = new FileService<IScript>("files");
 export const macroFileService = new MacroFileService<IMacroFile>("macros");
+export const dashboardService = new DashboardService<IDashboardFile>(
+  "dashboards"
+);
 export const databaseService = new DatabaseService<IDatabase>("databases");

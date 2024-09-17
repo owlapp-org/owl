@@ -1,4 +1,3 @@
-// src/components/DatabaseMenu.tsx
 import { useAlertDialog } from "@contexts/AlertDialogContext";
 import { notify } from "@lib/notify";
 import { ActionIcon, Menu } from "@mantine/core";
@@ -9,40 +8,40 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { IMacroFile, IScript } from "@ts/interfaces/interfaces";
+import { IFileModel, IScript } from "@ts/interfaces/interfaces";
 
-interface IMacroFileMenuProps {
-  macrofile: IMacroFile;
+interface IFileMenuProps<T extends IFileModel> {
+  file: T;
   className?: string;
   onDelete: (id: number) => void;
   onRename: (script: IScript) => void;
 }
 
-export default function ScriptMenu({
-  macrofile,
+export default function ScriptMenu<T extends IFileModel>({
+  file,
   className,
   onDelete,
   onRename,
-}: IMacroFileMenuProps) {
+}: IFileMenuProps<T>) {
   const { showDialog } = useAlertDialog();
 
   const handleDelete = (e: any) => {
     e.stopPropagation();
     showDialog({
       title: "Confirm Delete",
-      body: `Are you sure you want to delete the macro file ${macrofile.name}?`,
+      body: `Are you sure you want to delete the file ${file.name}?`,
       okButtonLabel: "Delete",
       cancelButtonLabel: "Cancel",
-      onOk: () => onDelete(macrofile.id),
+      onOk: () => onDelete(file.id),
     });
   };
 
   const handleRename = (e: any) => {
     e.stopPropagation();
-    onRename(macrofile);
+    onRename(file);
   };
   const handleDownload = async () => {
-    const { id, name } = macrofile;
+    const { id, name } = file;
     try {
       await macroFileService.download(id, name);
     } catch (error) {

@@ -1,6 +1,6 @@
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-import IFile from "@ts/interfaces/interfaces";
+import IFile, { IFileModel } from "@ts/interfaces/interfaces";
 import { FileType } from "@ts/enums/filetype_enum";
 import { notify } from "@lib/notify";
 import { getStoreWithFileType, IFileState } from "./hooks";
@@ -9,7 +9,6 @@ import {
   macroFileService,
   scriptService,
 } from "@services/services";
-import { IMacroFile, IScript } from "@ts/interfaces/interfaces";
 
 export interface IEditorTabState<T> {
   id: string;
@@ -25,7 +24,7 @@ export interface IEditorTabState<T> {
   setOption: (option: string, value: any) => void;
 }
 
-export interface IEditorState<T extends IScript | IMacroFile> {
+export interface IEditorState<T extends IFileModel> {
   activeTabId: string | null;
   tabs: Record<string, UseBoundStore<StoreApi<IEditorTabState<T>>>>;
   setActiveTab(tabId: string | null): void;
@@ -109,123 +108,121 @@ const createTabStore = <T>(service: FileService<T>) =>
     },
   }));
 
-const useEditorStore = create<IEditorState<IScript | IMacroFile>>(
-  (set, get) => ({
-    activeTabId: null,
-    tabs: {},
-    setActiveTab: (activeTabId: string) => set({ activeTabId }),
-    getTabCount: () => Object.keys(get().tabs).length,
-    activateTab: (
-      fileType: FileType = FileType.ScriptFile,
-      fileId?: number | null
-    ) => {
-      if (!fileId) return null;
-      for (const [id, store] of Object.entries(get().tabs)) {
-        if (
-          store.getState().file.id === fileId &&
-          store.getState().file.fileType === fileType
-        ) {
-          set({ activeTabId: id });
-          return id;
-        }
+const useEditorStore = create<IEditorState<IFileModel>>((set, get) => ({
+  activeTabId: null,
+  tabs: {},
+  setActiveTab: (activeTabId: string) => set({ activeTabId }),
+  getTabCount: () => Object.keys(get().tabs).length,
+  activateTab: (
+    fileType: FileType = FileType.ScriptFile,
+    fileId?: number | null
+  ) => {
+    if (!fileId) return null;
+    for (const [id, store] of Object.entries(get().tabs)) {
+      if (
+        store.getState().file.id === fileId &&
+        store.getState().file.fileType === fileType
+      ) {
+        set({ activeTabId: id });
+        return id;
       }
-      return null;
-    },
-    addTab: (
-      fileType: FileType = FileType.ScriptFile,
-      fileId?: number | null
-    ) => {
-      console.log(fileType, fileId);
-      const { activateTab } = get();
-      if (activateTab(fileType, fileId)) {
+    }
+    return null;
+  },
+  addTab: (
+    fileType: FileType = FileType.ScriptFile,
+    fileId?: number | null
+  ) => {
+    console.log(fileType, fileId);
+    const { activateTab } = get();
+    if (activateTab(fileType, fileId)) {
+      return;
+    }
+
+    let name = undefined;
+    if (fileId) {
+      try {
+        const store = getStoreWithFileType(fileType);
+        const state = store.getState() as IFileState<any>;
+        const { name: itemName } = state.findById(fileId);
+        name = itemName;
+      } catch (e) {
+        notify.error(`Internal error: ${e}`);
+      }
+    }
+
+    let newTabStore:
+      | UseBoundStore<StoreApi<IEditorTabState<IFileModel>>>
+      | undefined = undefined;
+
+    switch (fileType) {
+      case FileType.ScriptFile: {
+        newTabStore = createTabStore(scriptService);
+        break;
+      }
+      case FileType.MacroFile: {
+        newTabStore = createTabStore(macroFileService);
+        break;
+      }
+      default:
         return;
-      }
+    }
 
-      let name = undefined;
-      if (fileId) {
-        try {
-          const store = getStoreWithFileType(fileType);
-          const state = store.getState() as IFileState<any>;
-          const { name: itemName } = state.findById(fileId);
-          name = itemName;
-        } catch (e) {
-          notify.error(`Internal error: ${e}`);
-        }
+    const activeTabId = uuidv4();
+    newTabStore.setState({
+      id: activeTabId,
+      file: { id: fileId, fileType, name },
+    });
+    set((state) => ({
+      activeTabId,
+      tabs: {
+        ...state.tabs,
+        [activeTabId]: newTabStore,
+      },
+    }));
+  },
+  closeTab: (id: string) => {
+    set((state) => {
+      const tabs = { ...state.tabs };
+      delete tabs[id];
+      // If the closed tab was the active tab, set a new active tab
+      let newActiveTab = state.activeTabId === id ? null : state.activeTabId;
+      // If there are still tabs left, set the first tab as the active tab
+      if (newActiveTab === null && Object.keys(tabs).length > 0) {
+        newActiveTab = Object.keys(tabs)[0];
       }
-
-      let newTabStore:
-        | UseBoundStore<StoreApi<IEditorTabState<IScript | IMacroFile>>>
-        | undefined = undefined;
-
-      switch (fileType) {
-        case FileType.ScriptFile: {
-          newTabStore = createTabStore(scriptService);
-          break;
-        }
-        case FileType.MacroFile: {
-          newTabStore = createTabStore(macroFileService);
-          break;
-        }
-        default:
-          return;
+      return { tabs, activeTabId: newActiveTab };
+    });
+  },
+  closeTabByFile: (fileId: number, fileType: FileType) => {
+    const { tabs, closeTab } = get();
+    const tab = Object.entries(tabs).find(
+      ([_, tab]) =>
+        tab.getState().file.id === fileId &&
+        tab.getState().file.fileType === fileType
+    );
+    if (tab) {
+      const [tabId, _] = tab;
+      closeTab(tabId);
+    }
+  },
+  closeAllTabs: () => {
+    set({ tabs: {}, activeTabId: null });
+  },
+  closeOtherTabs: (id: string) => {
+    set((state) => {
+      const tabs = { ...state.tabs };
+      const ids = Object.keys(tabs);
+      for (let i = 0; i < ids.length; i++) {
+        if (ids[i] === id) continue;
+        delete tabs[ids[i]];
       }
-
-      const activeTabId = uuidv4();
-      newTabStore.setState({
-        id: activeTabId,
-        file: { id: fileId, fileType, name },
-      });
-      set((state) => ({
-        activeTabId,
-        tabs: {
-          ...state.tabs,
-          [activeTabId]: newTabStore,
-        },
-      }));
-    },
-    closeTab: (id: string) => {
-      set((state) => {
-        const tabs = { ...state.tabs };
-        delete tabs[id];
-        // If the closed tab was the active tab, set a new active tab
-        let newActiveTab = state.activeTabId === id ? null : state.activeTabId;
-        // If there are still tabs left, set the first tab as the active tab
-        if (newActiveTab === null && Object.keys(tabs).length > 0) {
-          newActiveTab = Object.keys(tabs)[0];
-        }
-        return { tabs, activeTabId: newActiveTab };
-      });
-    },
-    closeTabByFile: (fileId: number, fileType: FileType) => {
-      const { tabs, closeTab } = get();
-      const tab = Object.entries(tabs).find(
-        ([_, tab]) =>
-          tab.getState().file.id === fileId &&
-          tab.getState().file.fileType === fileType
-      );
-      if (tab) {
-        const [tabId, _] = tab;
-        closeTab(tabId);
-      }
-    },
-    closeAllTabs: () => {
-      set({ tabs: {}, activeTabId: null });
-    },
-    closeOtherTabs: (id: string) => {
-      set((state) => {
-        const tabs = { ...state.tabs };
-        const ids = Object.keys(tabs);
-        for (let i = 0; i < ids.length; i++) {
-          if (ids[i] === id) continue;
-          delete tabs[ids[i]];
-        }
-        return { tabs, activeTab: id };
-      });
-    },
-    findTabById: (id: string) => {
-      return get().tabs[id];
-    },
-  })
-);
+      return { tabs, activeTab: id };
+    });
+  },
+  findTabById: (id: string) => {
+    return get().tabs[id];
+  },
+}));
 
 export default useEditorStore;
