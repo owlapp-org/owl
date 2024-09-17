@@ -110,7 +110,6 @@ const baseActions = <T>(
     const items: any = get().items;
     for (let i = 0; i < items.length; i++) {
       if (items[i].id === id) {
-        console.log(items[i]);
         return items[i];
       }
     }
