@@ -8,7 +8,7 @@ import {
   Textarea,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IDatabase } from "@ts/interfaces/database_interface";
+import { IDatabase } from "@ts/interfaces/interfaces";
 import { FC, useEffect, useState } from "react";
 import { useUpdateDatabaseModalStore } from "./useUpdateDatabaseModalStore";
 

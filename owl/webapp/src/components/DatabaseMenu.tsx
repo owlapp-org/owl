@@ -9,7 +9,7 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { IDatabase } from "@ts/interfaces/database_interface";
+import { IDatabase } from "@ts/interfaces/interfaces";
 
 interface IDatabaseMenuProps {
   database: IDatabase;

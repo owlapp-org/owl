@@ -9,7 +9,7 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IScript } from "@ts/interfaces/interfaces";
 
 interface IScriptMenuProps {
   script: IScript;

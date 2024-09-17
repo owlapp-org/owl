@@ -3,7 +3,7 @@ import { IEditorTabState } from "@hooks/editorStore";
 import { useDatabaseStore } from "@hooks/hooks";
 import { ActionIcon, Button, Divider, Flex, Select } from "@mantine/core";
 import { IconCubeSend, IconPlayerPlay } from "@tabler/icons-react";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IScript } from "@ts/interfaces/interfaces";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 

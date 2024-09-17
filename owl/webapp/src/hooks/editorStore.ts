@@ -1,6 +1,6 @@
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-import IFile from "@ts/interfaces/file_interface";
+import IFile from "@ts/interfaces/interfaces";
 import { FileType } from "@ts/enums/filetype_enum";
 import { notify } from "@lib/notify";
 import { getStoreWithFileType, IFileState } from "./hooks";
@@ -9,8 +9,7 @@ import {
   macroFileService,
   scriptService,
 } from "@services/services";
-import { IMacroFile } from "@ts/interfaces/interfaces";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IMacroFile, IScript } from "@ts/interfaces/interfaces";
 
 export interface IEditorTabState<T> {
   id: string;

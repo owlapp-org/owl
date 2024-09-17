@@ -1,5 +1,21 @@
 import { FileType } from "@ts/enums/filetype_enum";
-import { IUser } from "./user_interface";
+
+export interface IUser {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface ILoginResponse {
+  name: string;
+  email: string;
+  access_token: string;
+}
+
+export interface IAppConfig {
+  google_login: boolean;
+  production: boolean;
+}
 
 export interface IDatabase {
   id: number;
@@ -28,6 +44,22 @@ export default interface IFile {
 }
 
 export interface IMacroFile {
+  id: number;
+  path: string;
+  owner: IUser;
+  name: string;
+  extension: string;
+}
+
+export interface IScript {
+  id: number;
+  path: string;
+  owner: IUser;
+  name: string;
+  extension: string;
+}
+
+export interface IDataFile {
   id: number;
   path: string;
   owner: IUser;

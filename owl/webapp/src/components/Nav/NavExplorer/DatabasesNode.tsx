@@ -5,7 +5,7 @@ import TreeNode from "@components/TreeNode";
 import { useDatabaseStore } from "@hooks/hooks";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { IconBrandOnedrive, IconCylinder, IconPlus } from "@tabler/icons-react";
-import { IDatabase } from "@ts/interfaces/database_interface";
+import { IDatabase } from "@ts/interfaces/interfaces";
 import { useEffect } from "react";
 import "./styles.css";
 

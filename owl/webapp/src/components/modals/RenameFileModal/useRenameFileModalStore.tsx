@@ -1,4 +1,4 @@
-import IFile from "@ts/interfaces/file_interface";
+import IFile from "@ts/interfaces/interfaces";
 import { create } from "zustand";
 
 interface IRenameFileModalState {

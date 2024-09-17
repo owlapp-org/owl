@@ -10,7 +10,7 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { IDataFile } from "@ts/interfaces/datafile_interface";
+import { IDataFile } from "@ts/interfaces/interfaces";
 
 interface IDataFileMenuProps {
   file: IDataFile;

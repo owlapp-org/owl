@@ -13,7 +13,7 @@ import {
   IconUpload,
 } from "@tabler/icons-react";
 import { FileType } from "@ts/enums/filetype_enum";
-import { IDataFile } from "@ts/interfaces/datafile_interface";
+import { IDataFile } from "@ts/interfaces/interfaces";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 

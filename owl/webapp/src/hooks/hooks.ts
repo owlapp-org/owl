@@ -11,7 +11,7 @@ import {
 } from "@services/services";
 import { FileType } from "@ts/enums/filetype_enum";
 import { IMacroFile } from "@ts/interfaces/interfaces";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IScript } from "@ts/interfaces/interfaces";
 import { notify } from "@lib/notify";
 
 type SetStateFunction<T> = (

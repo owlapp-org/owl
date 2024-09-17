@@ -1,6 +1,6 @@
 import { API_URL } from "src/lib/constants";
 import request from "src/lib/request";
-import { ILoginResponse } from "@ts/interfaces/auth_interface";
+import { ILoginResponse } from "@ts/interfaces/interfaces";
 
 export namespace AuthService {
   export const login = async (

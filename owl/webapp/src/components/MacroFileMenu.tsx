@@ -9,8 +9,7 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { IMacroFile } from "@ts/interfaces/macrofile_interface";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IMacroFile, IScript } from "@ts/interfaces/interfaces";
 
 interface IMacroFileMenuProps {
   macrofile: IMacroFile;

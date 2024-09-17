@@ -2,7 +2,7 @@ import { IEditorTabState } from "@hooks/editorStore";
 import { CodeHighlight } from "@mantine/code-highlight";
 import { IconBorderAll } from "@tabler/icons-react";
 import { IQueryResult } from "@ts/interfaces/database_interface";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IScript } from "@ts/interfaces/interfaces";
 import { StoreApi, UseBoundStore } from "zustand";
 import ResultSetContainer from "./ResultSet";
 

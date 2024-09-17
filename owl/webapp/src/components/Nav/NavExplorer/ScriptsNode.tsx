@@ -8,7 +8,7 @@ import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath } from "@mantine/dropzone";
 import { IconCodeDots, IconFileTypeSql, IconUpload } from "@tabler/icons-react";
 import { FileType } from "@ts/enums/filetype_enum";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IScript } from "@ts/interfaces/interfaces";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 import "./styles.upload.css";
