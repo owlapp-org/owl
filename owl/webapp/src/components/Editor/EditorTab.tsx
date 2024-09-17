@@ -4,19 +4,18 @@ import useEditorStore, { IEditorTabState } from "@hooks/editorStore";
 import { Divider, Loader, Menu, Tabs } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconDeviceFloppy, IconX } from "@tabler/icons-react";
-import { FileType } from "@ts/enums/filetype_enum";
 import { useEffect, useState } from "react";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import "./styles.css";
 
-interface IEditorTabProps {
+interface IEditorTabProps<T> {
   id: string;
   index: number;
-  store: UseBoundStore<StoreApi<IEditorTabState>>;
+  store: UseBoundStore<StoreApi<IEditorTabState<T>>>;
 }
 
-const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
+const EditorTab = <T,>({ id, store, index }: IEditorTabProps<T>) => {
   const { closeAllTabs, closeTab, closeOtherTabs } = useEditorStore();
   const { file, save, tabId } = useStore(
     store,
@@ -44,11 +43,8 @@ const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
     if (file.id) {
       await save();
     } else {
-      switch (file.fileType) {
-        case FileType.ScriptFile: {
-          showCreateFileModal({ onSave: save, fileType: FileType.ScriptFile });
-        }
-      }
+      file.fileType &&
+        showCreateFileModal({ onSave: save, fileType: file.fileType });
     }
   };
 

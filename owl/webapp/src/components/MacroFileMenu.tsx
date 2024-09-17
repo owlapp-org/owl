@@ -1,16 +1,15 @@
 // src/components/DatabaseMenu.tsx
 import { useAlertDialog } from "@contexts/AlertDialogContext";
+import { notify } from "@lib/notify";
 import { ActionIcon, Menu } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import MacroFileService from "@services/macrofileService";
+import { macroFileService } from "@services/services";
 import {
   IconDotsVertical,
   IconDownload,
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { IMacroFile } from "@ts/interfaces/macrofile_interface";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IMacroFile, IScript } from "@ts/interfaces/interfaces";
 
 interface IMacroFileMenuProps {
   macrofile: IMacroFile;
@@ -45,13 +44,9 @@ export default function ScriptMenu({
   const handleDownload = async () => {
     const { id, name } = macrofile;
     try {
-      await MacroFileService.download(id, name);
+      await macroFileService.download(id, name);
     } catch (error) {
-      notifications.show({
-        color: "red",
-        title: "Error",
-        message: `Error downloading file. ${error}`,
-      });
+      notify.error(`Error downloading file. ${error}`);
     }
   };
 

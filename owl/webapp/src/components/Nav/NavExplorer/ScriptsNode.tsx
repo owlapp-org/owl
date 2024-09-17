@@ -1,15 +1,14 @@
-import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { useRenameFileModalStore } from "@components/modals/RenameFileModal/useRenameFileModalStore";
 import ScriptMenu from "@components/ScriptMenu";
 import TreeNode from "@components/TreeNode";
 import useEditorStore from "@hooks/editorStore";
-import useScriptStore from "@hooks/scriptStore";
+import { useScriptStore } from "@hooks/hooks";
+import { notify } from "@lib/notify";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { Dropzone, FileWithPath } from "@mantine/dropzone";
-import { notifications } from "@mantine/notifications";
 import { IconCodeDots, IconFileTypeSql, IconUpload } from "@tabler/icons-react";
 import { FileType } from "@ts/enums/filetype_enum";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IScript } from "@ts/interfaces/interfaces";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 import "./styles.upload.css";
@@ -47,24 +46,24 @@ function toNode(
 }
 
 export default function ScriptsNode() {
-  const { scripts, fetchAll, remove, upload } = useScriptStore();
+  const { items: scripts, fetchAll, remove, upload } = useScriptStore();
+  const { closeTabByFile } = useEditorStore();
   const openRef = useRef<() => void>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { addTab } = useEditorStore();
   const { showModal: showRenameFileModal } = useRenameFileModalStore();
-  const { showModal: showCreateScriptModal } = useCreateFileModalStore();
 
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
+  const handleDelete = async (id: number) => {
+    await remove(id);
+    closeTabByFile(id, FileType.ScriptFile);
+  };
   const handleDrop = async (files: FileWithPath[]) => {
     if (files.length === 0) {
-      notifications.show({
-        title: "Error",
-        color: "red",
-        message: "No script file selected",
-      });
+      notify.error("No script file selected");
       return;
     }
     setIsLoading(true);
@@ -114,9 +113,9 @@ export default function ScriptsNode() {
         ),
       },
       children: scripts.map((scriptFile) =>
-        toNode(scriptFile, remove, handleRename, (e: any) => {
+        toNode(scriptFile, handleDelete, handleRename, (e: any) => {
           e.stopPropagation();
-          addTab(scriptFile.id, FileType.ScriptFile);
+          addTab(FileType.ScriptFile, scriptFile.id);
         })
       ),
     },

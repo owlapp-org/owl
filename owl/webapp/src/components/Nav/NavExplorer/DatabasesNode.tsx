@@ -2,10 +2,10 @@ import DatabaseMenu from "@components/DatabaseMenu";
 import { useCreateDatabaseModalStore } from "@components/modals/CreateDatabaseModal/useCreateDatabaseModalStore";
 import { useUpdateDatabaseModalStore } from "@components/modals/UpdateDatabaseModal/useUpdateDatabaseModalStore";
 import TreeNode from "@components/TreeNode";
-import useDatabaseStore from "@hooks/databaseStore";
+import { useDatabaseStore } from "@hooks/hooks";
 import { ActionIcon, Tree, TreeNodeData } from "@mantine/core";
 import { IconBrandOnedrive, IconCylinder, IconPlus } from "@tabler/icons-react";
-import { IDatabase } from "@ts/interfaces/database_interface";
+import { IDatabase } from "@ts/interfaces/interfaces";
 import { useEffect } from "react";
 import "./styles.css";
 
@@ -40,7 +40,7 @@ function toNode(
 }
 
 export default function DatabasesNode() {
-  const { databases, fetchAll, remove } = useDatabaseStore();
+  const { items, fetchAll, remove } = useDatabaseStore();
   const { showModal: showCreateDatabaseModal } = useCreateDatabaseModalStore();
   const { showModal: showUpdateDatabaseModal } = useUpdateDatabaseModalStore();
 
@@ -83,7 +83,7 @@ export default function DatabasesNode() {
           </div>
         ),
       },
-      children: databases.map((db) => toNode(db, remove, handleUpdateDatabase)),
+      children: items.map((db) => toNode(db, remove, handleUpdateDatabase)),
     },
   ];
 

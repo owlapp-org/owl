@@ -1,15 +1,15 @@
 // src/components/DatabaseMenu.tsx
 import { useAlertDialog } from "@contexts/AlertDialogContext";
+import { notify } from "@lib/notify";
 import { ActionIcon, Menu } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import ScriptService from "@services/scriptService";
+import { scriptService } from "@services/services";
 import {
   IconDotsVertical,
   IconDownload,
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IScript } from "@ts/interfaces/interfaces";
 
 interface IScriptMenuProps {
   script: IScript;
@@ -44,13 +44,9 @@ export default function ScriptMenu({
   const handleDownload = async () => {
     const { id, name } = script;
     try {
-      await ScriptService.download(id, name);
+      await scriptService.download(id, name);
     } catch (error) {
-      notifications.show({
-        color: "red",
-        title: "Error",
-        message: `Error downloading file. ${error}`,
-      });
+      notify.error(`Error downloading file. ${error}`);
     }
   };
 

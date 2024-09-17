@@ -14,15 +14,15 @@ import {
 } from "react";
 
 interface IContentProps {
-  store: UseBoundStore<StoreApi<IEditorTabState>>;
+  store: UseBoundStore<StoreApi<IEditorTabState<IScript>>>;
   onExecute: () => void;
 }
 
 import { getSelectedLines, getSelection } from "@components/Editor/lib";
 import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { IEditorTabState } from "@hooks/editorStore";
-import { notifications } from "@mantine/notifications";
 import { FileType } from "@ts/enums/filetype_enum";
+import { IScript } from "@ts/interfaces/interfaces";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -62,16 +62,8 @@ const ScriptCode = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
         if (fileId) {
           await save(name);
         } else {
-          if (!fileType) {
-            notifications.show({
-              color: "red",
-              title: "Error",
-              message: "Unknown file type",
-            });
-            return;
-          }
           showCreateFileModal({
-            fileType: FileType.MacroFile,
+            fileType: FileType.ScriptFile,
             onSave: save,
           });
         }

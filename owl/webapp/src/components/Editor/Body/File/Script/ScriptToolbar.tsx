@@ -1,15 +1,16 @@
 import { useCreateDatabaseModalStore } from "@components/modals/CreateDatabaseModal/useCreateDatabaseModalStore";
-import useDatabaseStore from "@hooks/databaseStore";
-import { IEditorScriptTabState } from "@hooks/editorStore";
+import { IEditorTabState } from "@hooks/editorStore";
+import { useDatabaseStore } from "@hooks/hooks";
 import { ActionIcon, Button, Divider, Flex, Select } from "@mantine/core";
 import { IconCubeSend, IconPlayerPlay } from "@tabler/icons-react";
+import { IScript } from "@ts/interfaces/interfaces";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
 interface IScriptToolbarProps {
   isRunLoading: boolean;
   isRenderLoading: boolean;
-  store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
+  store: UseBoundStore<StoreApi<IEditorTabState<IScript>>>;
   onExecute: () => void;
   onRender: () => void;
 }
@@ -21,12 +22,12 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
   onExecute,
   onRender,
 }) => {
-  const { databases } = useDatabaseStore();
-  const { setDatabase, options, content } = useStore(
+  const { items: databases } = useDatabaseStore();
+  const { getDatabaseId, setDatabaseId, content } = useStore(
     store,
     useShallow((state) => ({
-      setDatabase: state.setDatabase,
-      options: state.options,
+      getDatabaseId: () => state.getOption<string>("databaseId"),
+      setDatabaseId: (id: number) => state.setOption("databaseId", id),
       content: state.content,
     }))
   );
@@ -68,8 +69,10 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
             miw={200}
             placeholder={"Using in-memory database"}
             data={databaseSelectOptions}
-            value={options?.databaseId}
-            onChange={setDatabase}
+            value={getDatabaseId()}
+            onChange={(v: string | null) =>
+              v != null && setDatabaseId(Number.parseInt(v))
+            }
             styles={(theme) => ({
               input: {
                 border: "none",

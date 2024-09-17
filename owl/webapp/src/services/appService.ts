@@ -1,4 +1,4 @@
-import { IAppConfig } from "@ts/interfaces/app_interface";
+import { IAppConfig } from "@ts/interfaces/interfaces";
 import request from "src/lib/request";
 
 export namespace AppService {

@@ -1,18 +1,18 @@
-import { IEditorMacroFileTabState } from "@hooks/editorStore";
+import { IEditorTabState } from "@hooks/editorStore";
 import { CodeHighlight } from "@mantine/code-highlight";
 import "@mantine/code-highlight/styles.css";
 import { ActionIcon, Divider, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import MacroFileService from "@services/macrofileService";
+import { macroFileService } from "@services/services";
 import { IconFile3d, IconPlayerPlay } from "@tabler/icons-react";
 import { useState } from "react";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 
-interface IMacroFilePanelProps {
-  store: UseBoundStore<StoreApi<IEditorMacroFileTabState>>;
+interface IMacroFilePanelProps<T> {
+  store: UseBoundStore<StoreApi<IEditorTabState<T>>>;
 }
 
-const Panel: React.FC<IMacroFilePanelProps> = ({ store }) => {
+const Panel = <T,>({ store }: IMacroFilePanelProps<T>) => {
   const [command, setCommand] = useState("");
   const [renderedContent, setRenderedContent] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +21,7 @@ const Panel: React.FC<IMacroFilePanelProps> = ({ store }) => {
   const handleRenderClick = async () => {
     setIsLoading(true);
     try {
-      const result: any = await MacroFileService.renderContent(
+      const result: any = await macroFileService.renderContent(
         content,
         command
       );

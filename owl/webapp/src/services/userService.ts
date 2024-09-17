@@ -1,5 +1,5 @@
 import { API_URL } from "@lib/constants";
-import { IUser } from "@ts/interfaces/user_interface";
+import { IUser } from "@ts/interfaces/interfaces";
 import axios from "axios";
 import request from "src/lib/request";
 

@@ -1,6 +1,8 @@
-import useDataFileStore from "@hooks/datafileStore";
-import useMacroFileStore from "@hooks/macrofileStore";
-import useScriptStore from "@hooks/scriptStore";
+import {
+  useDataFileStore,
+  useMacroFileStore,
+  useScriptStore,
+} from "@hooks/hooks";
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { FileType } from "@ts/enums/filetype_enum";
