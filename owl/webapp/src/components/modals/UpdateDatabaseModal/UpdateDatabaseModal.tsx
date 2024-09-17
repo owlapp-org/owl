@@ -1,4 +1,4 @@
-import useDatabaseStore from "@hooks/databaseStore";
+import { useDatabaseStore } from "@hooks/hooks";
 import {
   Button,
   Group,

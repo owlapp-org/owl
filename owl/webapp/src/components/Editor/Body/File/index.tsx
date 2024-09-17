@@ -1,8 +1,5 @@
-import {
-  IEditorMacroFileTabState,
-  IEditorScriptTabState,
-} from "@hooks/editorStore";
-import { notifications } from "@mantine/notifications";
+import { IEditorTabState } from "@hooks/editorStore";
+import { notify } from "@lib/notify";
 import { FileType } from "@ts/enums/filetype_enum";
 import React from "react";
 import { StoreApi, UseBoundStore } from "zustand";
@@ -10,39 +7,32 @@ import MacroFile from "./MacroFile";
 import Script from "./Script";
 import "./styles.css";
 
-const File: React.FC<{
+const File = <T,>({
+  fileType,
+  store,
+}: {
   fileType?: FileType;
-  store: UseBoundStore<
-    StoreApi<IEditorScriptTabState | IEditorMacroFileTabState>
-  >;
-}> = React.memo(({ fileType, store }) => {
+  store: UseBoundStore<StoreApi<IEditorTabState<T>>>;
+}): React.ReactElement => {
   switch (fileType) {
     case FileType.ScriptFile:
       return (
-        <Script
-          store={store as UseBoundStore<StoreApi<IEditorScriptTabState>>}
-        />
+        <Script store={store as UseBoundStore<StoreApi<IEditorTabState<T>>>} />
       );
     case FileType.MacroFile:
       return (
         <MacroFile
-          store={store as UseBoundStore<StoreApi<IEditorMacroFileTabState>>}
+          store={store as UseBoundStore<StoreApi<IEditorTabState<T>>>}
         />
       );
     case FileType.DataFile:
-      notifications.show({
-        color: "red",
-        title: "Error",
-        message: "Unsupported file type",
-      });
-      return null;
+      notify.error("Unsupported file type");
+      return <></>;
     default:
       return (
-        <Script
-          store={store as UseBoundStore<StoreApi<IEditorScriptTabState>>}
-        />
+        <Script store={store as UseBoundStore<StoreApi<IEditorTabState<T>>>} />
       );
   }
-});
+};
 
 export default File;

@@ -9,13 +9,13 @@ import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import "./styles.css";
 
-interface IEditorTabProps {
+interface IEditorTabProps<T> {
   id: string;
   index: number;
-  store: UseBoundStore<StoreApi<IEditorTabState>>;
+  store: UseBoundStore<StoreApi<IEditorTabState<T>>>;
 }
 
-const EditorTab: React.FC<IEditorTabProps> = ({ id, store, index }) => {
+const EditorTab = <T,>({ id, store, index }: IEditorTabProps<T>) => {
   const { closeAllTabs, closeTab, closeOtherTabs } = useEditorStore();
   const { file, save, tabId } = useStore(
     store,

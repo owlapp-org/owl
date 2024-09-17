@@ -1,8 +1,10 @@
 import { create, StoreApi, UseBoundStore } from "zustand";
 
 import { notifications } from "@mantine/notifications";
-import ApiService, {
+import {
+  ApiService,
   databaseService,
+  dataFileService,
   FileService,
   macroFileService,
   scriptService,
@@ -10,6 +12,7 @@ import ApiService, {
 import { FileType } from "@ts/enums/filetype_enum";
 import { IMacroFile } from "@ts/interfaces/interfaces";
 import { IScript } from "@ts/interfaces/script_interface";
+import { notify } from "@lib/notify";
 
 type SetStateFunction<T> = (
   partial:
@@ -22,6 +25,7 @@ type SetStateFunction<T> = (
 export interface IState<T> {
   items: T[];
   create: (payload: Record<string, any>) => Promise<T>;
+  update: (id: number, payload: Record<string, any>) => Promise<T>;
   fetchAll: () => void;
   findById: (id: number) => T;
   remove: (id: number) => void;
@@ -30,6 +34,7 @@ export interface IState<T> {
 export interface IFileState<T> extends IState<T> {
   fetchContent: (id: number) => Promise<string>;
   upload: (data: FormData) => void;
+  rename: (id: number, name: string) => Promise<T>;
 }
 
 const baseActions = <T>(
@@ -56,6 +61,21 @@ const baseActions = <T>(
       });
       throw error;
     }
+  },
+  update: async (id: number, payload: Record<string, any>) => {
+    try {
+      const item = await service.update(id, payload);
+      set((state) => ({ items: [...state.items, item] }));
+      notify.info("Item created successfully");
+      return item;
+    } catch (error) {
+      notify.error(`Failed to create item ${error}`);
+      throw error;
+    }
+  },
+  rename: async (id: number, name: string) => {
+    const { update } = get();
+    return update(id, { name });
   },
   fetchAll: async () => {
     try {
@@ -90,6 +110,7 @@ const baseActions = <T>(
     const items: any = get().items;
     for (let i = 0; i < items.length; i++) {
       if (items[i].id === id) {
+        console.log(items[i]);
         return items[i];
       }
     }
@@ -145,23 +166,18 @@ export const createFileStore = <T>(
         set((state) => ({
           items: state.items.map((item: any) => (item.id === id ? file : item)),
         }));
-        notifications.show({
-          title: "Success",
-          message: `File renamed successfully`,
-        });
+        notify.error(`File renamed successfully`);
+        return file;
       } catch (err) {
-        console.error("Failed to rename file.", err);
-        notifications.show({
-          title: "Error",
-          color: "red",
-          message: `Failed to rename file: ${err}`,
-        });
+        notify.error(`Failed to rename file: ${err}`);
+        throw err;
       }
     },
   }));
 
 export const useScriptStore = createFileStore(scriptService);
 export const useMacroFileStore = createFileStore(macroFileService);
+export const useDataFileStore = createFileStore(dataFileService);
 export const useDatabaseStore = createBaseStore(databaseService);
 
 export const getStoreWithFileType = (

@@ -2,6 +2,7 @@
 import { useAlertDialog } from "@contexts/AlertDialogContext";
 import { ActionIcon, Menu } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { databaseService } from "@services/services";
 import {
   IconDotsVertical,
   IconDownload,
@@ -37,7 +38,7 @@ export default function DatabaseMenu({
   const handleDownload = async () => {
     const { id, name } = database;
     try {
-      await DatabaseService.download(id, name);
+      await databaseService.download(id, name);
     } catch (error) {
       notifications.show({
         color: "red",

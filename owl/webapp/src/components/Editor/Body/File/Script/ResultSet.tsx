@@ -1,28 +1,25 @@
-import { IEditorScriptTabState } from "@hooks/editorStore";
 import { notifications } from "@mantine/notifications";
 import { IQueryResult } from "@ts/interfaces/database_interface";
 
 import "@components/Editor/styles.css";
+import { databaseService } from "@services/services";
 import { useEffect, useRef, useState } from "react";
 import DataGrid, { DataGridHandle } from "react-data-grid";
-import { StoreApi, UseBoundStore, useStore } from "zustand";
 
 interface IResultSetContainerProps {
   result?: IQueryResult;
-  store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
 }
 interface IResultSetProps {
   result: IQueryResult;
-  store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
 }
 
-const ResultSet: React.FC<IResultSetProps> = ({ result, store }) => {
-  const { runQuery } = useStore(store);
+const ResultSet: React.FC<IResultSetProps> = ({ result }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [rows, setRows] = useState<Record<string, any>[]>([]);
   const [endRow, setEndRow] = useState(result.end_row || 0);
   const gridRef = useRef<DataGridHandle>(null);
+  const { database_id: databaseId } = result;
 
   const defaultColumnProperties = {
     resizable: true,
@@ -66,7 +63,13 @@ const ResultSet: React.FC<IResultSetProps> = ({ result, store }) => {
 
     setIsLoading(true);
     try {
-      const qr = await runQuery(result.query, start_row, end_row, false);
+      const qr = await databaseService.run(
+        databaseId,
+        result.query,
+        start_row,
+        end_row,
+        false
+      );
       if (qr) {
         setRows([...rows, ...(qr.data || [])]);
         setEndRow(qr.end_row!);
@@ -105,14 +108,11 @@ const ResultSet: React.FC<IResultSetProps> = ({ result, store }) => {
   );
 };
 
-const ResultSetContainer: React.FC<IResultSetContainerProps> = ({
-  result,
-  store,
-}) => {
+const ResultSetContainer: React.FC<IResultSetContainerProps> = ({ result }) => {
   if (result == undefined) {
     return <></>;
   } else {
-    return <ResultSet result={result} store={store} />;
+    return <ResultSet result={result} />;
   }
 };
 

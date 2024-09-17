@@ -1,7 +1,8 @@
-import { IEditorScriptTabState } from "@hooks/editorStore";
+import { IEditorTabState } from "@hooks/editorStore";
 import { CodeHighlight } from "@mantine/code-highlight";
 import { IconBorderAll } from "@tabler/icons-react";
 import { IQueryResult } from "@ts/interfaces/database_interface";
+import { IScript } from "@ts/interfaces/script_interface";
 import { StoreApi, UseBoundStore } from "zustand";
 import ResultSetContainer from "./ResultSet";
 
@@ -9,12 +10,11 @@ interface IPanelProps {
   active?: number;
   result?: IQueryResult;
   renderedContent?: string | null;
-  store: UseBoundStore<StoreApi<IEditorScriptTabState>>;
+  store: UseBoundStore<StoreApi<IEditorTabState<IScript>>>;
 }
 
 const ScriptPanel: React.FC<IPanelProps> = ({
   result,
-  store,
   active = 0,
   renderedContent = null,
 }) => {
@@ -50,9 +50,7 @@ const ScriptPanel: React.FC<IPanelProps> = ({
           </div>
         </div>
       )}
-      {active == 1 && result && (
-        <ResultSetContainer result={result} store={store} />
-      )}
+      {active == 1 && result && <ResultSetContainer result={result} />}
       {active == 2 && renderedContent !== null && (
         <CodeHighlight
           className="app-code-highlight macro-code-highlight"

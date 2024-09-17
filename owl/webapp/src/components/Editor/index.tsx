@@ -1,5 +1,5 @@
-import useDatabaseStore from "@hooks/databaseStore";
 import useEditorStore from "@hooks/editorStore";
+import { useDatabaseStore } from "@hooks/hooks";
 import { ActionIcon, Tabs } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { FileType } from "@ts/enums/filetype_enum";
@@ -11,7 +11,7 @@ import ZeroTabs from "./ZeroTabs";
 export default function Editor() {
   const { fetchAll } = useDatabaseStore();
 
-  const { addTab, tabs, getTabCount, activeTab, setActiveTab } =
+  const { addTab, tabs, getTabCount, activeTabId, setActiveTab } =
     useEditorStore();
 
   useEffect(() => {
@@ -27,14 +27,14 @@ export default function Editor() {
       <ZeroTabs
         onNewScriptTab={() => addTab()}
         onNewMacroTab={() => {
-          addTab(null, FileType.MacroFile);
+          addTab(FileType.MacroFile, null);
         }}
       />
     );
   }
 
   return (
-    <Tabs value={activeTab} onChange={(t) => t && setActiveTab(t)}>
+    <Tabs value={activeTabId} onChange={(t) => t && setActiveTab(t)}>
       {/* <ScrollArea scrollbarSize={0} style={{ width: "100%", display: "flex" }}> */}
       <Tabs.List
         className="editor-tab-list"

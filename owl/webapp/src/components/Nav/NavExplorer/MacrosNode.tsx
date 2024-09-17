@@ -60,7 +60,6 @@ export default function MacroFilesNode() {
 
   useEffect(() => {
     fetchAll();
-    console.log(items);
   }, [fetchAll]);
 
   const handleDrop = async (files: FileWithPath[]) => {
@@ -88,7 +87,7 @@ export default function MacroFilesNode() {
   const handleCreate = async () => {
     setIsLoading(true);
     try {
-      addTab(null, FileType.MacroFile);
+      addTab(FileType.MacroFile, null);
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +140,7 @@ export default function MacroFilesNode() {
       children: items.map((macrofile) =>
         toNode(macrofile, remove, handleRename, (e: any) => {
           e.stopPropagation();
-          addTab(macrofile.id, FileType.MacroFile);
+          addTab(FileType.MacroFile, macrofile.id);
         })
       ),
     },
