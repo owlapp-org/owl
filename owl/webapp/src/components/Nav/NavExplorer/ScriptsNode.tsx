@@ -57,8 +57,8 @@ export default function ScriptsNode() {
     fetchAll();
   }, [fetchAll]);
 
-  const handleDelete = (id: number) => {
-    remove(id);
+  const handleDelete = async (id: number) => {
+    await remove(id);
     closeTabByFile(id, FileType.ScriptFile);
   };
   const handleDrop = async (files: FileWithPath[]) => {

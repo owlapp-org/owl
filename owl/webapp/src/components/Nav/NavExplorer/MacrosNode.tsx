@@ -57,10 +57,16 @@ export default function MacroFilesNode() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { addTab } = useEditorStore();
   const { showModal: showRenameFileModal } = useRenameFileModalStore();
+  const { closeTabByFile } = useEditorStore();
 
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
+
+  const handleDelete = async (id: number) => {
+    await remove(id);
+    closeTabByFile(id, FileType.MacroFile);
+  };
 
   const handleDrop = async (files: FileWithPath[]) => {
     if (files.length === 0) {
@@ -138,7 +144,7 @@ export default function MacroFilesNode() {
         ),
       },
       children: items.map((macrofile) =>
-        toNode(macrofile, remove, handleRename, (e: any) => {
+        toNode(macrofile, handleDelete, handleRename, (e: any) => {
           e.stopPropagation();
           addTab(FileType.MacroFile, macrofile.id);
         })
