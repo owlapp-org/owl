@@ -194,7 +194,7 @@ const useEditorStore = create<IEditorState<IScript | IMacroFile>>(
         if (newActiveTab === null && Object.keys(tabs).length > 0) {
           newActiveTab = Object.keys(tabs)[0];
         }
-        return { tabs, activeTab: newActiveTab };
+        return { tabs, activeTabId: newActiveTab };
       });
     },
     closeTabByFile: (fileId: number, fileType: FileType) => {
