@@ -1,4 +1,4 @@
-import { IDashboardFile } from "@ts/interfaces/dashboard_interface";
+import { IDashboardFile } from "@ts/interfaces/interfaces";
 import request from "src/lib/request";
 
 namespace DashboardService {

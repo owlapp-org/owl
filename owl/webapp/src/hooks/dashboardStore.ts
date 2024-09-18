@@ -1,9 +1,9 @@
 import { create } from "zustand";
 
 import { notifications } from "@mantine/notifications";
-import { IScript } from "@ts/interfaces/script_interface";
+import { IScript } from "@ts/interfaces/interfaces";
 import useEditorStore from "./editorStore";
-import { IDashboardFile } from "@ts/interfaces/dashboard_interface";
+import { IDashboardFile } from "@ts/interfaces/interfaces";
 import DashboardService from "@services/dashboardService";
 
 interface IDashboardState {

@@ -1,5 +1,6 @@
 import "@components/Editor/styles.css";
-import { IEditorMacroFileTabState } from "@hooks/editorStore";
+import { IEditorTabState } from "@hooks/editorStore";
+import { IMacroFile } from "@ts/interfaces/interfaces";
 import { useEffect, useState } from "react";
 import {
   PanelGroup,
@@ -11,7 +12,7 @@ import MacroCode from "./MacroCode";
 import MacroFilePanel from "./MacroFilePanel";
 
 interface IMacroFileProps {
-  store: UseBoundStore<StoreApi<IEditorMacroFileTabState>>;
+  store: UseBoundStore<StoreApi<IEditorTabState<IMacroFile>>>;
 }
 
 const MacroFile: React.FC<IMacroFileProps> = ({ store }) => {

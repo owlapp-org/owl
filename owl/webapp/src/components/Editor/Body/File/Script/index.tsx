@@ -2,8 +2,7 @@ import "@components/Editor/styles.css";
 import { IEditorTabState } from "@hooks/editorStore";
 import { notify } from "@lib/notify";
 import { databaseService, macroFileService } from "@services/services";
-import { IQueryResult } from "@ts/interfaces/database_interface";
-import { IScript } from "@ts/interfaces/interfaces";
+import { IQueryResult, IScript } from "@ts/interfaces/interfaces";
 import { useEffect, useRef, useState } from "react";
 import {
   PanelGroup,
