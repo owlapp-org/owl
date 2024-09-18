@@ -130,11 +130,7 @@ export const createFileStore = <T extends IFileModel>(
         const content = await service.fetchContent(id);
         return content;
       } catch (e) {
-        notifications.show({
-          title: "Error",
-          color: "red",
-          message: "Failed to get file content",
-        });
+        notify.error("Failed to get file content");
         throw e;
       }
     },
@@ -145,17 +141,9 @@ export const createFileStore = <T extends IFileModel>(
       try {
         const item = await service.upload(data);
         set((state) => ({ items: [...state.items, item] }));
-        notifications.show({
-          title: "Success",
-          message: `File uploaded successfully`,
-        });
+        notify.info("File uploaded successfully");
       } catch (error) {
-        console.error("Failed to upload file", error);
-        notifications.show({
-          title: "Error",
-          color: "red",
-          message: `Failed to upload file ${error}`,
-        });
+        notify.error(`Failed to upload file ${error}`);
       }
     },
     rename: async (id: number, name: string) => {
@@ -164,7 +152,7 @@ export const createFileStore = <T extends IFileModel>(
         set((state) => ({
           items: state.items.map((item: any) => (item.id === id ? file : item)),
         }));
-        notify.error(`File renamed successfully`);
+        notify.info(`File renamed successfully`);
         return file;
       } catch (err) {
         notify.error(`Failed to rename file: ${err}`);
