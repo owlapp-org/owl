@@ -10,12 +10,7 @@ import {
   scriptService,
 } from "@services/services";
 import { FileType } from "@ts/enums/filetype_enum";
-import {
-  IDashboardFile,
-  IFileModel,
-  IMacroFile,
-} from "@ts/interfaces/interfaces";
-import { IScript } from "@ts/interfaces/interfaces";
+import { IFileModel } from "@ts/interfaces/interfaces";
 import { notify } from "@lib/notify";
 
 type SetStateFunction<T> = (

@@ -54,4 +54,3 @@ export interface IFileModel {
 export interface IMacroFile extends IFileModel {}
 export interface IScript extends IFileModel {}
 export interface IDataFile extends IFileModel {}
-export interface IDashboardFile extends IFileModel {}

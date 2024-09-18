@@ -9,8 +9,6 @@ export namespace FileExtensions {
         return ["sql"];
       case FileType.MacroFile:
         return ["j2", "jinja"];
-      case FileType.DashboardFile:
-        return ["yml", "yaml"];
     }
     return [];
   };

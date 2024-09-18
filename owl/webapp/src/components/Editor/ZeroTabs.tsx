@@ -4,14 +4,9 @@ import { IconCodeDots, IconCube } from "@tabler/icons-react";
 export interface IZeroTabsProps {
   onNewScriptTab: () => void;
   onNewMacroTab: () => void;
-  onNewDashboardTab: () => void;
 }
 
-const ZeroTabs = ({
-  onNewScriptTab,
-  onNewMacroTab,
-  onNewDashboardTab,
-}: IZeroTabsProps) => {
+const ZeroTabs = ({ onNewScriptTab, onNewMacroTab }: IZeroTabsProps) => {
   return (
     <div
       style={{
@@ -72,25 +67,6 @@ const ZeroTabs = ({
         >
           New Macro
         </Button>
-        {/* <Button
-          styles={{
-            inner: {
-              justifyContent: "start",
-            },
-          }}
-          onClick={onNewDashboardTab}
-          fullWidth
-          variant="outline"
-          leftSection={
-            <IconReportAnalytics
-              stroke={1}
-              height={22}
-              color="var(--mantine-color-blue-4)"
-            />
-          }
-        >
-          New Dashboard
-        </Button> */}
       </div>
     </div>
   );

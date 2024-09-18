@@ -1,10 +1,5 @@
 import request from "@lib/request";
-import {
-  IDashboardFile,
-  IDatabase,
-  IMacroFile,
-  IQueryResult,
-} from "@ts/interfaces/interfaces";
+import { IDatabase, IMacroFile, IQueryResult } from "@ts/interfaces/interfaces";
 import { IScript } from "@ts/interfaces/interfaces";
 
 // ApiService class for basic CRUD operations
