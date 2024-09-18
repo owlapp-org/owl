@@ -1,9 +1,5 @@
 import { Button } from "@mantine/core";
-import {
-  IconCodeDots,
-  IconCube,
-  IconReportAnalytics,
-} from "@tabler/icons-react";
+import { IconCodeDots, IconCube } from "@tabler/icons-react";
 
 export interface IZeroTabsProps {
   onNewScriptTab: () => void;
@@ -76,7 +72,7 @@ const ZeroTabs = ({
         >
           New Macro
         </Button>
-        <Button
+        {/* <Button
           styles={{
             inner: {
               justifyContent: "start",
@@ -94,7 +90,7 @@ const ZeroTabs = ({
           }
         >
           New Dashboard
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
