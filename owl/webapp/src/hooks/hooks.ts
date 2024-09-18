@@ -3,7 +3,6 @@ import { create, StoreApi, UseBoundStore } from "zustand";
 import { notifications } from "@mantine/notifications";
 import {
   ApiService,
-  dashboardService,
   databaseService,
   dataFileService,
   FileService,
@@ -182,7 +181,6 @@ export const createFileStore = <T extends IFileModel>(
 export const useScriptStore = createFileStore(scriptService);
 export const useMacroFileStore = createFileStore(macroFileService);
 export const useDataFileStore = createFileStore(dataFileService);
-export const useDashboardStore = createFileStore(dashboardService);
 export const useDatabaseStore = createBaseStore(databaseService);
 
 export const getStoreWithFileType = <T extends IFileModel>(
@@ -193,8 +191,6 @@ export const getStoreWithFileType = <T extends IFileModel>(
       return useScriptStore as UseBoundStore<StoreApi<IFileState<T>>>;
     case FileType.MacroFile:
       return useMacroFileStore as UseBoundStore<StoreApi<IFileState<T>>>;
-    case FileType.DashboardFile:
-      return useDashboardStore as UseBoundStore<StoreApi<IFileState<T>>>;
   }
   const message = `FileType not supported: ${fileType}`;
   notify.error(message);

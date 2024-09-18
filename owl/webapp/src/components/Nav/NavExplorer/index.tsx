@@ -23,7 +23,6 @@ export default function NavExplorer() {
       <DataFilesNode />
       <ScriptsNode />
       <MacrosNode />
-      {/* <DashboardsNode /> */}
       {/* -- modals -- */}
       <CreateDatabaseModal />
       <UpdateDatabaseModal />

@@ -27,15 +27,6 @@ class User(TimestampMixin, db.Model):
         cascade="all, delete-orphan",
         single_parent=True,
     )
-
-    dashboards = relationship(
-        "Dashboard",
-        back_populates="owner",
-        lazy="dynamic",
-        cascade="all, delete-orphan",
-        single_parent=True,
-    )
-
     data_files = relationship(
         "DataFile",
         back_populates="owner",
@@ -43,7 +34,6 @@ class User(TimestampMixin, db.Model):
         cascade="all, delete-orphan",
         single_parent=True,
     )
-
     databases = relationship(
         "Database",
         back_populates="owner",

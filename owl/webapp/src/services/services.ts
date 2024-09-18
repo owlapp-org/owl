@@ -173,7 +173,4 @@ export class DatabaseService<T> extends ApiService<T> {
 export const scriptService = new FileService<IScript>("scripts");
 export const dataFileService = new FileService<IScript>("files");
 export const macroFileService = new MacroFileService<IMacroFile>("macros");
-export const dashboardService = new DashboardService<IDashboardFile>(
-  "dashboards"
-);
 export const databaseService = new DatabaseService<IDatabase>("databases");
