@@ -1,4 +1,3 @@
-import { notifications } from "@mantine/notifications";
 import { FileType } from "@ts/enums/filetype_enum";
 import { notify } from "./notify";
 
