@@ -104,7 +104,7 @@ select * from
  as Greet, t.* from 'path/to/data-files/addresses.csv' as t)
 ```
 
-### Use Management
+### User Management
 
 Currently you can only manage users using cli. Use the following command to see available options.
 ```sh
@@ -124,5 +124,31 @@ Commands:
   update-password  Update the password of a user
 ```
 
+### Development
+
+We have [backend](./owl/server/) and [frontend](./owl/webapp/) separated in respective directories.
+
+#### Backend
+
+- It's a classic flask application and we use [apiflask](https://apiflask.com/)
+- We use:
+  - Alembic for migrations
+  - Currently supports sqlite and postgres for repository.
+  - Click for the `cli`
+  - `pytest` for testing
+- If you are familiar with above it's super easy to get started.
+- Check the [Makefile](./Makefile) for the available targets.
 
 
+#### Frontend
+
+- We use react, it's my first time using react so probably there are tons of possible improvement points.
+- Initialized a testing setup but didn't cover much.
+
+
+### TODO
+
+- [ ] Add CI support
+- [ ] Robust tests on the frontend side
+- [ ] More automation on `develop > build > publish` path.
+- [ ] Move those `todos` to GH Issues.
