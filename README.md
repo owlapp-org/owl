@@ -104,5 +104,25 @@ select * from
  as Greet, t.* from 'path/to/data-files/addresses.csv' as t)
 ```
 
+### Use Management
+
+Currently you can only manage users using cli. Use the following command to see available options.
+```sh
+❯ owl users --help
+Usage: owl users [OPTIONS] COMMAND [ARGS]...
+
+  User management commands
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  create           Create a new user
+  delete           Delete a user
+  list             List all users
+  update           Update a user
+  update-password  Update the password of a user
+```
+
 
 
