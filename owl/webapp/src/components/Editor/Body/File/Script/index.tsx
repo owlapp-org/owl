@@ -63,10 +63,15 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
     if (!query) return;
     setIsRunLoading(true);
     // todo hardcoded values
-    const result = await databaseService.run(databaseId, query, 0, 25);
-    setQueryResult(result);
-    setActivePanel(1);
-    setIsRunLoading(false);
+    try {
+      const result = await databaseService.run(databaseId, query, 0, 25);
+      setQueryResult(result);
+      setActivePanel(1);
+    } catch (err: any) {
+      notify.error(err["response"]["data"]["message"] || `${err}`);
+    } finally {
+      setIsRunLoading(false);
+    }
   };
 
   useEffect(() => {
