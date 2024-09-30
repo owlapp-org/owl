@@ -13,6 +13,11 @@ Currently you can use it to query:
 
 - You can also upload files and query them.
 
+## Query Engine
+
+- First [macro](#macros) resolution is done on the given statement.
+- After [macros](#macros) are resolved, Everything is executed by [duckdb](https://duckdb.org/)
+
 ## Installation
 
 ```sh
