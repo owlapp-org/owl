@@ -1,7 +1,6 @@
-import { useCreateDatabaseModalStore } from "@components/modals/CreateDatabaseModal/useCreateDatabaseModalStore";
 import { IEditorTabState } from "@hooks/editorStore";
 import { useDatabaseStore } from "@hooks/hooks";
-import { ActionIcon, Button, Divider, Flex, Select } from "@mantine/core";
+import { ActionIcon, Divider, Flex, Select } from "@mantine/core";
 import { IconCubeSend, IconPlayerPlay } from "@tabler/icons-react";
 import { IScript } from "@ts/interfaces/interfaces";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
@@ -31,7 +30,6 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
       content: state.content,
     }))
   );
-  const { showModal: showCreateDatabaseModal } = useCreateDatabaseModalStore();
 
   const databaseSelectOptions = databases.map((database) => ({
     value: database.id.toString(),
@@ -56,30 +54,21 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
           height: "100%",
         }}
       >
-        {databases.length == 0 ? (
-          <Button
-            miw={200}
-            variant="transparent"
-            onClick={() => showCreateDatabaseModal({})}
-          >
-            Add database
-          </Button>
-        ) : (
-          <Select
-            miw={200}
-            placeholder={"Using in-memory database"}
-            data={databaseSelectOptions}
-            value={getDatabaseId()}
-            onChange={(v: string | null) =>
-              v != null && setDatabaseId(Number.parseInt(v))
-            }
-            styles={(theme) => ({
-              input: {
-                border: "none",
-              },
-            })}
-          />
-        )}
+        <Select
+          miw={200}
+          placeholder={"Using in-memory database"}
+          data={databaseSelectOptions}
+          value={getDatabaseId()}
+          onChange={(v: string | null) =>
+            v != null && setDatabaseId(Number.parseInt(v))
+          }
+          styles={(theme) => ({
+            input: {
+              border: "none",
+            },
+          })}
+        />
+        )
         <Divider orientation="vertical" />
         <ActionIcon
           h="100%"

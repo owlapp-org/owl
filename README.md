@@ -151,4 +151,5 @@ We have [backend](./owl/server/) and [frontend](./owl/webapp/) separated in resp
 - [ ] Add CI support
 - [ ] Robust tests on the frontend side
 - [ ] More automation on `develop > build > publish` path.
+- [ ] Better error messages
 - [ ] Move those `todos` to GH Issues.
