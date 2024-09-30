@@ -68,7 +68,6 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
             },
           })}
         />
-        )
         <Divider orientation="vertical" />
         <ActionIcon
           h="100%"

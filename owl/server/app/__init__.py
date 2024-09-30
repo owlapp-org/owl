@@ -8,7 +8,7 @@ from flask_migrate import Migrate
 try:
     __version__ = importlib.metadata.version(APP_NAME)
 except:  # noqa
-    __version__ = "-"
+    __version__ = "0.3.20"
 
 setup_logging()
 
