@@ -10,6 +10,8 @@ from app.schemas.base import MessageOut
 from app.schemas.database_schema import (
     CreateDatabaseIn,
     DatabaseOut,
+    ExportIn,
+    ExportQuery,
     RunIn,
     RunOut,
     RunQuery,
@@ -163,6 +165,43 @@ def run(payload: RunIn, q: Optional[RunQuery] = None):
         return abort(403, "Not authorized to execute the query on this database")
     except Exception as e:
         logger.exception(e)
+        return abort(500, str(e))
+
+
+@bp.route("/export", methods=["POST"])
+@bp.input(ExportQuery.Schema, location="query", arg_name="q")
+@bp.input(
+    ExportIn.Schema,
+    example={
+        "query": "select * from my_table",
+        "file_name": "output.csv",
+        "file_type": "CSV",
+    },
+    arg_name="payload",
+)
+@bp.output(FileSchema, content_type="application/octet-stream")
+@bp.doc(
+    security="TokenAuth",
+    summary="Export a query result",
+    description="Accepts a query and exports the result",
+)
+def export(q: ExportQuery, payload: ExportIn):
+    try:
+        filepath = Database.export(
+            payload.query, payload.filename, payload.file_type, payload.options
+        )
+        file = open(filepath, "rb" if payload.options.get("compress") else "r")
+        return (
+            send_file(
+                file,
+                as_attachment=True,
+                download_name=payload.filename,
+                conditional=True,
+            ),
+            200,
+            {"Connection": "close"},
+        )
+    except Exception as e:
         return abort(500, str(e))
 
 

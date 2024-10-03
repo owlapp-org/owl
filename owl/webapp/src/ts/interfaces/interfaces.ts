@@ -1,4 +1,4 @@
-import { FileType } from "@ts/enums/filetype_enum";
+import { FileType } from "@ts/enums";
 
 export interface IUser {
   id: number;

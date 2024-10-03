@@ -5,7 +5,7 @@ import {
 } from "@hooks/hooks";
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { FileType } from "@ts/enums/filetype_enum";
+import { FileType } from "@ts/enums";
 import { FC, useEffect, useState } from "react";
 import { useRenameFileModalStore } from "./useRenameFileModalStore";
 

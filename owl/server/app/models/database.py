@@ -1,7 +1,8 @@
 import logging
 import os
+import tempfile
 import uuid
-from typing import Optional
+from typing import Any, Generator, Optional
 
 import duckdb
 import jinja2
@@ -203,7 +204,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         #     raise QueryParseError(f"Failed to parse query {query}")
 
         if id is not None:
-            database = cls.find_by_id(id)
+            database = cls.find_by_id_and_owner(id, owner_id=owner_id)
         else:
             # run select only in-memory queries
             database = cls(id=None)
@@ -287,3 +288,55 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             start_row=start_row,
             end_row=end_row,
         )
+
+    @classmethod
+    def export(
+        cls,
+        id: int | None,
+        owner_id: int,
+        query: str,
+        filename: str,
+        file_type: str,
+        options: dict[str, Any],
+    ) -> Generator[str, None, None]:
+
+        opts = []
+        if options.get("compress", False):
+            opts.append("compression gzip")
+
+        delimiter = options.get("delimiter", ",")
+        header = options.get("header", True)
+        quote = options.get("quote", '"')
+        escape_quote = options.get("escape_quote", '"')
+        date_format = options.get("date_format", "%Y.%m.%d %H:%M:%s")
+
+        opts.append(f"delimiter {delimiter}")
+        opts.append(f"header {header    }")
+        opts.append(f"quote {quote}")
+        opts.append(f"escape {escape_quote}")
+        opts.append(f"dateformat {date_format}")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filepath = os.path.join(temp_dir, filename)
+            sql = f"""
+                copy ({query}) to '{filepath} ({",".join(opts)})'
+            """
+            logger.debug(sql)
+
+            # todo funtionalize this pattern
+            if id is not None:
+                database = cls.find_by_id_and_owner(id, owner_id=owner_id)
+                if not database:
+                    raise ModelNotFoundException("Database not found")
+
+                pool = registry.get(database.id, database)
+                if not pool:
+                    raise ConnectionError(
+                        f"Failed to establish connection to database, {database}"
+                    )
+                with pool.acquire_connection() as conn:
+                    conn.execute(sql)
+            else:
+                duckdb.execute(sql)
+
+            yield filepath

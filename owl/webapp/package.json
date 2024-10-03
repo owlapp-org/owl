@@ -28,7 +28,7 @@
     "@tabler/icons-react": "^3.11.0",
     "@testing-library/dom": "^10.4.0",
     "@types/js-cookie": "^3.0.6",
-    "@types/lodash": "^4.17.7",
+    "@types/lodash": "^4.17.9",
     "@types/nprogress": "^0.2.3",
     "@types/uuid": "^10.0.0",
     "@uiw/react-codemirror": "^4.23.0",

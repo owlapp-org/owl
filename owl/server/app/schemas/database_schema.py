@@ -1,7 +1,7 @@
 from dataclasses import field
 from typing import Any, Optional
 
-from apiflask.validators import Length, Range
+from apiflask.validators import Length, OneOf, Range
 from app.constants import StatementType
 from app.schemas.user_schema import UserOut
 from app.settings import settings
@@ -90,6 +90,24 @@ class RunQuery:
 @dataclass
 class RunIn:
     query: str = field(metadata={"required": True, "validate": Length(min=1)})
+
+
+@dataclass
+class ExportQuery:
+    database_id: Optional[int] = field()
+
+
+@dataclass
+class ExportIn:
+    query: str = field(metadata={"required": True, "validate": Length(min=7)})
+    file_type: str = field(
+        default="CSV",
+        metadata={"required": True, "validate": OneOf("CSV")},
+    )
+    filename: str = (field(metadata={"required": True}, default="owl-export.dat"),)
+    options: Optional[dict[str, Any]] = field(
+        default_factory=dict, metadata={"required": False}
+    )
 
 
 @dataclass

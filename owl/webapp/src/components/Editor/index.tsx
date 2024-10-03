@@ -2,7 +2,7 @@ import useEditorStore from "@hooks/editorStore";
 import { useDatabaseStore } from "@hooks/hooks";
 import { ActionIcon, Tabs } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
-import { FileType } from "@ts/enums/filetype_enum";
+import { FileType } from "@ts/enums";
 import { useEffect } from "react";
 import EditorBody from "./Body/EditorBody";
 import EditorTab from "./EditorTab";

@@ -1,6 +1,6 @@
 import { IEditorTabState } from "@hooks/editorStore";
 import { notify } from "@lib/notify";
-import { FileType } from "@ts/enums/filetype_enum";
+import { FileType } from "@ts/enums";
 import React from "react";
 import { StoreApi, UseBoundStore } from "zustand";
 import MacroFile from "./MacroFile";
