@@ -76,6 +76,11 @@ select * from '{{files}}/addresses.csv'
 ```
 `{{files}}` are the base path of the uploaded files.
 
+
+### Downloading result-set
+- You can use the `download` icon on the `Script Toolbar` to download last executed query result.
+
+
 ### Macros
 
 You can create macros and use default macros on the sql scripts. Example to default macros are;
