@@ -13,7 +13,7 @@ interface IMacroCodeProps<T extends IFileModel> {
 
 import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { IEditorTabState } from "@hooks/editorStore";
-import { FileType } from "@ts/enums/filetype_enum";
+import { FileType } from "@ts/enums";
 import { IFileModel } from "@ts/interfaces/interfaces";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";

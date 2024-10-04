@@ -1,7 +1,7 @@
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-import IFile, { IFileModel } from "@ts/interfaces/interfaces";
-import { FileType } from "@ts/enums/filetype_enum";
+import IFile, { IFileModel, IScript } from "@ts/interfaces/interfaces";
+import { FileType } from "@ts/enums";
 import { notify } from "@lib/notify";
 import { getStoreWithFileType, IFileState } from "./hooks";
 import {
@@ -9,6 +9,7 @@ import {
   macroFileService,
   scriptService,
 } from "@services/services";
+import _ from "lodash";
 
 export interface IEditorTabState<T> {
   id: string;
@@ -22,6 +23,12 @@ export interface IEditorTabState<T> {
   findFileName: () => string | undefined;
   getOption: <K>(option: string) => K | undefined;
   setOption: (option: string, value: any) => void;
+}
+
+export interface IEditorScriptTabState<T extends IScript>
+  extends IEditorTabState<T> {
+  lastExecution: Record<string, any> | null;
+  setLastExecution: (lastExec: Record<string, any>) => void;
 }
 
 export interface IEditorState<T extends IFileModel> {
@@ -40,71 +47,100 @@ export interface IEditorState<T extends IFileModel> {
   ) => UseBoundStore<StoreApi<IEditorTabState<T>>> | undefined;
 }
 
+type SetStateFunction<T> = (
+  partial:
+    | IEditorTabState<T>
+    | Partial<IEditorTabState<T>>
+    | ((
+        state: IEditorTabState<T>
+      ) => IEditorTabState<T> | Partial<IEditorTabState<T>>),
+  replace?: boolean
+) => void;
+
+const editorTabStateManager = <T>(
+  service: FileService<T>,
+  set: SetStateFunction<T>,
+  get: () => IEditorTabState<T>
+) => ({
+  id: uuidv4(),
+  file: {},
+  options: null,
+  content: "",
+  setFile: (file: IFile) => {
+    set({ file });
+  },
+  fetchAndSetContent: async () => {
+    const file = get().file;
+    if (!file.id) return "";
+    try {
+      const content = await service.fetchContent(file.id);
+      set({ content });
+      return content;
+    } catch (error) {
+      console.error(error);
+      notify.error("Failed to fetch file content");
+      return Promise.reject(error);
+    }
+  },
+  save: async (name?: string) => {
+    const { file, content } = get();
+    if (file.id) {
+      await service.updateContent(file.id, content);
+    } else if (!name) {
+      notify.error("Unknown file name");
+      throw new Error("Unknown file name");
+    } else {
+      const filename = name || "New file";
+      const { id } = await getStoreWithFileType(file.fileType!)
+        .getState()
+        .create({ name: filename, content });
+      set((state) => ({
+        file: {
+          ...state.file,
+          name: filename,
+          id,
+        },
+      }));
+    }
+  },
+  setContent: async (content: string) => {
+    set({ content: content });
+  },
+  setDatabase: (databaseId: string | null) => {
+    set({ options: { ...get().options, databaseId } });
+  },
+  findFileName: () => {
+    const { file } = get();
+    if (!file.id || !file.fileType) return undefined;
+    const store = getStoreWithFileType(file.fileType);
+    const item = store.getState().findById(file.id);
+    if (!item) return undefined;
+    return item.name;
+  },
+  getOption: <K>(option: string) => {
+    const options = get().options;
+    if (options) return options[option] as K;
+    return undefined;
+  },
+  setOption: (option: string, value: any) => {
+    const options = get().options;
+    set({ options: { ...options, ...{ option: value } } });
+  },
+});
+
 const createTabStore = <T>(service: FileService<T>) =>
-  create<IEditorTabState<T>>((set, get) => ({
-    id: uuidv4(),
-    file: {},
-    options: null,
-    content: "",
-    setFile: (file: IFile) => {
-      set({ file });
-    },
-    fetchAndSetContent: async () => {
-      const file = get().file;
-      if (!file.id) return "";
-      try {
-        const content = await service.fetchContent(file.id);
-        set({ content });
-        return content;
-      } catch (error) {
-        console.error(error);
-        notify.error("Failed to fetch file content");
-        return Promise.reject(error);
-      }
-    },
-    save: async (name?: string) => {
-      const { file, content } = get();
-      if (file.id) {
-        await service.updateContent(file.id, content);
-      } else if (!name) {
-        notify.error("Unknown file name");
-        throw new Error("Unknown file name");
-      } else {
-        const filename = name || "New file";
-        const { id } = await getStoreWithFileType(file.fileType!)
-          .getState()
-          .create({ name: filename, content });
-        set((state) => ({
-          file: {
-            ...state.file,
-            name: filename,
-            id,
-          },
-        }));
-      }
-    },
-    setContent: async (content: string) => {
-      set({ content: content });
-    },
-    setDatabase: (databaseId: string | null) => {
-      set({ options: { ...get().options, databaseId } });
-    },
-    findFileName: () => {
-      const { file } = get();
-      if (!file.id || !file.fileType) return undefined;
-      const store = getStoreWithFileType(file.fileType);
-      const item = store.getState().findById(file.id);
-      if (!item) return undefined;
-      return item.name;
-    },
-    getOption: <K>(option: string) => {
-      const options = get().options;
-      if (options) return options[option] as K;
-      return undefined;
-    },
-    setOption: (option: string, value: any) => {
-      const options = get().options;
-      set({ options: { ...options, ...{ option: value } } });
+  create<IEditorTabState<T>>((set, get) =>
+    editorTabStateManager(service, set, get)
+  );
+
+const createScriptTabStore = <T extends IScript>(
+  service: FileService<T>
+): UseBoundStore<StoreApi<IEditorScriptTabState<T>>> =>
+  create<IEditorScriptTabState<T>>((set, get) => ({
+    ...editorTabStateManager(service, set, get),
+    lastExecution: null,
+    setLastExecution: (lastExecution: Record<string, any>) => {
+      set({ lastExecution: { ...lastExecution } });
     },
   }));
 
@@ -156,7 +192,7 @@ const useEditorStore = create<IEditorState<IFileModel>>((set, get) => ({
 
     switch (fileType) {
       case FileType.ScriptFile: {
-        newTabStore = createTabStore(scriptService);
+        newTabStore = createScriptTabStore(scriptService);
         break;
       }
       case FileType.MacroFile: {

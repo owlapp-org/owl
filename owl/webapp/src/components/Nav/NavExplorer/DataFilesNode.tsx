@@ -12,7 +12,7 @@ import {
   IconFolders,
   IconUpload,
 } from "@tabler/icons-react";
-import { FileType } from "@ts/enums/filetype_enum";
+import { FileType } from "@ts/enums";
 import { IDataFile } from "@ts/interfaces/interfaces";
 import { useEffect, useRef, useState } from "react";
 import "./styles.css";

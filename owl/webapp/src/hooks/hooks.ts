@@ -9,7 +9,7 @@ import {
   macroFileService,
   scriptService,
 } from "@services/services";
-import { FileType } from "@ts/enums/filetype_enum";
+import { FileType } from "@ts/enums";
 import { IFileModel } from "@ts/interfaces/interfaces";
 import { notify } from "@lib/notify";
 

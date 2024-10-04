@@ -162,6 +162,40 @@ export class DatabaseService<T> extends ApiService<T> {
       )
       .then((response) => response.data);
   }
+  async exportData(
+    database_id: number | undefined,
+    query: string | undefined,
+    filename: string,
+    file_type: string,
+    options: Record<string, any>
+  ) {
+    try {
+      const response = await request.post(
+        `${this.domain}/export`,
+        {
+          query,
+          filename,
+          file_type,
+          options,
+        },
+        {
+          params: { database_id },
+          responseType: "blob",
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      throw error;
+    }
+  }
 }
 
 // Instantiate services

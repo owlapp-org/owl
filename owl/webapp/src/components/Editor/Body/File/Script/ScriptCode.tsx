@@ -21,7 +21,7 @@ interface IContentProps {
 import { getSelectedLines, getSelection } from "@components/Editor/lib";
 import { useCreateFileModalStore } from "@components/modals/CreateFileModal/useCreateFileModalStore";
 import { IEditorTabState } from "@hooks/editorStore";
-import { FileType } from "@ts/enums/filetype_enum";
+import { FileType } from "@ts/enums";
 import { IScript } from "@ts/interfaces/interfaces";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { StoreApi, UseBoundStore, useStore } from "zustand";

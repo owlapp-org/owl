@@ -4,3 +4,7 @@ export enum FileType {
   ScriptFile,
   MacroFile,
 }
+
+export enum StatementType {
+  SELECT = "SELECT",
+}

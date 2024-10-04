@@ -1,9 +1,8 @@
 from dataclasses import field
-from typing import Any, Optional
+from typing import Optional
 
 from apiflask.validators import Email
 from marshmallow_dataclass import dataclass
-from pydantic import BaseModel
 
 
 @dataclass

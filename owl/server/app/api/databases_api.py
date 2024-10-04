@@ -5,11 +5,12 @@ from apiflask import APIBlueprint, FileSchema, abort
 from app.errors.errors import ModelNotFoundException, NotAuthorizedError
 from app.models import db
 from app.models.database import Database
-from app.models.macrofile import MacroFile
 from app.schemas.base import MessageOut
 from app.schemas.database_schema import (
     CreateDatabaseIn,
     DatabaseOut,
+    ExportIn,
+    ExportQuery,
     RunIn,
     RunOut,
     RunQuery,
@@ -145,7 +146,6 @@ def run(payload: RunIn, q: Optional[RunQuery] = None):
     q = q or RunQuery()
     try:
         owner_id = get_jwt_identity()
-        macro_files = MacroFile.find_by_owner(id=owner_id)
         return Database.run(
             id=q.database_id,
             owner_id=owner_id,
@@ -153,7 +153,6 @@ def run(payload: RunIn, q: Optional[RunQuery] = None):
             start_row=q.start_row,
             end_row=q.end_row,
             with_total_count=q.with_total_count,
-            macro_files=macro_files,
         )
     except ModelNotFoundException as e:
         logger.exception(e)
@@ -163,6 +162,48 @@ def run(payload: RunIn, q: Optional[RunQuery] = None):
         return abort(403, "Not authorized to execute the query on this database")
     except Exception as e:
         logger.exception(e)
+        return abort(500, str(e))
+
+
+@bp.route("/export", methods=["POST"])
+@bp.input(ExportQuery.Schema, location="query", arg_name="q")
+@bp.input(
+    ExportIn.Schema,
+    example={
+        "query": "select * from my_table",
+        "file_name": "output.csv",
+        "file_type": "CSV",
+    },
+    arg_name="payload",
+)
+@bp.output(FileSchema, content_type="application/octet-stream")
+@bp.doc(
+    security="TokenAuth",
+    summary="Export a query result",
+    description="Accepts a query and exports the result",
+)
+def export(q: Optional[ExportQuery], payload: ExportIn):
+    try:
+        with Database.export(
+            id=q.database_id,
+            query=payload.query,
+            filename=payload.filename,
+            options=payload.options,
+            owner_id=get_jwt_identity(),
+        ) as filepath:
+            file = open(filepath, "rb")
+            return (
+                send_file(
+                    file,
+                    as_attachment=True,
+                    download_name=payload.filename,
+                    conditional=True,
+                ),
+                200,
+                {"Connection": "close"},
+            )
+    except Exception as e:
+        logger.exception("Failed to export data", extra={"error": str(e)})
         return abort(500, str(e))
 
 

@@ -1,5 +1,6 @@
 import "@components/Editor/styles.css";
-import { IEditorTabState } from "@hooks/editorStore";
+import ExportDataModal from "@components/modals/ExportDataModal/ExportDataModal";
+import { IEditorScriptTabState } from "@hooks/editorStore";
 import { notify } from "@lib/notify";
 import { databaseService, macroFileService } from "@services/services";
 import { IQueryResult, IScript } from "@ts/interfaces/interfaces";
@@ -15,15 +16,19 @@ import Panel from "./ScriptPanel";
 import ScriptToolbar from "./ScriptToolbar";
 
 interface IScriptProps {
-  store: UseBoundStore<StoreApi<IEditorTabState<IScript>>>;
+  store: UseBoundStore<StoreApi<IEditorScriptTabState<IScript>>>;
 }
 
 const Script: React.FC<IScriptProps> = ({ store }) => {
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
-  const { content, databaseId } = useStore(store, (state) => ({
-    content: state.content,
-    databaseId: state.getOption("databaseId"),
-  }));
+  const { content, databaseId, setLastExecution } = useStore(
+    store,
+    (state) => ({
+      content: state.content,
+      databaseId: state.getOption("databaseId"),
+      setLastExecution: state.setLastExecution,
+    })
+  );
 
   const [queryResult, setQueryResult] = useState<IQueryResult | undefined>(
     undefined
@@ -62,10 +67,15 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
     const query = selectionOrContent();
     if (!query) return;
     setIsRunLoading(true);
-    // todo hardcoded values
     try {
+      // todo hardcoded values
       const result = await databaseService.run(databaseId, query, 0, 25);
       setQueryResult(result);
+      setLastExecution({
+        databaseId,
+        query,
+        statement_type: result.statement_type,
+      });
       setActivePanel(1);
     } catch (err: any) {
       notify.error(err["response"]["data"]["message"] || `${err}`);
@@ -105,11 +115,11 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
           <Panel
             renderedContent={renderedContent}
             result={queryResult}
-            store={store}
             active={activePanel}
           />
         </ResizablePanel>
       </PanelGroup>
+      <ExportDataModal />
     </div>
   );
 };

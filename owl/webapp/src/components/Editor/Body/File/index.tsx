@@ -1,6 +1,7 @@
-import { IEditorTabState } from "@hooks/editorStore";
+import { IEditorScriptTabState, IEditorTabState } from "@hooks/editorStore";
 import { notify } from "@lib/notify";
-import { FileType } from "@ts/enums/filetype_enum";
+import { FileType } from "@ts/enums";
+import { IScript } from "@ts/interfaces/interfaces";
 import React from "react";
 import { StoreApi, UseBoundStore } from "zustand";
 import MacroFile from "./MacroFile";
@@ -16,14 +17,26 @@ const File = <T,>({
 }): React.ReactElement => {
   switch (fileType) {
     case FileType.ScriptFile:
-      return <Script store={store} />;
+      return (
+        <Script
+          store={
+            store as UseBoundStore<StoreApi<IEditorScriptTabState<IScript>>>
+          }
+        />
+      );
     case FileType.MacroFile:
       return <MacroFile store={store} />;
     case FileType.DataFile:
       notify.error("Unsupported file type");
       return <></>;
     default:
-      return <Script store={store} />;
+      return (
+        <Script
+          store={
+            store as UseBoundStore<StoreApi<IEditorScriptTabState<IScript>>>
+          }
+        />
+      );
   }
 };
 

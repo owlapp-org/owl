@@ -1,16 +1,14 @@
-import { FileType } from "@ts/enums";
 import { create } from "zustand";
 
-interface ICreateFileModalState {
+interface IExportDataModalState {
   open: boolean;
   title?: string;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
-  tabId?: string;
-  fileType: FileType | null;
-  onSave: (name: string) => void;
+  query?: string;
+  databaseId?: number;
   showModal: (
     options: Omit<
-      ICreateFileModalState,
+      IExportDataModalState,
       "showModal" | "open" | "reset" | "destroy" | "closeModal"
     >
   ) => void;
@@ -19,19 +17,16 @@ interface ICreateFileModalState {
   destroy: () => void;
 }
 
-export const useCreateFileModalStore = create<ICreateFileModalState>(
+export const useExportDataModalStore = create<IExportDataModalState>(
   (set, get) => ({
     open: false,
-    title: "Create File",
+    title: "Export Data",
     size: "md",
-    tabId: undefined,
-    fileType: null,
-    onSave: (name: string) => {
-      throw new Error("Not Implemented");
-    },
+    query: undefined,
+    databaseId: undefined,
     showModal: (options) => set({ ...options, open: true }),
     closeModal: () => set({ open: false }),
-    reset: () => set({ open: false, title: "Create File" }),
+    reset: () => set({ open: false, title: "Create Database" }),
     destroy: () => {
       const state = get();
       state.closeModal();

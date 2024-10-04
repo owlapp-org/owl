@@ -1,7 +1,9 @@
 import logging
 import os
+import tempfile
 import uuid
-from typing import Optional
+from contextlib import contextmanager
+from typing import Any, Generator, Optional
 
 import duckdb
 import jinja2
@@ -147,12 +149,10 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             raise e
 
     @classmethod
-    def resolve_query_template(
-        cls, query: str, owner_id: int, macro_files: list = None
-    ) -> str:
+    def resolve_query_template(cls, query: str, owner_id: int) -> str:
         from app.models import MacroFile
 
-        macro_files: list[MacroFile] = macro_files or []
+        macro_files = MacroFile.find_by_owner(id=owner_id) or []
         combined_macro_files_content = "\n".join([c.read_file() for c in macro_files])
 
         files_path = os.path.join(
@@ -168,7 +168,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
 
         text = "\n".join([template_base, query])
         # todo 2- dag implementation / better solution
-        for _ in range(settings.MAX_MACRO_RESOLVE_DEPTH):
+        for __ in range(settings.MAX_MACRO_RESOLVE_DEPTH):
             text = "\n".join([template_base, text])
             text = jinja2.Template(text).render(
                 files=files_path,
@@ -184,12 +184,11 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         id: int | None,
         query: str,
         owner_id: int,
-        macro_files: list = None,
         **kwargs,
     ) -> RunOut:
         logger.debug("Received query", extra={"query": query})
         query = _.chain(query).trim().trim_end(";").value()
-        query = cls.resolve_query_template(validate_query(query), owner_id, macro_files)
+        query = cls.resolve_query_template(validate_query(query), owner_id)
 
         statements = sqlparse.parse(query)
         if len(statements) == 0:
@@ -203,24 +202,23 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         #     raise QueryParseError(f"Failed to parse query {query}")
 
         if id is not None:
-            database = cls.find_by_id(id)
+            database = cls.find_by_id_and_owner(id, owner_id=owner_id)
+            if not database:
+                raise ModelNotFoundException("Database not found")
         else:
             # run select only in-memory queries
             database = cls(id=None)
 
-        if id is not None and not database:
-            raise ModelNotFoundException()
-        if id is not None and owner_id is not None and database.owner_id != owner_id:
-            raise NotAuthorizedError(
-                "You are not authorized to delete database that is not owned by you!"
-            )
         if id is None and statement.get_type() != "SELECT":
             raise Exception(
                 "Only select statement is supported for in memory database."
             )
+
+        # execute using im-memory database
         if id is None:
             return database.run_query(conn=duckdb, statement=statement, **kwargs)
 
+        # execute using a database
         pool = registry.get(database.id, database)
         if not pool:
             raise ConnectionError(
@@ -287,3 +285,63 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             start_row=start_row,
             end_row=end_row,
         )
+
+    @classmethod
+    @contextmanager
+    def export(
+        cls,
+        id: int | None,
+        owner_id: int,
+        query: str,
+        filename: str,
+        _file_type: str = "CSV",
+        options: dict[str, Any] = None,
+    ) -> Generator[str, None, None]:
+
+        logger.debug("Received query", extra={"query": query})
+
+        opts = []
+        options = options or {}
+        if options.get("compress", False):
+            opts.append("compression gzip")
+
+        delimiter = options.get("delimiter", ",")
+        header = options.get("header", True)
+        quote = options.get("quote", '"')
+        escape_quote = options.get("escape_quote", '"')
+        date_format = options.get("date_format", "%Y.%m.%d %H:%M:%s")
+
+        delimiter and opts.append(f"delimiter '{delimiter}'")
+        opts.append(f"header {header}")
+        quote and opts.append(f"quote '{quote}'")
+        escape_quote and opts.append(f"escape '{escape_quote}'")
+        date_format and opts.append(f"dateformat '{date_format}'")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            print(temp_dir, filename)
+            filepath = os.path.join(temp_dir, filename)
+            sql = f"""
+                copy ({query}) to '{filepath}' ({",".join(opts)})
+            """
+            logger.debug(f"=== Raw SQL ===\n{sql}")
+            sql = _.chain(sql).trim().trim_end(";").value()
+            sql = cls.resolve_query_template(validate_query(sql), owner_id)
+            logger.debug(f"=== Resolved SQL ===\n{sql}")
+            print(sql)
+            # todo funtionalize this pattern
+            if id is not None:
+                database = cls.find_by_id_and_owner(id, owner_id=owner_id)
+                if not database:
+                    raise ModelNotFoundException("Database not found")
+
+                pool = registry.get(database.id, database)
+                if not pool:
+                    raise ConnectionError(
+                        f"Failed to establish connection to database, {database}"
+                    )
+                with pool.acquire_connection() as conn:
+                    conn.execute(sql)
+            else:
+                duckdb.execute(sql)
+
+            yield filepath

@@ -1,15 +1,12 @@
-import { IEditorTabState } from "@hooks/editorStore";
 import { CodeHighlight } from "@mantine/code-highlight";
 import { IconBorderAll } from "@tabler/icons-react";
-import { IQueryResult, IScript } from "@ts/interfaces/interfaces";
-import { StoreApi, UseBoundStore } from "zustand";
+import { IQueryResult } from "@ts/interfaces/interfaces";
 import ResultSetContainer from "./ResultSet";
 
 interface IPanelProps {
   active?: number;
   result?: IQueryResult;
   renderedContent?: string | null;
-  store: UseBoundStore<StoreApi<IEditorTabState<IScript>>>;
 }
 
 const ScriptPanel: React.FC<IPanelProps> = ({
