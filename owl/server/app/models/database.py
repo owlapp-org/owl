@@ -22,7 +22,6 @@ from app.lib.database.validation import validate_query
 from app.macros.index import default_macros
 from app.macros.macros import gen__read_script_file
 from app.models.base import TimestampMixin, db
-from app.models.macrofile import MacroFile
 from app.models.mixins.user_space_mixin import UserSpaceMixin
 from app.schemas.database_schema import RunOut
 from app.settings import settings
@@ -169,7 +168,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
 
         text = "\n".join([template_base, query])
         # todo 2- dag implementation / better solution
-        for _ in range(settings.MAX_MACRO_RESOLVE_DEPTH):
+        for __ in range(settings.MAX_MACRO_RESOLVE_DEPTH):
             text = "\n".join([template_base, text])
             text = jinja2.Template(text).render(
                 files=files_path,

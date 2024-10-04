@@ -116,7 +116,7 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
         text = "\n".join([template_base, content])
 
         # todo 2- dag implementation / better solution
-        for _ in range(settings.MAX_MACRO_RESOLVE_DEPTH):
+        for __ in range(settings.MAX_MACRO_RESOLVE_DEPTH):
             text = "\n".join([template_base, text])
             text = jinja2.Template(text).render(
                 files=files_path,

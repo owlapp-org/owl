@@ -5,7 +5,6 @@ from apiflask import APIBlueprint, FileSchema, abort
 from app.errors.errors import ModelNotFoundException, NotAuthorizedError
 from app.models import db
 from app.models.database import Database
-from app.models.macrofile import MacroFile
 from app.schemas.base import MessageOut
 from app.schemas.database_schema import (
     CreateDatabaseIn,
