@@ -203,23 +203,22 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
 
         if id is not None:
             database = cls.find_by_id_and_owner(id, owner_id=owner_id)
+            if not database:
+                raise ModelNotFoundException("Database not found")
         else:
             # run select only in-memory queries
             database = cls(id=None)
 
-        if id is not None and not database:
-            raise ModelNotFoundException()
-        if id is not None and owner_id is not None and database.owner_id != owner_id:
-            raise NotAuthorizedError(
-                "You are not authorized to delete database that is not owned by you!"
-            )
         if id is None and statement.get_type() != "SELECT":
             raise Exception(
                 "Only select statement is supported for in memory database."
             )
+
+        # execute using im-memory database
         if id is None:
             return database.run_query(conn=duckdb, statement=statement, **kwargs)
 
+        # execute using a database
         pool = registry.get(database.id, database)
         if not pool:
             raise ConnectionError(
@@ -318,7 +317,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         escape_quote and opts.append(f"escape '{escape_quote}'")
         date_format and opts.append(f"dateformat '{date_format}'")
 
-        with tempfile.TemporaryDirectory(delete=False) as temp_dir:
+        with tempfile.TemporaryDirectory() as temp_dir:
             print(temp_dir, filename)
             filepath = os.path.join(temp_dir, filename)
             sql = f"""
