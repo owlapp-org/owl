@@ -47,7 +47,11 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
   }));
 
   const handleDownload = async () => {
-    showExportDataModal({});
+    const { query, databaseId } = { ...lastExecution };
+    showExportDataModal({
+      query,
+      databaseId,
+    });
   };
 
   return (

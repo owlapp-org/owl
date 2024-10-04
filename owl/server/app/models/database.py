@@ -2,6 +2,7 @@ import logging
 import os
 import tempfile
 import uuid
+from contextlib import contextmanager
 from typing import Any, Generator, Optional
 
 import duckdb
@@ -21,6 +22,7 @@ from app.lib.database.validation import validate_query
 from app.macros.index import default_macros
 from app.macros.macros import gen__read_script_file
 from app.models.base import TimestampMixin, db
+from app.models.macrofile import MacroFile
 from app.models.mixins.user_space_mixin import UserSpaceMixin
 from app.schemas.database_schema import RunOut
 from app.settings import settings
@@ -148,12 +150,10 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             raise e
 
     @classmethod
-    def resolve_query_template(
-        cls, query: str, owner_id: int, macro_files: list = None
-    ) -> str:
+    def resolve_query_template(cls, query: str, owner_id: int) -> str:
         from app.models import MacroFile
 
-        macro_files: list[MacroFile] = macro_files or []
+        macro_files = MacroFile.find_by_owner(id=owner_id) or []
         combined_macro_files_content = "\n".join([c.read_file() for c in macro_files])
 
         files_path = os.path.join(
@@ -185,12 +185,11 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         id: int | None,
         query: str,
         owner_id: int,
-        macro_files: list = None,
         **kwargs,
     ) -> RunOut:
         logger.debug("Received query", extra={"query": query})
         query = _.chain(query).trim().trim_end(";").value()
-        query = cls.resolve_query_template(validate_query(query), owner_id, macro_files)
+        query = cls.resolve_query_template(validate_query(query), owner_id)
 
         statements = sqlparse.parse(query)
         if len(statements) == 0:
@@ -290,17 +289,21 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         )
 
     @classmethod
+    @contextmanager
     def export(
         cls,
         id: int | None,
         owner_id: int,
         query: str,
         filename: str,
-        file_type: str,
-        options: dict[str, Any],
+        _file_type: str = "CSV",
+        options: dict[str, Any] = None,
     ) -> Generator[str, None, None]:
 
+        logger.debug("Received query", extra={"query": query})
+
         opts = []
+        options = options or {}
         if options.get("compress", False):
             opts.append("compression gzip")
 
@@ -310,19 +313,23 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         escape_quote = options.get("escape_quote", '"')
         date_format = options.get("date_format", "%Y.%m.%d %H:%M:%s")
 
-        opts.append(f"delimiter {delimiter}")
-        opts.append(f"header {header    }")
-        opts.append(f"quote {quote}")
-        opts.append(f"escape {escape_quote}")
-        opts.append(f"dateformat {date_format}")
+        delimiter and opts.append(f"delimiter '{delimiter}'")
+        opts.append(f"header {header}")
+        quote and opts.append(f"quote '{quote}'")
+        escape_quote and opts.append(f"escape '{escape_quote}'")
+        date_format and opts.append(f"dateformat '{date_format}'")
 
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory(delete=False) as temp_dir:
+            print(temp_dir, filename)
             filepath = os.path.join(temp_dir, filename)
             sql = f"""
-                copy ({query}) to '{filepath} ({",".join(opts)})'
+                copy ({query}) to '{filepath}' ({",".join(opts)})
             """
-            logger.debug(sql)
-
+            logger.debug(f"=== Raw SQL ===\n{sql}")
+            sql = _.chain(sql).trim().trim_end(";").value()
+            sql = cls.resolve_query_template(validate_query(sql), owner_id)
+            logger.debug(f"=== Resolved SQL ===\n{sql}")
+            print(sql)
             # todo funtionalize this pattern
             if id is not None:
                 database = cls.find_by_id_and_owner(id, owner_id=owner_id)

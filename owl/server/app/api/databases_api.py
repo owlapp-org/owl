@@ -147,7 +147,6 @@ def run(payload: RunIn, q: Optional[RunQuery] = None):
     q = q or RunQuery()
     try:
         owner_id = get_jwt_identity()
-        macro_files = MacroFile.find_by_owner(id=owner_id)
         return Database.run(
             id=q.database_id,
             owner_id=owner_id,
@@ -155,7 +154,6 @@ def run(payload: RunIn, q: Optional[RunQuery] = None):
             start_row=q.start_row,
             end_row=q.end_row,
             with_total_count=q.with_total_count,
-            macro_files=macro_files,
         )
     except ModelNotFoundException as e:
         logger.exception(e)
@@ -185,23 +183,28 @@ def run(payload: RunIn, q: Optional[RunQuery] = None):
     summary="Export a query result",
     description="Accepts a query and exports the result",
 )
-def export(q: ExportQuery, payload: ExportIn):
+def export(q: Optional[ExportQuery], payload: ExportIn):
     try:
-        filepath = Database.export(
-            payload.query, payload.filename, payload.file_type, payload.options
-        )
-        file = open(filepath, "rb" if payload.options.get("compress") else "r")
-        return (
-            send_file(
-                file,
-                as_attachment=True,
-                download_name=payload.filename,
-                conditional=True,
-            ),
-            200,
-            {"Connection": "close"},
-        )
+        with Database.export(
+            id=q.database_id,
+            query=payload.query,
+            filename=payload.filename,
+            options=payload.options,
+            owner_id=get_jwt_identity(),
+        ) as filepath:
+            file = open(filepath, "rb")
+            return (
+                send_file(
+                    file,
+                    as_attachment=True,
+                    download_name=payload.filename,
+                    conditional=True,
+                ),
+                200,
+                {"Connection": "close"},
+            )
     except Exception as e:
+        logger.exception("Failed to export data", extra={"error": str(e)})
         return abort(500, str(e))
 
 

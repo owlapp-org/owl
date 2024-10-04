@@ -94,7 +94,7 @@ class RunIn:
 
 @dataclass
 class ExportQuery:
-    database_id: Optional[int] = field()
+    database_id: Optional[int] = field(metadata={"required": False})
 
 
 @dataclass

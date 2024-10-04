@@ -7,9 +7,12 @@ import { useExportDataModalStore } from "./useExportDataModalStore";
 
 const ExportDataModal: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { query, databaseId, open, destroy } = useExportDataModalStore();
+  const { query, databaseId, open, destroy, closeModal } =
+    useExportDataModalStore();
 
-  const handleClose = () => {};
+  const handleClose = () => {
+    closeModal();
+  };
   const handleExport = async (
     filename: string,
     file_type: string,
@@ -24,6 +27,7 @@ const ExportDataModal: FC = () => {
         file_type,
         options
       );
+      closeModal();
     } catch (e: any) {
       notify.error(`Error exporting data ${e}`);
     } finally {

@@ -163,7 +163,7 @@ export class DatabaseService<T> extends ApiService<T> {
       .then((response) => response.data);
   }
   async exportData(
-    id: number | undefined,
+    database_id: number | undefined,
     query: string | undefined,
     filename: string,
     file_type: string,
@@ -171,7 +171,7 @@ export class DatabaseService<T> extends ApiService<T> {
   ) {
     try {
       const response = await request.post(
-        `${this.domain}/${id}/export`,
+        `${this.domain}/export`,
         {
           query,
           filename,
@@ -179,6 +179,7 @@ export class DatabaseService<T> extends ApiService<T> {
           options,
         },
         {
+          params: { database_id },
           responseType: "blob",
         }
       );
