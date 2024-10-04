@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import field
 from typing import Any, Optional
 
@@ -89,6 +90,7 @@ class RunQuery:
 
 @dataclass
 class RunIn:
+    query_id: Optional[str] = field(metadata={"required": False})
     query: str = field(metadata={"required": True, "validate": Length(min=1)})
 
 
@@ -112,6 +114,12 @@ class ExportIn:
 
 @dataclass
 class RunOut:
+    query_id: str = field(
+        metadata={
+            "required": True,
+            "description": "Internal uniq id to track queries",
+        }
+    )
     query: str = field(
         metadata={
             "required": True,
@@ -133,3 +141,10 @@ class RunOut:
     total_count: Optional[int] = field(default=None)
     start_row: Optional[int] = field(default=None)
     end_row: Optional[int] = field(default=None)
+
+    @post_load
+    def ensure_query_id(self, data, **kwargs):
+        if not data.get("query_id"):
+            data["query_id"] = str(uuid.uuid4())
+
+        return data

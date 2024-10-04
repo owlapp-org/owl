@@ -13,7 +13,6 @@ from app.constants import StatementType
 from app.errors.errors import (
     ModelNotFoundException,
     MultipleStatementsNotAllowedError,
-    NotAuthorizedError,
     QueryParseError,
     StoragePathExists,
 )
@@ -184,6 +183,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         id: int | None,
         query: str,
         owner_id: int,
+        query_id: str | None = None,
         **kwargs,
     ) -> RunOut:
         logger.debug("Received query", extra={"query": query})
@@ -226,12 +226,22 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             )
         with pool.acquire_connection() as conn:
             if statement.get_type() == "SELECT":
-                return database.run_query(conn=conn, statement=statement, **kwargs)
+                return database.run_query(
+                    conn=conn, statement=statement, query_id=query_id, **kwargs
+                )
             else:
-                return database.run_execute(conn=conn, statement=statement)
+                return database.run_execute(
+                    conn=conn,
+                    statement=statement,
+                    query_id=query_id,
+                )
 
     def run_execute(
-        self, conn: DuckDBPyConnection, statement: SqlParseStatement, **kwargs
+        self,
+        conn: DuckDBPyConnection,
+        statement: SqlParseStatement,
+        query_id: Optional[str] = None,
+        **kwargs,
     ) -> RunOut:
         statement_type = statement.get_type()
         result = conn.execute(str(statement))
@@ -246,12 +256,14 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
                 query=str(statement),
                 statement_type=statement_type,
                 affected_rows=result.fetchone()[0],
+                query_id=query_id,
             )
         else:
             return RunOut(
                 database_id=self.id,
                 query=str(statement),
                 statement_type=statement_type,
+                query_id=query_id,
             )
 
     def run_query(
@@ -261,6 +273,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         start_row: int = 0,
         end_row: int = settings.result_set_hard_limit,
         with_total_count: bool = True,
+        query_id: Optional[str] = None,
         **kwargs,
     ) -> RunOut:
 
@@ -284,6 +297,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             total_count=total_count,
             start_row=start_row,
             end_row=end_row,
+            query_id=query_id,
         )
 
     @classmethod
@@ -327,8 +341,6 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             sql = _.chain(sql).trim().trim_end(";").value()
             sql = cls.resolve_query_template(validate_query(sql), owner_id)
             logger.debug(f"=== Resolved SQL ===\n{sql}")
-            print(sql)
-            # todo funtionalize this pattern
             if id is not None:
                 database = cls.find_by_id_and_owner(id, owner_id=owner_id)
                 if not database:

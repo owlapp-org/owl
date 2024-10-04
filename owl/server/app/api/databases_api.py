@@ -153,6 +153,7 @@ def run(payload: RunIn, q: Optional[RunQuery] = None):
             start_row=q.start_row,
             end_row=q.end_row,
             with_total_count=q.with_total_count,
+            query_id=payload.query_id,
         )
     except ModelNotFoundException as e:
         logger.exception(e)
