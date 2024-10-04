@@ -35,6 +35,7 @@ export interface IQueryResult {
   total_count?: number;
   start_row?: number;
   end_row?: number;
+  query_id?: string;
 }
 
 export default interface IFile {

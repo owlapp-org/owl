@@ -148,7 +148,8 @@ export class DatabaseService<T> extends ApiService<T> {
     query: string,
     start_row?: number,
     end_row?: number,
-    with_total_count: boolean = true
+    with_total_count: boolean = true,
+    query_id?: string
   ): Promise<IQueryResult> {
     return request
       .post(
@@ -157,7 +158,13 @@ export class DatabaseService<T> extends ApiService<T> {
           query,
         },
         {
-          params: { start_row, end_row, with_total_count, database_id },
+          params: {
+            start_row,
+            end_row,
+            with_total_count,
+            database_id,
+            query_id,
+          },
         }
       )
       .then((response) => response.data);

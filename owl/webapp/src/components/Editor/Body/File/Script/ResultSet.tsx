@@ -19,7 +19,7 @@ const ResultSet: React.FC<IResultSetProps> = ({ result }) => {
   const [rows, setRows] = useState<Record<string, any>[]>([]);
   const [endRow, setEndRow] = useState(result.end_row || 0);
   const gridRef = useRef<DataGridHandle>(null);
-  const { database_id: databaseId } = result;
+  const { database_id: databaseId, query_id } = result;
 
   const defaultColumnProperties = {
     resizable: true,
@@ -68,7 +68,8 @@ const ResultSet: React.FC<IResultSetProps> = ({ result }) => {
         result.query,
         start_row,
         end_row,
-        false
+        false,
+        query_id
       );
       if (qr) {
         setRows([...rows, ...(qr.data || [])]);
