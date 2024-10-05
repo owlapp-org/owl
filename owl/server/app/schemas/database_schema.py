@@ -93,6 +93,13 @@ class RunIn:
     query_id: Optional[str] = field(metadata={"required": False})
     query: str = field(metadata={"required": True, "validate": Length(min=1)})
 
+    @post_load
+    def ensure_query_id(self, data, **kwargs):
+        if not data.get("query_id"):
+            data["query_id"] = str(uuid.uuid4())
+
+        return data
+
 
 @dataclass
 class ExportQuery:
@@ -101,6 +108,7 @@ class ExportQuery:
 
 @dataclass
 class ExportIn:
+    query_id: Optional[str] = field(metadata={"required": False})
     query: str = field(metadata={"required": True, "validate": Length(min=7)})
     file_type: str = field(
         default="CSV",
@@ -110,6 +118,13 @@ class ExportIn:
     options: Optional[dict[str, Any]] = field(
         default_factory=dict, metadata={"required": False}
     )
+
+    @post_load
+    def ensure_query_id(self, data, **kwargs):
+        if not data.get("query_id"):
+            data["query_id"] = str(uuid.uuid4())
+
+        return data
 
 
 @dataclass
@@ -141,10 +156,3 @@ class RunOut:
     total_count: Optional[int] = field(default=None)
     start_row: Optional[int] = field(default=None)
     end_row: Optional[int] = field(default=None)
-
-    @post_load
-    def ensure_query_id(self, data, **kwargs):
-        if not data.get("query_id"):
-            data["query_id"] = str(uuid.uuid4())
-
-        return data

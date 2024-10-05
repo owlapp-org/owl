@@ -41,6 +41,13 @@ class User(TimestampMixin, db.Model):
         cascade="all, delete-orphan",
         single_parent=True,
     )
+    executions = relationship(
+        "Execution",
+        back_populates="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        single_parent=True,
+    )
 
     is_admin = Column(Boolean, default=False)
 

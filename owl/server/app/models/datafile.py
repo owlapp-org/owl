@@ -51,7 +51,7 @@ class DataFile(TimestampMixin, UserSpaceMixin["DataFile"], db.Model):
 
     @classmethod
     def upload_datafile(cls, owner_id: int, file: FileStorage) -> "DataFile":
-        datafile = DataFile(owner_id=owner_id).upload_file(file)
+        datafile = cls(owner_id=owner_id).upload_file(file)
         datafile.path = datafile.relative_path(file.filename)
         try:
             db.session.add(datafile)

@@ -145,10 +145,9 @@ def update_database(id: int, payload: UpdateDatabaseIn):
 def run(payload: RunIn, q: Optional[RunQuery] = None):
     q = q or RunQuery()
     try:
-        owner_id = get_jwt_identity()
         return Database.run(
             id=q.database_id,
-            owner_id=owner_id,
+            owner_id=get_jwt_identity(),
             query=payload.query,
             start_row=q.start_row,
             end_row=q.end_row,
@@ -190,7 +189,7 @@ def export(q: Optional[ExportQuery], payload: ExportIn):
             query=payload.query,
             filename=payload.filename,
             options=payload.options,
-            owner_id=get_jwt_identity(),
+            user_id=get_jwt_identity(),
         ) as filepath:
             file = open(filepath, "rb")
             return (

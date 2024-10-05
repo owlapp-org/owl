@@ -3,6 +3,7 @@ import os
 import tempfile
 import uuid
 from contextlib import contextmanager
+from datetime import datetime
 from typing import Any, Generator, Optional
 
 import duckdb
@@ -10,23 +11,22 @@ import jinja2
 import pydash as _
 import sqlparse
 from app.constants import StatementType
-from app.errors.errors import (
-    ModelNotFoundException,
-    MultipleStatementsNotAllowedError,
-    QueryParseError,
-    StoragePathExists,
-)
+from app.errors.errors import (ModelNotFoundException,
+                               MultipleStatementsNotAllowedError,
+                               QueryParseError, StoragePathExists)
 from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
 from app.macros.index import default_macros
 from app.macros.macros import gen__read_script_file
 from app.models.base import TimestampMixin, db
+from app.models.execution import Execution
 from app.models.mixins.user_space_mixin import UserSpaceMixin
 from app.schemas.database_schema import RunOut
 from app.settings import settings
 from duckdb import DuckDBPyConnection
 from flask import json
-from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint, and_
+from sqlalchemy import (JSON, Column, ForeignKey, Integer, String,
+                        UniqueConstraint, and_)
 from sqlalchemy.orm import relationship
 from sqlparse.sql import Statement as SqlParseStatement
 
@@ -188,11 +188,11 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
     ) -> RunOut:
         logger.debug("Received query", extra={"query": query})
         query = _.chain(query).trim().trim_end(";").value()
-        query = cls.resolve_query_template(validate_query(query), owner_id)
+        resolved_query = cls.resolve_query_template(validate_query(query), owner_id)
 
-        statements = sqlparse.parse(query)
+        statements = sqlparse.parse(resolved_query)
         if len(statements) == 0:
-            raise QueryParseError(f"Failed to parse query {query}")
+            raise QueryParseError(f"Failed to parse query {resolved_query}")
         if len(statements) > 1:
             raise MultipleStatementsNotAllowedError("Multiple statements not allowed")
 
@@ -207,7 +207,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
                 raise ModelNotFoundException("Database not found")
         else:
             # run select only in-memory queries
-            database = cls(id=None)
+            database = cls(id=None, owner_id=owner_id)
 
         if id is None and statement.get_type() != "SELECT":
             raise Exception(
@@ -216,7 +216,13 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
 
         # execute using im-memory database
         if id is None:
-            return database.run_query(conn=duckdb, statement=statement, **kwargs)
+            return database.run_query(
+                conn=duckdb,
+                statement=statement,
+                query_id=query_id,
+                raw_query=query,
+                **kwargs,
+            )
 
         # execute using a database
         pool = registry.get(database.id, database)
@@ -227,13 +233,18 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         with pool.acquire_connection() as conn:
             if statement.get_type() == "SELECT":
                 return database.run_query(
-                    conn=conn, statement=statement, query_id=query_id, **kwargs
+                    conn=conn,
+                    statement=statement,
+                    query_id=query_id,
+                    raw_query=query,
+                    **kwargs,
                 )
             else:
                 return database.run_execute(
                     conn=conn,
                     statement=statement,
                     query_id=query_id,
+                    raw_query=query,
                 )
 
     def run_execute(
@@ -244,27 +255,37 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         **kwargs,
     ) -> RunOut:
         statement_type = statement.get_type()
-        result = conn.execute(str(statement))
-        conn.commit()
+        exec: Execution = None
+        try:
+            exec = Execution.start(
+                query_id=query_id,
+                user_id=self.owner_id,
+                raw_query=kwargs.get("raw_query", "N/A"),
+                executed_query=str(statement),
+            )
+            result = conn.execute(str(statement))
+            conn.commit()
+            exec.success()
+        except Exception as e:
+            exec and exec.error(str(e))
+            raise e
+
         if statement_type in [
             StatementType.INSERT,
             StatementType.UPDATE,
             StatementType.DELETE,
         ]:
-            return RunOut(
-                database_id=self.id,
-                query=str(statement),
-                statement_type=statement_type,
-                affected_rows=result.fetchone()[0],
-                query_id=query_id,
-            )
+            affected_rows = result.fetchone()[0]
         else:
-            return RunOut(
-                database_id=self.id,
-                query=str(statement),
-                statement_type=statement_type,
-                query_id=query_id,
-            )
+            affected_rows = None
+
+        return RunOut(
+            database_id=self.id,
+            query=str(statement),
+            statement_type=statement_type,
+            affected_rows=affected_rows,
+            query_id=query_id,
+        )
 
     def run_query(
         self,
@@ -276,44 +297,59 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         query_id: Optional[str] = None,
         **kwargs,
     ) -> RunOut:
-
         offset = start_row
         limit = end_row - start_row
-        query_wrapper = f"select * from ({statement}) order by * LIMIT {limit} OFFSET {offset}"  # nosec B608
-        df = conn.execute(query_wrapper).pl()
+        query_wrapper = f"select * from ({str(statement).strip()}) order by * LIMIT {limit} OFFSET {offset}"  # nosec B608
 
-        if with_total_count:
-            total_count_query = f"select count(*) from ({statement})"  # nosec B608
-            total_count = conn.execute(total_count_query).fetchone()[0]
-        else:
-            total_count = None
+        exec: Execution = None
+        try:
+            exec = Execution.start(
+                query_id=query_id,
+                user_id=self.owner_id,
+                raw_query=kwargs.get("raw_query", "N/A"),
+                executed_query=query_wrapper,
+            )
+            df = conn.execute(query_wrapper).pl()
+            exec.success()
 
-        return RunOut(
-            database_id=self.id,
-            query=str(statement),
-            statement_type=StatementType.SELECT,
-            data=df.to_dicts(),
-            columns=df.columns,
-            total_count=total_count,
-            start_row=start_row,
-            end_row=end_row,
-            query_id=query_id,
-        )
+            if with_total_count:
+                # todo add this to message as json
+                total_count_query = (
+                    f"select count(*) from ({str(statement).strip()})"  # nosec B608
+                )
+                total_count = conn.execute(total_count_query).fetchone()[0]
+            else:
+                total_count = None
+
+            return RunOut(
+                database_id=self.id,
+                query=str(statement),
+                statement_type=StatementType.SELECT,
+                data=df.to_dicts(),
+                columns=df.columns,
+                total_count=total_count,
+                start_row=start_row,
+                end_row=end_row,
+                query_id=query_id,
+            )
+
+        except Exception as e:
+            exec and exec.error(message=str(e), end_time=datetime.now())
+            raise e
 
     @classmethod
     @contextmanager
     def export(
         cls,
         id: int | None,
-        owner_id: int,
+        user_id: int,
         query: str,
         filename: str,
         _file_type: str = "CSV",
+        query_id: str = None,
         options: dict[str, Any] = None,
     ) -> Generator[str, None, None]:
-
         logger.debug("Received query", extra={"query": query})
-
         opts = []
         options = options or {}
         if options.get("compress", False):
@@ -332,28 +368,41 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         date_format and opts.append(f"dateformat '{date_format}'")
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            print(temp_dir, filename)
             filepath = os.path.join(temp_dir, filename)
             sql = f"""
                 copy ({query}) to '{filepath}' ({",".join(opts)})
             """
             logger.debug(f"=== Raw SQL ===\n{sql}")
             sql = _.chain(sql).trim().trim_end(";").value()
-            sql = cls.resolve_query_template(validate_query(sql), owner_id)
+            sql = cls.resolve_query_template(validate_query(sql), user_id).strip()
             logger.debug(f"=== Resolved SQL ===\n{sql}")
-            if id is not None:
-                database = cls.find_by_id_and_owner(id, owner_id=owner_id)
-                if not database:
-                    raise ModelNotFoundException("Database not found")
 
-                pool = registry.get(database.id, database)
-                if not pool:
-                    raise ConnectionError(
-                        f"Failed to establish connection to database, {database}"
-                    )
-                with pool.acquire_connection() as conn:
-                    conn.execute(sql)
-            else:
-                duckdb.execute(sql)
+            exec: Execution = None
+            try:
+                exec = Execution.start(
+                    query_id=query_id,
+                    user_id=user_id,
+                    raw_query=query,
+                    executed_query=sql,
+                )
+                if id is not None:
+                    database = cls.find_by_id_and_owner(id, owner_id=user_id)
+                    if not database:
+                        raise ModelNotFoundException("Database not found")
+
+                    pool = registry.get(database.id, database)
+                    if not pool:
+                        raise ConnectionError(
+                            f"Failed to establish connection to database, {database}"
+                        )
+                    with pool.acquire_connection() as conn:
+                        conn.execute(sql)
+                else:
+                    duckdb.execute(sql)
+
+                exec.success()
+            except Exception as e:
+                exec.error(e)
+                raise e
 
             yield filepath

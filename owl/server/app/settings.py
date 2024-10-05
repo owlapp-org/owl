@@ -4,6 +4,8 @@ from typing import Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy import URL
+from sqlalchemy.engine import make_url
 
 
 class Settings(BaseSettings, extra="ignore"):
@@ -117,6 +119,9 @@ class Settings(BaseSettings, extra="ignore"):
         default=10,
         description="Maximum iterations to resolve macros. This is a temporary solution and will be replaced in the future.",
     )
+
+    def parse_sqlalchemy_url(self) -> URL:
+        return make_url(self.SQLALCHEMY_DATABASE_URI)
 
 
 settings = Settings()

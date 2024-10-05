@@ -151,6 +151,45 @@ def upgrade() -> None:
         sa.UniqueConstraint("path", "owner_id", name="_macros_path_owner_uc"),
     )
 
+    # Create the executions table
+    op.create_table(
+        "executions",
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("query_id", sa.String(), nullable=False),
+        sa.Column("database_id", sa.Integer(), nullable=True),
+        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("raw_query", sa.String(), nullable=False),
+        sa.Column("executed_query", sa.String(), nullable=False),
+        sa.Column("status", sa.String(), nullable=False),
+        sa.Column("message", sa.String(), nullable=True),
+        sa.Column(
+            "start_time",
+            sa.DateTime(),
+            server_default=created_at_default,
+            nullable=False,
+        ),
+        sa.Column(
+            "end_time",
+            sa.DateTime(),
+            server_default=updated_at_default,
+            nullable=True,
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(),
+            server_default=created_at_default,
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(),
+            server_default=updated_at_default,
+            nullable=True,
+        ),
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"]),
+        sa.PrimaryKeyConstraint("id"),
+    )
+
 
 def downgrade() -> None:
     op.drop_table("databases")
@@ -158,3 +197,4 @@ def downgrade() -> None:
     op.drop_table("data_files")
     op.drop_table("scripts")
     op.drop_table("macro_files")
+    op.drop_table("executions")
