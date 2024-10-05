@@ -93,6 +93,13 @@ class RunIn:
     query_id: Optional[str] = field(metadata={"required": False})
     query: str = field(metadata={"required": True, "validate": Length(min=1)})
 
+    @post_load
+    def ensure_query_id(self, data, **kwargs):
+        if not data.get("query_id"):
+            data["query_id"] = str(uuid.uuid4())
+
+        return data
+
 
 @dataclass
 class ExportQuery:
