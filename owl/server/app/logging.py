@@ -19,6 +19,7 @@ class JSONFormatter(logging.Formatter):
             "filename": record.pathname,
             "line_no": record.lineno,
             "logger": record.name,
+            "extra": {},
         }
 
         for key, value in record.__dict__.items():
@@ -43,8 +44,11 @@ class JSONFormatter(logging.Formatter):
                 "process",
                 "taskName",
                 "asctime",
+                "filename",
+                "msecs",
+                "message",
             ):
-                log[key] = value
+                log["extra"][key] = value
 
         return json.dumps(log)
 
