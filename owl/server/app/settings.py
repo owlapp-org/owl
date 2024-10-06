@@ -96,7 +96,11 @@ class Settings(BaseSettings, extra="ignore"):
         default="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
     LOG_LEVEL: Optional[str] = Field(
-        description="The level of the logs", default="INFO"
+        description="The level of the logs", default="DEBUG"
+    )
+
+    LOG_PATH: Optional[str] = Field(
+        description="The path to the log files", default="logs/app.log"
     )
 
     STORAGE_BASE_PATH: Optional[str] = Field(
