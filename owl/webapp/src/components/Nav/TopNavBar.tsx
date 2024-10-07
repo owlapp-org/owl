@@ -43,10 +43,7 @@ const TopNavBar: React.FC<TopNavBarProps> = (props) => {
         <ActionIcon
           variant="transparent"
           onClick={() => {
-            window.open(
-              `${window.location.protocol}//${window.location.hostname}:3000/api/docs`,
-              "_blank"
-            );
+            window.open(`/api/docs`, "_blank");
           }}
         >
           <IconApi size={24} stroke={1} color="var(--mantine-color-gray-7)" />
