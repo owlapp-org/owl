@@ -86,7 +86,9 @@ def add_rotating_json_file_handler(
         isinstance(handler, RotatingFileHandler) for handler in root_logger.handlers
     ):
         handler = RotatingFileHandler(
-            filename=settings.LOG_PATH, maxBytes=max_bytes, backupCount=backup_count
+            filename=os.path.join(settings.LOG_PATH, "app.log"),
+            maxBytes=max_bytes,
+            backupCount=backup_count,
         )
         handler.setFormatter(JSONFormatter())
         handler.setLevel(settings.LOG_LEVEL)

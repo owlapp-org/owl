@@ -100,7 +100,7 @@ class Settings(BaseSettings, extra="ignore"):
     )
 
     LOG_PATH: Optional[str] = Field(
-        description="The path to the log files", default="logs/app.log"
+        description="The path to the log files", default="logs"
     )
 
     STORAGE_BASE_PATH: Optional[str] = Field(
