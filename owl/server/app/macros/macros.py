@@ -1,12 +1,21 @@
+import os
 from typing import Callable
 
 from app.models.script import Script
+from app.settings import settings
 
 REF_MACRO = """
 {% macro ref(filename) %}
     {% set result = read_script_file(filename + '.sql') %}
     ({{ result }})
 {% endmacro %}
+"""
+
+log_files = os.path.join(settings.LOG_PATH, "*.log")
+LOGS_MACRO = f"""
+{{% macro logs() %}}
+    read_json('{log_files}',format = 'newline_delimited')
+{{% endmacro %}}
 """
 
 
