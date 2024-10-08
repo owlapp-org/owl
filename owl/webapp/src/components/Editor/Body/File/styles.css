@@ -4,7 +4,7 @@
 
 .app-code-highlight .mantine-CodeHighlight-copy:hover,
 .app-code-highlight .mantine-CodeHighlight-copy {
-    margin-left: 10px !important;
+    margin-left: 40px !important;
     background: transparent !important;
     color: var(--mantine-color-blue-5);
 }

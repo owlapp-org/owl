@@ -12,7 +12,7 @@ import {
 } from "react-resizable-panels";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import Code, { ExtendedReactCodeMirrorRef } from "./ScriptCode";
-import Panel from "./ScriptPanel";
+import ScriptPanel from "./ScriptPanel";
 import ScriptToolbar from "./ScriptToolbar";
 
 interface IScriptProps {
@@ -112,10 +112,11 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
         </ResizablePanel>
         <PanelResizeHandle className="panel-resize-handle" />
         <ResizablePanel maxSize={90} minSize={10}>
-          <Panel
+          <ScriptPanel
             renderedContent={renderedContent}
             result={queryResult}
             active={activePanel}
+            setActivePanel={setActivePanel}
           />
         </ResizablePanel>
       </PanelGroup>
