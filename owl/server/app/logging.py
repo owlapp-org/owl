@@ -14,8 +14,8 @@ class JSONFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         log = {
             "level": record.levelname,
-            "message": record.getMessage(),
             "time": self.format_time(record),
+            "message": record.getMessage(),
             "filename": record.pathname,
             "line_no": record.lineno,
             "logger": record.name,

@@ -1,7 +1,7 @@
 import { useExportDataModalStore } from "@components/modals/ExportDataModal/useExportDataModalStore";
 import { IEditorScriptTabState } from "@hooks/editorStore";
 import { useDatabaseStore } from "@hooks/hooks";
-import { ActionIcon, Divider, Flex, Select } from "@mantine/core";
+import { ActionIcon, Divider, Flex, Select, Tooltip } from "@mantine/core";
 import {
   IconCubeSend,
   IconDownload,
@@ -87,19 +87,21 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
           })}
         />
         <Divider orientation="vertical" />
-        <ActionIcon
-          h="100%"
-          radius={0}
-          p={0}
-          disabled={!content.trim()}
-          aria-label="Run"
-          variant="transparent"
-          miw={40}
-          onClick={onExecute}
-          loading={isRunLoading}
-        >
-          <IconPlayerPlay stroke={1} />
-        </ActionIcon>
+        <Tooltip label="Run">
+          <ActionIcon
+            h="100%"
+            radius={0}
+            p={0}
+            disabled={!content.trim()}
+            aria-label="Run"
+            variant="transparent"
+            miw={40}
+            onClick={onExecute}
+            loading={isRunLoading}
+          >
+            <IconPlayerPlay stroke={1} />
+          </ActionIcon>
+        </Tooltip>
         <Divider orientation="vertical" />
       </div>
       <div
@@ -111,36 +113,40 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
         }}
       >
         <Divider orientation="vertical" />
-        <ActionIcon
-          h="100%"
-          radius={0}
-          p={0}
-          disabled={
-            !lastExecution ||
-            lastExecution["statement_type"] != StatementType.SELECT
-          }
-          aria-label="Run"
-          variant="transparent"
-          miw={40}
-          onClick={handleDownload}
-          loading={isDownloadLoading}
-        >
-          <IconDownload stroke={1} />
-        </ActionIcon>
+        <Tooltip label="Export result set">
+          <ActionIcon
+            h="100%"
+            radius={0}
+            p={0}
+            disabled={
+              !lastExecution ||
+              lastExecution["statement_type"] != StatementType.SELECT
+            }
+            aria-label="Run"
+            variant="transparent"
+            miw={40}
+            onClick={handleDownload}
+            loading={isDownloadLoading}
+          >
+            <IconDownload stroke={1} />
+          </ActionIcon>
+        </Tooltip>
         <Divider orientation="vertical" />
-        <ActionIcon
-          h="100%"
-          radius={0}
-          p={0}
-          disabled={!content.trim()}
-          aria-label="Run"
-          variant="transparent"
-          miw={40}
-          onClick={onRender}
-          loading={isRenderLoading}
-        >
-          <IconCubeSend stroke={1} />
-        </ActionIcon>
+        <Tooltip label="Show resolved query">
+          <ActionIcon
+            h="100%"
+            radius={0}
+            p={0}
+            disabled={!content.trim()}
+            aria-label="Run"
+            variant="transparent"
+            miw={40}
+            onClick={onRender}
+            loading={isRenderLoading}
+          >
+            <IconCubeSend stroke={1} />
+          </ActionIcon>
+        </Tooltip>
       </div>
     </Flex>
   );

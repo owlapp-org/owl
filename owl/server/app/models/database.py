@@ -280,7 +280,10 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         query = str(statement).strip()
         offset = start_row
         limit = end_row - start_row
-        query_wrapper = f"select * from ({query}) order by * LIMIT {limit} OFFSET {offset}"  # nosec B608
+        query_wrapper = (
+            f"select * from ({query}) LIMIT {limit} OFFSET {offset}"  # nosec B608
+        )
+        print(query_wrapper)
         df = conn.execute(query_wrapper).pl()
 
         if with_total_count:
