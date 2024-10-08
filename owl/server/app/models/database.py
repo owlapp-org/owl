@@ -10,12 +10,9 @@ import jinja2
 import pydash as _
 import sqlparse
 from app.constants import StatementType
-from app.errors.errors import (
-    ModelNotFoundException,
-    MultipleStatementsNotAllowedError,
-    QueryParseError,
-    StoragePathExists,
-)
+from app.errors.errors import (ModelNotFoundException,
+                               MultipleStatementsNotAllowedError,
+                               QueryParseError, StoragePathExists)
 from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
 from app.macros.index import default_macros
@@ -26,7 +23,8 @@ from app.schemas.database_schema import RunOut
 from app.settings import settings
 from duckdb import DuckDBPyConnection
 from flask import json
-from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint, and_
+from sqlalchemy import (JSON, Column, ForeignKey, Integer, String,
+                        UniqueConstraint, and_)
 from sqlalchemy.orm import relationship
 from sqlparse.sql import Statement as SqlParseStatement
 
@@ -277,20 +275,21 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         **kwargs,
     ) -> RunOut:
 
+        query = str(statement).strip()
         offset = start_row
         limit = end_row - start_row
-        query_wrapper = f"select * from ({statement}) order by * LIMIT {limit} OFFSET {offset}"  # nosec B608
+        query_wrapper = f"select * from ({query}) order by * LIMIT {limit} OFFSET {offset}"  # nosec B608
         df = conn.execute(query_wrapper).pl()
 
         if with_total_count:
-            total_count_query = f"select count(*) from ({statement})"  # nosec B608
+            total_count_query = f"select count(*) from ({query})"  # nosec B608
             total_count = conn.execute(total_count_query).fetchone()[0]
         else:
             total_count = None
 
         return RunOut(
             database_id=self.id,
-            query=str(statement),
+            query=query,
             statement_type=StatementType.SELECT,
             data=df.to_dicts(),
             columns=df.columns,
@@ -335,7 +334,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             print(temp_dir, filename)
             filepath = os.path.join(temp_dir, filename)
             sql = f"""
-                copy ({query}) to '{filepath}' ({",".join(opts)})
+                copy ({query.strip()}) to '{filepath}' ({",".join(opts)})
             """
             logger.debug(f"=== Raw SQL ===\n{sql}")
             sql = _.chain(sql).trim().trim_end(";").value()
