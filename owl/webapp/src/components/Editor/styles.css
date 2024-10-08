@@ -24,6 +24,14 @@
   background: rgba(255, 255, 204, 0.6);
 }
 
+.rdg-cell {
+  box-sizing: border-box;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-style: solid;
+  border-color: var(--mantine-color-gray-2);
+}
+
 .editor-tab {
   display: "flex" !important;
   justify-content: space-between !important;

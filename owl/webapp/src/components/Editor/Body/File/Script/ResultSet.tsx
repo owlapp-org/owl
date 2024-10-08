@@ -88,7 +88,7 @@ const ResultSet: React.FC<IResultSetProps> = ({ result }) => {
 
   return (
     <div
-      className="rdg-light"
+      className=""
       style={{
         display: "flex",
         height: "100%",
@@ -100,7 +100,7 @@ const ResultSet: React.FC<IResultSetProps> = ({ result }) => {
         columns={headers || []}
         rows={rows}
         style={{ height: "100%", width: "100%" }}
-        className="rdg-light editor-data-grid"
+        className="rdg fill-grid rdg-light editor-data-grid"
         onScroll={handleScroll}
         onRowsChange={setRows}
       />

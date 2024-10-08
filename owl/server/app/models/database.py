@@ -10,9 +10,12 @@ import jinja2
 import pydash as _
 import sqlparse
 from app.constants import StatementType
-from app.errors.errors import (ModelNotFoundException,
-                               MultipleStatementsNotAllowedError,
-                               QueryParseError, StoragePathExists)
+from app.errors.errors import (
+    ModelNotFoundException,
+    MultipleStatementsNotAllowedError,
+    QueryParseError,
+    StoragePathExists,
+)
 from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
 from app.macros.index import default_macros
@@ -23,8 +26,7 @@ from app.schemas.database_schema import RunOut
 from app.settings import settings
 from duckdb import DuckDBPyConnection
 from flask import json
-from sqlalchemy import (JSON, Column, ForeignKey, Integer, String,
-                        UniqueConstraint, and_)
+from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint, and_
 from sqlalchemy.orm import relationship
 from sqlparse.sql import Statement as SqlParseStatement
 
