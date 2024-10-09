@@ -74,7 +74,7 @@ const UserMenu: React.FC<IUserMenuProps> = ({
   };
 
   return (
-    <Menu position="bottom-start" width={300}>
+    <Menu position="bottom-start" width={270}>
       <Menu.Target>
         <UserButton
           userName={userName}

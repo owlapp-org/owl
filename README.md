@@ -91,7 +91,7 @@ You can create macros and use default macros on the sql scripts. Example to defa
 ```sql
 
 -- Example to {{files}}
-select * from '{{files}}/addresses.csv''
+select * from '{{files}}/addresses.csv'
 -- Assuming you have a uploaded a data file named `addresses.csv`
 -- Above script will resolve to the path of that file and will be something like;
 -- select * from 'path/to/data-files/addresses.csv''
