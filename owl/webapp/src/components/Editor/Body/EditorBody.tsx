@@ -11,21 +11,22 @@ interface IEditorBodyProps<T> {
 
 const EditorBody = <T,>({ store }: IEditorBodyProps<T>): React.ReactElement => {
   const [isContentLoading, setIsContentLoading] = useState(false);
-  const { fileId, fileType, fetchAndSetContent } = useStore(
+  const { fileId, fileType, content, fetchAndSetContent } = useStore(
     store,
     useShallow((state) => ({
       fileId: state.file.id,
       fileType: state.file.fileType,
+      content: state.content,
       fetchAndSetContent: state.fetchAndSetContent,
     }))
   );
 
   useEffect(() => {
-    if (fileId) {
+    if (fileId && !content) {
       setIsContentLoading(true);
       fetchAndSetContent().finally(() => setIsContentLoading(false));
     }
-  }, [fileId]);
+  }, [fileId, content]);
 
   return (
     <div
