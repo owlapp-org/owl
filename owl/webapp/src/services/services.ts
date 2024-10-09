@@ -176,6 +176,11 @@ export class DatabaseService<T> extends ApiService<T> {
     file_type: string,
     options: Record<string, any>
   ) {
+    let params = {};
+    if (database_id) {
+      params = { ...params, database_id };
+    }
+
     try {
       const response = await request.post(
         `${this.domain}/export`,
@@ -186,7 +191,7 @@ export class DatabaseService<T> extends ApiService<T> {
           options,
         },
         {
-          params: { database_id },
+          params: params,
           responseType: "blob",
         }
       );
