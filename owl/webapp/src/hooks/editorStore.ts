@@ -252,7 +252,7 @@ const useEditorStore = create<IEditorState<IFileModel>>((set, get) => ({
         if (ids[i] === id) continue;
         delete tabs[ids[i]];
       }
-      return { tabs, activeTab: id };
+      return { tabs, activeTabId: id };
     });
   },
   findTabById: (id: string) => {
