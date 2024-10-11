@@ -13,11 +13,6 @@ Currently you can use it to query:
 
 - You can also upload files and query them.
 
-## Query Engine
-
-- First [macro](#macros) resolution is done on the given statement.
-- After [macros](#macros) are resolved, Everything is executed by [duckdb](https://duckdb.org/)
-
 ## Installation
 
 ```sh
@@ -134,7 +129,13 @@ Commands:
   update-password  Update the password of a user
 ```
 
-### Development
+## Query Engine
+
+- First [macro](#macros) resolution is done on the given statement.
+- After [macros](#macros) are resolved, Everything is executed by [duckdb](https://duckdb.org/)
+
+
+## Development
 
 We have [backend](./owl/server/) and [frontend](./owl/webapp/) separated in respective directories.
 

@@ -21,14 +21,11 @@ interface IScriptProps {
 
 const Script: React.FC<IScriptProps> = ({ store }) => {
   const codeRef = useRef<ExtendedReactCodeMirrorRef>(null);
-  const { content, databaseId, setLastExecution } = useStore(
-    store,
-    (state) => ({
-      content: state.content,
-      databaseId: state.getOption("databaseId"),
-      setLastExecution: state.setLastExecution,
-    })
-  );
+  const { content, getOption, setLastExecution } = useStore(store, (state) => ({
+    content: state.content,
+    getOption: state.getOption,
+    setLastExecution: state.setLastExecution,
+  }));
 
   const [queryResult, setQueryResult] = useState<IQueryResult | undefined>(
     undefined
@@ -68,6 +65,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
     if (!query) return;
     setIsRunLoading(true);
     try {
+      const databaseId = getOption("databaseId") as number;
       // todo hardcoded values
       const result = await databaseService.run(databaseId, query, 0, 25);
       setQueryResult(result);

@@ -124,7 +124,7 @@ const editorTabStateManager = <T>(
   },
   setOption: (option: string, value: any) => {
     const options = get().options;
-    set({ options: { ...options, ...{ option: value } } });
+    set({ options: { ...options, ...{ [option]: value } } });
   },
 });
 
