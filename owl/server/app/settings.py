@@ -122,5 +122,10 @@ class Settings(BaseSettings, extra="ignore"):
         description="Maximum iterations to resolve macros. This is a temporary solution and will be replaced in the future.",
     )
 
+    GENERATE_EXAMPLES: Optional[bool] = Field(
+        default=True,
+        description="Generate example files for each created user",
+    )
+
 
 settings = Settings()

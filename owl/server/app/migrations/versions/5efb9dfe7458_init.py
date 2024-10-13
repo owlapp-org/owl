@@ -63,7 +63,6 @@ def upgrade() -> None:
         sa.Column("owner_id", sa.Integer(), nullable=False),
         sa.Column("config", sa.JSON(), nullable=True),
         sa.Column("description", sa.String(), nullable=True),
-        sa.Column("path", sa.String(), nullable=True),
         sa.Column("pool_size", sa.Integer(), nullable=True),
         sa.Column(
             "created_at",
@@ -86,7 +85,7 @@ def upgrade() -> None:
     op.create_table(
         "data_files",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("path", sa.String(), nullable=False),
+        sa.Column("name", sa.String(), nullable=False),
         sa.Column("owner_id", sa.Integer(), nullable=False),
         sa.Column(
             "created_at",
@@ -102,14 +101,14 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(["owner_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("path", "owner_id", name="_data_files_path_owner_uc"),
+        sa.UniqueConstraint("name", "owner_id", name="_data_files_name_owner_uc"),
     )
 
     # Create the scripts table
     op.create_table(
         "scripts",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("path", sa.String(), nullable=False),
+        sa.Column("name", sa.String(), nullable=False),
         sa.Column("owner_id", sa.Integer(), nullable=False),
         sa.Column(
             "created_at",
@@ -125,14 +124,14 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(["owner_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("path", "owner_id", name="_scripts_path_owner_uc"),
+        sa.UniqueConstraint("name", "owner_id", name="_scripts_name_owner_uc"),
     )
 
     # Create the macro_files table
     op.create_table(
         "macro_files",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("path", sa.String(), nullable=False),
+        sa.Column("name", sa.String(), nullable=False),
         sa.Column("owner_id", sa.Integer(), nullable=False),
         sa.Column(
             "created_at",
@@ -148,7 +147,7 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(["owner_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("path", "owner_id", name="_macros_path_owner_uc"),
+        sa.UniqueConstraint("name", "owner_id", name="_macros_name_owner_uc"),
     )
 
 

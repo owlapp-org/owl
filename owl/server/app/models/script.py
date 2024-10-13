@@ -15,7 +15,7 @@ class Script(TimestampMixin, UserSpaceMixin["Script"], db.Model):
     __folder__ = "scripts"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    path = Column(String, nullable=False)
+    name = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     owner = relationship("User", back_populates="scripts")
@@ -26,15 +26,12 @@ class Script(TimestampMixin, UserSpaceMixin["Script"], db.Model):
 
     @classmethod
     def find_by_owner(cls, id: int) -> list["Script"]:
-        return cls.query.filter(cls.owner_id == id).order_by(cls.path).all()
+        return cls.query.filter(cls.owner_id == id).order_by(cls.name).all()
 
     @classmethod
     def find_by_filename(cls, owner_id: int, filename: str) -> Optional["Script"]:
         return cls.query.filter(
-            and_(
-                cls.owner_id == owner_id,
-                cls.path.like(f"%/{filename}"),
-            )
+            and_(cls.owner_id == owner_id, cls.name == filename)
         ).one_or_none()
 
     @classmethod
@@ -47,8 +44,7 @@ class Script(TimestampMixin, UserSpaceMixin["Script"], db.Model):
     def create_script(
         cls, owner_id: int, filename: str, content: Optional[str] = None
     ) -> "Script":
-        script = cls(owner_id=owner_id).create_file(filename, content)
-        script.path = script.relative_path(filename)
+        script = cls(owner_id=owner_id, name=filename).create_file(content)
         try:
             db.session.add(script)
             db.session.commit()
@@ -71,8 +67,7 @@ class Script(TimestampMixin, UserSpaceMixin["Script"], db.Model):
 
     @classmethod
     def upload_script(cls, owner_id: int, file: FileStorage) -> "Script":
-        script = Script(owner_id=owner_id).upload_file(file)
-        script.path = script.relative_path(file.filename)
+        script = Script(owner_id=owner_id, name=file.filename).upload_file(file)
         try:
             db.session.add(script)
             db.session.commit()
@@ -89,7 +84,7 @@ class Script(TimestampMixin, UserSpaceMixin["Script"], db.Model):
 
         self.update_file(name, content)
         if name:
-            self.path = self.relative_path(name)
+            self.name = name
 
         db.session.add(self)
         db.session.commit()

@@ -3,7 +3,6 @@ from logging import getLogger
 
 from apiflask import APIBlueprint, abort
 from app.auth.oauth import oauth
-from app.models import db
 from app.models.user import User
 from app.schemas.auth_schema import LoginIn, LoginOut
 from flask import make_response, redirect, request, url_for
@@ -49,9 +48,7 @@ def google_callback():
     email = userinfo["email"]
     user = User.find_by_email(email)
     if user is None:
-        user = User(name=userinfo["name"], email=email)
-        db.session.add(user)
-        db.session.commit()
+        user = User.create(name=userinfo["name"], email=email)
 
     access_token = create_access_token(identity=user)
     redirect_url = os.path.join(request.host_url, "/ui/auth/handle-google-callback")

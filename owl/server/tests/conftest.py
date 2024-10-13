@@ -1,6 +1,7 @@
 import pydash as _
 import pytest
 import requests
+from app import create_app
 from app.models import User
 from app.settings import settings
 from sqlalchemy.orm import Session
@@ -46,3 +47,23 @@ def use_access_token(use_user):
     )
     response_json = response.json()
     yield response_json["access_token"]
+
+
+def find_me(access_token: str) -> dict:
+    response = requests.get(
+        api_url("users/me"),
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(
+            f"Unable to get authenticated user. {response.status_code}:{response.text}"
+        )
+
+
+@pytest.fixture(scope="session")
+def use_app_context():
+    app = create_app()
+    with app.app_context():
+        yield app

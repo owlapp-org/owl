@@ -1,11 +1,11 @@
 import logging
-import os
 from typing import Optional
 
 import jinja2
 from app.macros.index import default_macros
 from app.macros.macros import gen__read_script_file
 from app.models.base import TimestampMixin, db
+from app.models.datafile import DataFile
 from app.models.mixins.user_space_mixin import UserSpaceMixin
 from app.settings import settings
 from sqlalchemy import Column, ForeignKey, Integer, String, and_
@@ -20,7 +20,7 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
     __folder__ = "macros"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    path = Column(String, nullable=False)
+    name = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     owner = relationship("User", back_populates="macro_files")
@@ -31,7 +31,7 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
 
     @classmethod
     def find_by_owner(cls, id: int) -> list["MacroFile"]:
-        return cls.query.filter(cls.owner_id == id).order_by(cls.path).all()
+        return cls.query.filter(cls.owner_id == id).order_by(cls.name).all()
 
     @classmethod
     def find_by_id_and_owner(cls, id: int, owner_id: int) -> Optional["MacroFile"]:
@@ -67,8 +67,7 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
 
     @classmethod
     def upload_macro_file(cls, owner_id: int, file: FileStorage) -> "MacroFile":
-        macro_file = MacroFile(owner_id=owner_id).upload_file(file)
-        macro_file.path = macro_file.relative_path(file.filename)
+        macro_file = MacroFile(owner_id=owner_id, name=file.filename).upload_file(file)
         try:
             db.session.add(macro_file)
             db.session.commit()
@@ -98,9 +97,7 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
         content: str,
         command: Optional[str] = None,
     ):
-        files_path = os.path.join(
-            settings.STORAGE_BASE_PATH, "users", str(owner_id), "files"
-        )
+        files_path = DataFile(owner_id=owner_id).folder_storage_path
         if command:
             content = content + "\n\n" + "{{" + command + "}}"
 
@@ -116,11 +113,12 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
         text = "\n".join([template_base, content])
 
         # todo 2- dag implementation / better solution
+        read_script_file = gen__read_script_file(owner_id=owner_id)
         for __ in range(settings.MAX_MACRO_RESOLVE_DEPTH):
             text = "\n".join([template_base, text])
             text = jinja2.Template(text).render(
                 files=files_path,
-                read_script_file=gen__read_script_file(owner_id=owner_id),
+                read_script_file=read_script_file,
             )
             if "{{" not in text:
                 break

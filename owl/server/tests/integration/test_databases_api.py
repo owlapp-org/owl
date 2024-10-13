@@ -12,7 +12,7 @@ def test_create_database(use_access_token) -> None:
         },
         headers={"Authorization": f"Bearer {use_access_token}"},
     )
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
     response_json = response.json()
     assert response_json["name"] == "test"
     assert response_json["pool_size"] == 1

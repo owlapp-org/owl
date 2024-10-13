@@ -15,7 +15,7 @@ class DataFile(TimestampMixin, UserSpaceMixin["DataFile"], db.Model):
     __folder__ = "files"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    path = Column(String, nullable=False)
+    name = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     owner = relationship("User", back_populates="data_files")
@@ -26,13 +26,17 @@ class DataFile(TimestampMixin, UserSpaceMixin["DataFile"], db.Model):
 
     @classmethod
     def find_by_owner(cls, id: int) -> list["DataFile"]:
-        return cls.query.filter(cls.owner_id == id).order_by(cls.path).all()
+        return cls.query.filter(cls.owner_id == id).order_by(cls.name).all()
 
     @classmethod
     def find_by_id_and_owner(cls, id: int, owner_id: int) -> Optional["DataFile"]:
         return cls.query.filter(
             and_(cls.id == id, cls.owner_id == owner_id)
         ).one_or_none()
+
+    @classmethod
+    def find_by_owner_and_name(cls, owner_id: int, name: str) -> "DataFile":
+        return cls.query.filter(and_(cls.owner_id == owner_id, cls.name == name)).one()
 
     @classmethod
     def delete_by_id(cls, id: int, owner_id: int = None) -> "DataFile":
@@ -72,3 +76,15 @@ class DataFile(TimestampMixin, UserSpaceMixin["DataFile"], db.Model):
             logger.exception("Error creating data file '%s'", str(e))
             db.session.rollback()
             raise e
+
+    @classmethod
+    def create_datafile(
+        cls, owner_id: int, name: str, content: Optional[str] = None
+    ) -> "DataFile":
+        datafile = cls(owner_id=owner_id)
+        datafile.path = datafile.relative_path(name)
+        db.session.add(datafile)
+        db.session.commit()
+        if content is not None:
+            datafile.create_file(name, content)
+        return datafile

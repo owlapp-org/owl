@@ -1,7 +1,6 @@
 import logging
 import os
 import tempfile
-import uuid
 from contextlib import contextmanager
 from typing import Any, Generator, Optional
 
@@ -10,23 +9,22 @@ import jinja2
 import pydash as _
 import sqlparse
 from app.constants import StatementType
-from app.errors.errors import (
-    ModelNotFoundException,
-    MultipleStatementsNotAllowedError,
-    QueryParseError,
-    StoragePathExists,
-)
+from app.errors.errors import (ModelNotFoundException,
+                               MultipleStatementsNotAllowedError,
+                               QueryParseError)
 from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
 from app.macros.index import default_macros
 from app.macros.macros import gen__read_script_file
 from app.models.base import TimestampMixin, db
+from app.models.datafile import DataFile
 from app.models.mixins.user_space_mixin import UserSpaceMixin
 from app.schemas.database_schema import RunOut
 from app.settings import settings
 from duckdb import DuckDBPyConnection
 from flask import json
-from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint, and_
+from sqlalchemy import (JSON, Column, ForeignKey, Integer, String,
+                        UniqueConstraint, and_)
 from sqlalchemy.orm import relationship
 from sqlparse.sql import Statement as SqlParseStatement
 
@@ -42,7 +40,6 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     config = Column(JSON, nullable=True)
     description = Column(String, nullable=True)
-    path = Column(String, nullable=True)
 
     pool_size = Column(Integer, nullable=True, default=1)
 
@@ -57,9 +54,6 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             }
         )
 
-    def abs_path(self) -> str:
-        return os.path.join(settings.STORAGE_BASE_PATH, self.path)
-
     @classmethod
     def find_by_id(cls, id: int) -> "Database":
         return cls.query.filter(cls.id == id).one_or_none()
@@ -70,7 +64,11 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
 
     @classmethod
     def find_by_owner(cls, id: int) -> list["Database"]:
-        return cls.query.filter(cls.owner_id == id).order_by(cls.path).all()
+        return cls.query.filter(cls.owner_id == id).order_by(cls.name).all()
+
+    @classmethod
+    def find_by_owner_and_name(cls, owner_id: int, name: str) -> "Database":
+        return cls.query.filter(and_(cls.owner_id == owner_id, cls.name == name)).one()
 
     @classmethod
     def find_by_id_and_owner(cls, id: int, owner_id: int) -> "Database":
@@ -80,7 +78,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
 
     @classmethod
     def delete_by_id(cls, id: int, owner_id: int = None) -> "Database":
-        database = cls.query.filter(
+        database: Database = cls.query.filter(
             cls.id == id and cls.owner_id == owner_id
         ).one_or_none()
         if not database:
@@ -89,23 +87,12 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         db.session.delete(database)
         db.session.commit()
         registry.remove(database.id)
-        path = os.path.join(settings.STORAGE_BASE_PATH, database.path)
         try:
-            os.remove(path)
+            os.remove(database.absolute_path())
         except FileNotFoundError:
             logger.warning(
-                "File not found: %s. Database might be never accessed." % path
+                "File not found: %s. Database might be never accessed." % database.path
             )
-
-    def set_path(self):
-        self.path = os.path.join(
-            "users",
-            str(self.owner_id),
-            "databases",
-            str(self.id),
-            self.name + "." + str(uuid.uuid4()) + ".db",
-        )
-        return self
 
     def update(
         self,
@@ -131,15 +118,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         try:
             db.session.add(self)
             db.session.flush()
-            self.set_path()
-            database_path = os.path.join(
-                settings.STORAGE_BASE_PATH,
-                self.path,
-            )
-            directories = database_path.rsplit(os.sep, 1)[0]
-            if os.path.exists(directories):
-                raise StoragePathExists()
-            os.makedirs(directories)
+            os.makedirs(self.folder_storage_path, exist_ok=True)
             db.session.commit()
             return self
         except Exception as e:
@@ -154,24 +133,21 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         macro_files = MacroFile.find_by_owner(id=owner_id) or []
         combined_macro_files_content = "\n".join([c.read_file() for c in macro_files])
 
-        files_path = os.path.join(
-            settings.STORAGE_BASE_PATH, "users", str(owner_id), "files"
-        )
-
         template_base = "\n".join(
             [
                 default_macros(),
                 combined_macro_files_content,
             ]
         )
-
         text = "\n".join([template_base, query])
         # todo 2- dag implementation / better solution
+        files_path = DataFile(owner_id=owner_id).folder_storage_path
+        read_script_file = gen__read_script_file(owner_id=owner_id)
         for __ in range(settings.MAX_MACRO_RESOLVE_DEPTH):
             text = "\n".join([template_base, text])
             text = jinja2.Template(text).render(
                 files=files_path,
-                read_script_file=gen__read_script_file(owner_id=owner_id),
+                read_script_file=read_script_file,
             )
             if "{{" not in text:
                 break
@@ -283,7 +259,6 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         query_wrapper = (
             f"select * from ({query}) LIMIT {limit} OFFSET {offset}"  # nosec B608
         )
-        print(query_wrapper)
         df = conn.execute(query_wrapper).pl()
 
         if with_total_count:
@@ -315,7 +290,6 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         _file_type: str = "CSV",
         options: dict[str, Any] = None,
     ) -> Generator[str, None, None]:
-
         logger.debug("Received query", extra={"query": query})
 
         opts = []
