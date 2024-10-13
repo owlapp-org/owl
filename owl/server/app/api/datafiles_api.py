@@ -153,7 +153,7 @@ def delete_datafile(id: int):
 def download_datafile(id: int):
     try:
         if datafile := DataFile.find_by_id_and_owner(id, owner_id=get_jwt_identity()):
-            filepath = datafile.absolute_path()
+            filepath = datafile.file_storage_path()
             file = open(filepath, "rb")
             return (
                 send_file(

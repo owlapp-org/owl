@@ -11,6 +11,8 @@ from app.examples.example_content import (
 )
 from app.models.database import Database
 from app.models.datafile import DataFile
+from app.models.macrofile import MacroFile
+from app.models.script import Script
 from app.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -80,17 +82,15 @@ class Examples:
             ("example.sql", BASIC_SCRIPT),
             ("example-model.sql", REFERENCE_SCRIPT),
         ]:
-            filepath = os.path.join(self.scripts_path, filename)
-            with open(filepath, "w") as f:
-                f.write(content)
+            Script.create_script(owner_id=self.user_id, name=filename, content=content)
 
     def generate_macros(self) -> "Examples":
         logger.info("Generating macros ...")
         for filename, content in [
             ("example.j2", BASIC_MACROS),
         ]:
-            filepath = os.path.join(self.macros_path, filename)
-            with open(filepath, "w") as f:
-                f.write(content)
+            MacroFile.create_macro_file(
+                owner_id=self.user_id, name=filename, content=content
+            )
 
         return self

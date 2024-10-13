@@ -6,6 +6,7 @@ from app.models.mixins.user_space_mixin import UserSpaceMixin
 from sqlalchemy import Column, ForeignKey, Integer, String, and_
 from sqlalchemy.orm import relationship
 from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +56,7 @@ class DataFile(TimestampMixin, UserSpaceMixin["DataFile"], db.Model):
 
     @classmethod
     def upload_datafile(cls, owner_id: int, file: FileStorage) -> "DataFile":
-        datafile = DataFile(owner_id=owner_id).upload_file(file)
-        datafile.path = datafile.relative_path(file.filename)
+        datafile = DataFile(owner_id=owner_id, name=file.filename).upload_file(file)
         try:
             db.session.add(datafile)
             db.session.commit()
@@ -67,7 +67,7 @@ class DataFile(TimestampMixin, UserSpaceMixin["DataFile"], db.Model):
 
     def update_datafile(self, name: str) -> "DataFile":
         self.rename_file(name)
-        self.path = self.relative_path(name)
+        self.name = secure_filename(name)
         try:
             db.session.add(self)
             db.session.commit()
@@ -81,10 +81,9 @@ class DataFile(TimestampMixin, UserSpaceMixin["DataFile"], db.Model):
     def create_datafile(
         cls, owner_id: int, name: str, content: Optional[str] = None
     ) -> "DataFile":
-        datafile = cls(owner_id=owner_id)
-        datafile.path = datafile.relative_path(name)
+        datafile = cls(owner_id=owner_id, name=name)
         db.session.add(datafile)
         db.session.commit()
         if content is not None:
-            datafile.create_file(name, content)
+            datafile.create_file(content)
         return datafile

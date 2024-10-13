@@ -103,7 +103,7 @@ def create_script(payload: CreateScriptIn):
     try:
         script = Script.create_script(
             owner_id=get_jwt_identity(),
-            filename=payload.name,
+            name=payload.name,
             content=payload.content,
         )
         return script
@@ -196,7 +196,7 @@ def delete_script(id: int):
 def download_script(id: int):
     try:
         if script := Script.find_by_id_and_owner(id, owner_id=get_jwt_identity()):
-            filepath = script.absolute_path()
+            filepath = script.file_storage_path()
             file = open(filepath, "rb")
             return (
                 send_file(

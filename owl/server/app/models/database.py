@@ -9,9 +9,11 @@ import jinja2
 import pydash as _
 import sqlparse
 from app.constants import StatementType
-from app.errors.errors import (ModelNotFoundException,
-                               MultipleStatementsNotAllowedError,
-                               QueryParseError)
+from app.errors.errors import (
+    ModelNotFoundException,
+    MultipleStatementsNotAllowedError,
+    QueryParseError,
+)
 from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
 from app.macros.index import default_macros
@@ -23,8 +25,7 @@ from app.schemas.database_schema import RunOut
 from app.settings import settings
 from duckdb import DuckDBPyConnection
 from flask import json
-from sqlalchemy import (JSON, Column, ForeignKey, Integer, String,
-                        UniqueConstraint, and_)
+from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint, and_
 from sqlalchemy.orm import relationship
 from sqlparse.sql import Statement as SqlParseStatement
 
@@ -34,6 +35,7 @@ logger = logging.getLogger(__name__)
 class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
     __tablename__ = "databases"
     __table_args__ = (UniqueConstraint("name", "owner_id", name="_name_owner_uc"),)
+    __folder__ = "databases"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
@@ -88,7 +90,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
         db.session.commit()
         registry.remove(database.id)
         try:
-            os.remove(database.absolute_path())
+            os.remove(database.file_storage_path())
         except FileNotFoundError:
             logger.warning(
                 "File not found: %s. Database might be never accessed." % database.path

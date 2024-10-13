@@ -1,18 +1,16 @@
 import os
 import tempfile
-
-# from app.models.datafile import DataFile
 from unittest.mock import patch
 
 from app.examples.examples import Examples
 from app.models.database import Database
 from app.models.datafile import DataFile
+from app.models.macrofile import MacroFile
+from app.models.script import Script
 from app.models.user import User
 
 
-def test_generate_databases(
-    use_app_context,
-):
+def test_generate_databases(use_app_context):
     with tempfile.TemporaryDirectory() as temp_dir:
         with patch("app.examples.examples.settings.STORAGE_BASE_PATH", temp_dir), patch(
             "app.models.database.settings.STORAGE_BASE_PATH", temp_dir
@@ -33,9 +31,7 @@ def test_generate_databases(
             User.delete_by_id(id=user.id)
 
 
-def test_generate_datafiles(
-    use_app_context,
-):
+def test_generate_datafiles(use_app_context):
     with tempfile.TemporaryDirectory() as temp_dir:
         with patch("app.examples.examples.settings.STORAGE_BASE_PATH", temp_dir), patch(
             "app.models.mixins.user_space_mixin.settings.STORAGE_BASE_PATH",
@@ -52,7 +48,57 @@ def test_generate_datafiles(
                 owner_id=user.id, name="example-addresses.csv"
             )
             assert datafile is not None
-            with open(datafile.absolute_path(), "r") as f:
+            with open(datafile.file_storage_path(), "r") as f:
                 content = f.read()
-                line_count = content.split("\n")
+                line_count = len(content.split("\n"))
                 assert line_count > 10
+
+            User.delete_by_id(id=user.id)
+
+
+def test_generate_scripts(use_app_context):
+    with tempfile.TemporaryDirectory() as temp_dir:
+        with patch("app.examples.examples.settings.STORAGE_BASE_PATH", temp_dir), patch(
+            "app.models.mixins.user_space_mixin.settings.STORAGE_BASE_PATH",
+            temp_dir,
+        ):
+            os.makedirs(os.path.join(temp_dir, "users"), exist_ok=True)
+            user = User.create(name="test", email="test@example")
+            os.makedirs(
+                os.path.join(temp_dir, "users", str(user.id), "scripts"), exist_ok=True
+            )
+
+            Examples(user_id=user.id).generate_scripts()
+
+            for name in ["example.sql", "example-model.sql"]:
+                script = Script.find_by_name(owner_id=user.id, name=name)
+                assert script is not None
+                with open(script.file_storage_path(), "r") as f:
+                    content = f.read()
+                    assert len(content) >= 1
+
+            User.delete_by_id(id=user.id)
+
+
+def test_generate_macrofiles(use_app_context):
+    with tempfile.TemporaryDirectory() as temp_dir:
+        with patch("app.examples.examples.settings.STORAGE_BASE_PATH", temp_dir), patch(
+            "app.models.mixins.user_space_mixin.settings.STORAGE_BASE_PATH",
+            temp_dir,
+        ):
+            os.makedirs(os.path.join(temp_dir, "users"), exist_ok=True)
+            user = User.create(name="test", email="test@example")
+            os.makedirs(
+                os.path.join(temp_dir, "users", str(user.id), "macros"), exist_ok=True
+            )
+
+            Examples(user_id=user.id).generate_macros()
+
+            for name in ["example.j2"]:
+                script = MacroFile.find_by_name(owner_id=user.id, name=name)
+                assert script is not None
+                with open(script.file_storage_path(), "r") as f:
+                    content = f.read()
+                    assert len(content) >= 1
+
+            User.delete_by_id(id=user.id)

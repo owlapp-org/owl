@@ -26,8 +26,14 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
     owner = relationship("User", back_populates="macro_files")
 
     @classmethod
+    def find_by_name(cls, owner_id: int, name: str) -> Optional["MacroFile"]:
+        return cls.query.filter(
+            and_(cls.owner_id == owner_id, cls.name == name)
+        ).one_or_none()
+
+    @classmethod
     def find_by_id(cls, id: int) -> Optional["MacroFile"]:
-        return cls.query.filter_by(id=id).one_or_none()
+        return cls.query.filter_by(cls.id == id).one_or_none()
 
     @classmethod
     def find_by_owner(cls, id: int) -> list["MacroFile"]:
@@ -41,10 +47,9 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
 
     @classmethod
     def create_macro_file(
-        cls, owner_id: int, filename: str, content: Optional[str] = None
+        cls, owner_id: int, name: str, content: Optional[str] = None
     ) -> "MacroFile":
-        macro_file = cls(owner_id=owner_id).create_file(filename, content)
-        macro_file.path = macro_file.relative_path(filename)
+        macro_file = cls(owner_id=owner_id, name=name).create_file(content)
         try:
             db.session.add(macro_file)
             db.session.commit()

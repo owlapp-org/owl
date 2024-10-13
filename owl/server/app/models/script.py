@@ -29,9 +29,9 @@ class Script(TimestampMixin, UserSpaceMixin["Script"], db.Model):
         return cls.query.filter(cls.owner_id == id).order_by(cls.name).all()
 
     @classmethod
-    def find_by_filename(cls, owner_id: int, filename: str) -> Optional["Script"]:
+    def find_by_name(cls, owner_id: int, name: str) -> Optional["Script"]:
         return cls.query.filter(
-            and_(cls.owner_id == owner_id, cls.name == filename)
+            and_(cls.owner_id == owner_id, cls.name == name)
         ).one_or_none()
 
     @classmethod
@@ -42,9 +42,9 @@ class Script(TimestampMixin, UserSpaceMixin["Script"], db.Model):
 
     @classmethod
     def create_script(
-        cls, owner_id: int, filename: str, content: Optional[str] = None
+        cls, owner_id: int, name: str, content: Optional[str] = None
     ) -> "Script":
-        script = cls(owner_id=owner_id, name=filename).create_file(content)
+        script = cls(owner_id=owner_id, name=name).create_file(content)
         try:
             db.session.add(script)
             db.session.commit()

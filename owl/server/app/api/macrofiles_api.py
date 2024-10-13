@@ -103,7 +103,7 @@ def create_macro_file(payload: CreateMacroFileIn):
     try:
         macro = MacroFile.create_macro_file(
             owner_id=get_jwt_identity(),
-            filename=payload.name,
+            name=payload.name,
             content=payload.content,
         )
         return macro
@@ -198,7 +198,7 @@ def download_macro_file(id: int):
         if macro_file := MacroFile.find_by_id_and_owner(
             id, owner_id=get_jwt_identity()
         ):
-            filepath = macro_file.absolute_path()
+            filepath = macro_file.file_storage_path()
             file = open(filepath, "rb")
             return (
                 send_file(
