@@ -16,6 +16,7 @@ from app.errors.errors import (
 )
 from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
+from app.lib.sqlparser import statement_starts_with
 from app.macros.index import default_macros
 from app.macros.macros import gen__read_script_file
 from app.models.base import TimestampMixin, db
@@ -188,13 +189,21 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             database = cls(id=None)
 
         if id is None and statement.get_type() != "SELECT":
-            raise Exception(
-                "Only select statement is supported for in memory database."
-            )
+            if not statement_starts_with(statement, "install", "load", "attach"):
+                raise Exception(
+                    "Only 'select', 'install', 'load', 'attach' statements are supported for in memory database."
+                )
 
         # execute using im-memory database
         if id is None:
-            return database.run_query(conn=duckdb, statement=statement, **kwargs)
+            if statement.get_type() == "SELECT":
+                return database.run_query(conn=duckdb, statement=statement, **kwargs)
+            else:
+                return database.run_execute(
+                    conn=duckdb,
+                    statement=statement,
+                    query_id=query_id,
+                )
 
         # execute using a database
         pool = registry.get(database.id, database)

@@ -95,18 +95,24 @@ STATES = [
 BASIC_SCRIPT = dedent(
     """
 -- ! If you have multiple statements on the script, you need to select the one to execute.
+-- You can render the actual script that is going to be executed by using the "cube" button
+-- on top-right
+-- You can download the result-set using the download button on the top-right
+-- You can use [Ctrl+Enter] shortcut key to execute the script
+-- Check duckdb documentation for the available functions and syntax, https://duckdb.org/docs/
 
--- # Simple select statement
+-- Simple select statement
 select 10 as MY_NUMBER
 
--- # Querying uploaded files
+-- Querying uploaded files
 -- {{files}} you can access every data file you've uploaded with '{{files}}/file-name.ext'
 -- Currently only below file types are supported:
 -- csv (and friends like tsv etc ...), line delimited json, excel family and parquet files.
 select * from '{{files}}/example-addresses.csv'
 
--- # Using macros
--- You can use the your custom macros as well as the system macros and variables using {{content}} syntax.
+-- Using macros
+-- You can use the your custom macros as well as the system macros and variables
+-- using {{content}} syntax.
 select {{greet('Alice')}} as GREETINGS
 
 -- Read NYC taxi data
@@ -115,7 +121,7 @@ select * from
 limit 10
 
 
--- # Extensions
+-- Extensions
 -- Check out duckdb documentation for more details on the extensions.
 -- https://duckdb.org/docs/extensions/overview.html
 -- Example usage of postgres extension
@@ -129,7 +135,9 @@ load postgres
 -- https://rnacentral.org/help/public-database
 
 -- Attach to postgres instance.
-ATTACH 'dbname=pfmegrnargs user=reader password=NWDMCE5xdipIjRrp host=hh-pgsql-public.ebi.ac.uk port=5432' AS pg (TYPE POSTGRES, READ_ONLY);
+ATTACH
+    'dbname=pfmegrnargs user=reader password=NWDMCE5xdipIjRrp host=hh-pgsql-public.ebi.ac.uk port=5432'
+AS pg (TYPE POSTGRES, READ_ONLY);
 
 -- See available tables on the attached database.
 select * from pg.information_schema.tables limit 10;
@@ -139,21 +147,24 @@ install spatial
 load spatial
 
 -- Select from the sheet 'states'
-select * from st_read('{{files}}/example-states.xls', layer = 'states')
+select * from st_read('{{files}}/example-states.xls',
+  layer = 'states',
+  open_options = ['HEADERS=FORCE']
+)
 
 
 -- You can also use other scripts in your scripts directory as datasets.
--- see 'example-addresses.sql'
+-- see 'example-model.sql'
 -- 'ref' is a system macro and it accepts the name of the script file without '.sql' extension.
-select * from {{ref('example-addresses')}}
+select * from {{ref('example-model')}}
 
 -- Using database
--- ^^^ Select the "demo" database from the dropdown above ^^^
+-- ^^^ Select the "example" database from the dropdown above ^^^
 -- There is already a test table called addresses.
 select * from my_addresses
 
 -- Insert example;
-insert into my_addresses ('name', 'email', 'street','city','phone')
+insert into my_addresses (name, email, street,city,phone)
 values (
     'John Doe','johndoe@example.com','123 Elm St','Springfield','555-1234'
 )
@@ -187,7 +198,7 @@ select * from '{{files}}/example-addresses.csv'
 BASIC_MACROS = """
 -- We use jinja to manage macros.
 -- See documentation for using jinja https://jinja.palletsprojects.com
-
+-- You can test your macros in this section using the command and render Icon on top right
 {% macro greet(name) %}
   'Hello, {{ name }}!'
 {% endmacro %}
