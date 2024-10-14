@@ -16,7 +16,7 @@ Currently you can use it to query:
 ## Installation
 
 ```sh
-# Requires python >=3.12
+# Requires python >=3.10, <=3.12
 pip install owlapp
 ```
 
