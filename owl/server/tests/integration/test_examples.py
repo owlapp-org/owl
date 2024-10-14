@@ -18,9 +18,7 @@ def test_generate_databases(use_app_context):
             os.makedirs(os.path.join(temp_dir, "users"), exist_ok=True)
             user = User.create(name="test", email="test@example")
             Examples(user_id=user.id).generate_databases()
-            database = Database.find_by_owner_and_name(
-                owner_id=user.id, name="example.db"
-            )
+            database = Database.find_by_owner_and_name(owner_id=user.id, name="example")
             assert database is not None
             result = database.run(
                 id=database.id,

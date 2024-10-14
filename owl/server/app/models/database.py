@@ -9,11 +9,9 @@ import jinja2
 import pydash as _
 import sqlparse
 from app.constants import StatementType
-from app.errors.errors import (
-    ModelNotFoundException,
-    MultipleStatementsNotAllowedError,
-    QueryParseError,
-)
+from app.errors.errors import (ModelNotFoundException,
+                               MultipleStatementsNotAllowedError,
+                               QueryParseError)
 from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
 from app.lib.sqlparser import statement_starts_with
@@ -26,7 +24,8 @@ from app.schemas.database_schema import RunOut
 from app.settings import settings
 from duckdb import DuckDBPyConnection
 from flask import json
-from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint, and_
+from sqlalchemy import (JSON, Column, ForeignKey, Integer, String,
+                        UniqueConstraint, and_)
 from sqlalchemy.orm import relationship
 from sqlparse.sql import Statement as SqlParseStatement
 
@@ -142,7 +141,7 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
                 combined_macro_files_content,
             ]
         )
-        text = "\n".join([template_base, query])
+        text = query
         # todo 2- dag implementation / better solution
         files_path = DataFile(owner_id=owner_id).folder_storage_path
         read_script_file = gen__read_script_file(owner_id=owner_id)
