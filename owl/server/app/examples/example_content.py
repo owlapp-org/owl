@@ -146,6 +146,32 @@ select * from st_read('{{files}}/example-states.xls', layer = 'states')
 -- see 'example-addresses.sql'
 -- 'ref' is a system macro and it accepts the name of the script file without '.sql' extension.
 select * from {{ref('example-addresses')}}
+
+-- Using database
+-- ^^^ Select the "demo" database from the dropdown above ^^^
+-- There is already a test table called addresses.
+select * from my_addresses
+
+-- Insert example;
+insert into my_addresses ('name', 'email', 'street','city','phone')
+values (
+    'John Doe','johndoe@example.com','123 Elm St','Springfield','555-1234'
+)
+-- see the inserted data
+select * from my_addresses
+
+-- create a temp table
+create table drop_me as select * from my_addresses
+
+-- check the data
+select * from drop_me
+
+-- drop it
+drop table drop_me
+
+-- ^^^ In-memory ^^^
+-- If you don't select any database you can still execute select statements on external resources.
+-- But you **can't** create tables
 """
 )
 
@@ -159,6 +185,9 @@ select * from '{{files}}/example-addresses.csv'
 
 
 BASIC_MACROS = """
+-- We use jinja to manage macros.
+-- See documentation for using jinja https://jinja.palletsprojects.com
+
 {% macro greet(name) %}
   'Hello, {{ name }}!'
 {% endmacro %}

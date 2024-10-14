@@ -2,6 +2,7 @@ import click
 from app.examples.examples import Examples
 from app.models import db
 from app.models.user import User
+from app.settings import settings
 from click import argument, prompt
 from flask.cli import AppGroup
 
@@ -33,7 +34,8 @@ def create(ctx: click.Context, email: str, name: str) -> None:
     try:
         db.session.add(user)
         db.session.flush()
-        Examples(user_id=user.id).generate()
+        if settings.GENERATE_EXAMPLES:
+            Examples(user_id=user.id).generate()
         db.session.commit()
     except Exception as e:
         db.session.rollback()

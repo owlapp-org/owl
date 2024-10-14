@@ -88,7 +88,8 @@ def init_all(ctx: click.Context) -> None:
 
         db.session.add(admin_user)
         db.session.flush()
-        Examples(user_id=admin_user.id).generate()
+        if settings.GENERATE_EXAMPLES:
+            Examples(user_id=admin_user.id).generate()
         db.session.commit()
     except Exception as e:
         db.session.rollback()
