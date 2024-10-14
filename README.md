@@ -133,6 +133,13 @@ Commands:
   update-password  Update the password of a user
 ```
 
+## UI Shortcut Keys
+
+- `Mod-\`, `CTRL-\`: Render resolved selected statement or entire script if no selection.
+- `Mod-Enter`, `CTRL-Enter` : Execute selected statement or entire script if no selection.
+- `Mod-S`, `CTRL-S` : Save content
+
+
 ## Query Engine
 
 - First [macro](#macros) resolution is done on the given statement.

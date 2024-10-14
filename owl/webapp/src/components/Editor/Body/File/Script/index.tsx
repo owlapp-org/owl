@@ -105,7 +105,12 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
       <PanelGroup direction="vertical">
         <ResizablePanel defaultSize={60}>
           <div style={{ flex: 1, overflow: "hidden", height: "100%" }}>
-            <Code ref={codeRef} store={store} onExecute={handleExecute} />
+            <Code
+              ref={codeRef}
+              store={store}
+              onExecute={handleExecute}
+              onRender={handleRender}
+            />
           </div>
         </ResizablePanel>
         <PanelResizeHandle className="panel-resize-handle" />

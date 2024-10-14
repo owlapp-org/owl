@@ -15,6 +15,7 @@ import {
 
 interface IContentProps {
   store: UseBoundStore<StoreApi<IEditorTabState<IScript>>>;
+  onRender: () => void;
   onExecute: () => void;
 }
 
@@ -34,13 +35,12 @@ export interface ExtendedReactCodeMirrorRef extends ReactCodeMirrorRef {
 }
 
 const ScriptCode = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
-  function Code({ store, onExecute, ...other }, ref) {
+  function Code({ store, onExecute, onRender, ...other }, ref) {
     const codeMirrorRef = useRef<ReactCodeMirrorRef>(null);
-    const { fileId, fileType, content, setContent, save } = useStore(
+    const { fileId, content, setContent, save } = useStore(
       store,
       useShallow((state) => ({
         fileId: state.file.id,
-        fileType: state.file.fileType,
         content: state.content,
         setContent: state.setContent,
         save: state.save,
@@ -76,6 +76,13 @@ const ScriptCode = forwardRef<ExtendedReactCodeMirrorRef, IContentProps>(
           key: "Mod-Enter",
           run: () => {
             onExecute();
+            return true;
+          },
+        },
+        {
+          key: "Mod-\\",
+          run: () => {
+            onRender();
             return true;
           },
         },
