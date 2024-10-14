@@ -4,6 +4,7 @@ import textwrap
 import click
 from alembic import command
 from alembic.config import Config
+from app.examples.examples import Examples
 from app.models.user import User
 from app.settings import settings
 from flask.cli import AppGroup
@@ -86,8 +87,11 @@ def init_all(ctx: click.Context) -> None:
         from app.models import db
 
         db.session.add(admin_user)
+        db.session.flush()
+        Examples(user_id=admin_user.id).generate()
         db.session.commit()
     except Exception as e:
+        db.session.rollback()
         click.echo("- Failed to create user: %s" % e)
         exit(1)
 

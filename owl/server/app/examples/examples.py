@@ -35,12 +35,8 @@ class Examples:
         )
 
     def generate(self) -> "Examples":
-        return (
-            self.generate_databases()
-            .generate_datafiles()
-            .generate_scripts()
-            .generate_macros()
-        )
+        self.generate_databases().generate_datafiles().generate_scripts().generate_macros()
+        return self
 
     def generate_databases(self) -> "Examples":
         logger.info("Generating databases ...")
@@ -58,6 +54,7 @@ class Examples:
                 )
             """,
         )
+        return self
 
     def generate_datafiles(self) -> "Examples":
         logger.info("Generating data files ...")
@@ -83,6 +80,8 @@ class Examples:
             ("example-model.sql", REFERENCE_SCRIPT),
         ]:
             Script.create_script(owner_id=self.user_id, name=filename, content=content)
+
+        return self
 
     def generate_macros(self) -> "Examples":
         logger.info("Generating macros ...")

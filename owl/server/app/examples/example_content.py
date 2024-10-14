@@ -94,14 +94,58 @@ STATES = [
 
 BASIC_SCRIPT = dedent(
     """
--- Simple select statement
+-- ! If you have multiple statements on the script, you need to select the one to execute.
+
+-- # Simple select statement
 select 10 as MY_NUMBER
 
--- Querying uploaded files
+-- # Querying uploaded files
+-- {{files}} you can access every data file you've uploaded with '{{files}}/file-name.ext'
+-- Currently only below file types are supported:
+-- csv (and friends like tsv etc ...), line delimited json, excel family and parquet files.
 select * from '{{files}}/example-addresses.csv'
 
--- Using macros
+-- # Using macros
+-- You can use the your custom macros as well as the system macros and variables using {{content}} syntax.
 select {{greet('Alice')}} as GREETINGS
+
+-- Read NYC taxi data
+select * from
+    read_parquet('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet')
+limit 10
+
+
+-- # Extensions
+-- Check out duckdb documentation for more details on the extensions.
+-- https://duckdb.org/docs/extensions/overview.html
+-- Example usage of postgres extension
+
+-- Install "postgres" the extension
+install postgres
+-- Load the postgres extension
+load postgres
+
+-- We use a publicly available postgres instance, see below link.
+-- https://rnacentral.org/help/public-database
+
+-- Attach to postgres instance.
+ATTACH 'dbname=pfmegrnargs user=reader password=NWDMCE5xdipIjRrp host=hh-pgsql-public.ebi.ac.uk port=5432' AS pg (TYPE POSTGRES, READ_ONLY);
+
+-- See available tables on the attached database.
+select * from pg.information_schema.tables limit 10;
+
+-- Install "excel" extension
+install spatial
+load spatial
+
+-- Select from the sheet 'states'
+select * from st_read('{{files}}/example-states.xls', layer = 'states')
+
+
+-- You can also use other scripts in your scripts directory as datasets.
+-- see 'example-addresses.sql'
+-- 'ref' is a system macro and it accepts the name of the script file without '.sql' extension.
+select * from {{ref('example-addresses')}}
 """
 )
 
@@ -110,7 +154,6 @@ REFERENCE_SCRIPT = dedent(
     """
 -- This script will be referenced from example.sql
 select * from '{{files}}/example-addresses.csv'
--- todo
 """
 )
 
