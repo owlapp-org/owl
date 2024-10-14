@@ -115,8 +115,7 @@ class MacroFile(TimestampMixin, UserSpaceMixin["MacroFile"], db.Model):
                 macro_files_combined_content,
             ]
         )
-        text = "\n".join([template_base, content])
-
+        text = content
         # todo 2- dag implementation / better solution
         read_script_file = gen__read_script_file(owner_id=owner_id)
         for __ in range(settings.MAX_MACRO_RESOLVE_DEPTH):

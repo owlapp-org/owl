@@ -46,7 +46,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
     return text.trim();
   };
 
-  const handleRenderClick = async () => {
+  const handleRender = async () => {
     try {
       setIsRenderLoading(true);
       const text = selectionOrContent();
@@ -98,7 +98,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
       <ScriptToolbar
         store={store}
         onExecute={handleExecute}
-        onRender={handleRenderClick}
+        onRender={handleRender}
         isRunLoading={isRunLoading}
         isRenderLoading={isRenderLoading}
       />
