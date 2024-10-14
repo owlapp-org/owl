@@ -218,7 +218,7 @@ def export(q: Optional[ExportQuery], payload: ExportIn):
 def download_database(id: int):
     try:
         if database := Database.find_by_id_and_owner(id, owner_id=get_jwt_identity()):
-            filepath = database.absolute_path()
+            filepath = database.file_storage_path()
             file = open(filepath, "rb")
             return (
                 send_file(

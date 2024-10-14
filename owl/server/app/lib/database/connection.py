@@ -10,10 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class DuckDBConnectionPool:
-    def __init__(self, database):
+    def __init__(self, database: object):
+        self.database = database
         self.pool = queue.Queue(database.pool_size)
         for _ in range(database.pool_size):
-            conn = duckdb.connect(database.abs_path())
+            conn = duckdb.connect(database.file_storage_path())
             self.pool.put(conn)
         self.lock = threading.Lock()
 
@@ -36,7 +37,7 @@ class DuckDBConnectionPool:
 
             elif pool_size > current_size:
                 for _ in range(pool_size - current_size):
-                    conn = duckdb.connect(self.database.abs_path())
+                    conn = duckdb.connect(self.database.file_storage_path())
                     self.pool.put(conn)
 
         return self

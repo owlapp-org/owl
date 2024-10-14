@@ -21,7 +21,7 @@ LOGS_MACRO = f"""
 
 def gen__read_script_file(owner_id: int) -> Callable[[str], str]:
     def fn(filename: str) -> str:
-        if script := Script.find_by_filename(owner_id, filename):
+        if script := Script.find_by_name(owner_id, filename):
             if content := script.read_file():
                 return content
             else:

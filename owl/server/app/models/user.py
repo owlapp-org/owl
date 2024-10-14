@@ -73,3 +73,16 @@ class User(TimestampMixin, db.Model):
 
         db.session.commit()
         return self
+
+    @classmethod
+    def create(cls, email: str, name: str) -> "User":
+        user = cls(name=name, email=email)
+        db.session.add(user)
+        db.session.commit()
+        return user
+
+    @classmethod
+    def delete_by_id(cls, id: int) -> None:
+        user = cls.find_by_id(id)
+        db.session.delete(user)
+        db.session.commit()

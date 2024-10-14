@@ -31,7 +31,7 @@ function toNode(
           color="var(--mantine-color-gray-8)"
         />
       );
-    } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xlsx")) {
+    } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
       return (
         <IconFileTypeXls
           stroke={1}
