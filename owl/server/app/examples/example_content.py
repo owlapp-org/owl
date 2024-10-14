@@ -139,6 +139,9 @@ ATTACH
     'dbname=pfmegrnargs user=reader password=NWDMCE5xdipIjRrp host=hh-pgsql-public.ebi.ac.uk port=5432'
 AS pg (TYPE POSTGRES, READ_ONLY);
 
+-- Show a list of all attached databases
+SHOW DATABASES
+
 -- See available tables on the attached database.
 select * from pg.information_schema.tables limit 10;
 

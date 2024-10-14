@@ -159,6 +159,7 @@ We have [backend](./owl/server/) and [frontend](./owl/webapp/) separated in resp
 
 ### TODO
 
+- [ ] Complete security and isolation of user data.
 - [ ] Add CI support
 - [ ] Robust tests on the frontend side
 - [ ] More automation on `develop > build > publish` path.
