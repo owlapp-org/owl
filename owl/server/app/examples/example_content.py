@@ -267,7 +267,7 @@ select add_default(5) my_column
 -- -----------------------------------------------------------------------------------------------------
 -- 💡 If no database selected, queries are executed using in-memory database.
 -- 💡 If you don't select any database you can still execute select statements on external resources,
---    but you **can't** create tables.
+--    but you can't create tables.
 """
 )
 
