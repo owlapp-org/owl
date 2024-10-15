@@ -234,7 +234,7 @@ select
 from
   '{{files}}/example-addresses.csv'
 group by City
-order by 2 desc
+order by 2 asc
 """
 )
 
