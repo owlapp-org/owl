@@ -229,7 +229,12 @@ select add_default(5) my_column
 REFERENCE_SCRIPT = dedent(
     """
 -- This script will be referenced from example.sql
-select * from '{{files}}/example-addresses.csv'
+select
+  City as CITY, count(1) as POPULATION
+from
+  '{{files}}/example-addresses.csv'
+group by City
+order by 2 desc
 """
 )
 
