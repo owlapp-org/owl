@@ -63,7 +63,7 @@ const AppAboutModal: FC = () => {
               alignItems: "start",
             }}
           >
-            <Text size="sm" c="blue.2">
+            <Text size="sm" c="green.7">
               {about?.last_commit_date.toString()}
             </Text>
             <NavLink
