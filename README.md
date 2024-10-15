@@ -135,9 +135,9 @@ Commands:
 
 ## UI Shortcut Keys
 
-- `Mod-\`, `CTRL-\`: Render resolved selected statement or entire script if no selection.
-- `Mod-Enter`, `CTRL-Enter` : Execute selected statement or entire script if no selection.
-- `Mod-S`, `CTRL-S` : Save content
+- `Command-\`, `CTRL-\`: Render resolved selected statement or entire script if no selection.
+- `Command-Enter`, `CTRL-Enter` : Execute selected statement or entire script if no selection.
+- `Command-S`, `CTRL-S` : Save content
 
 
 ## Query Engine
