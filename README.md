@@ -51,7 +51,7 @@ owl run
 owl --help
 ```
 
-![Example 1](./doc/static/img/exmaples/example.png)
+![Example 2](./doc/static/img/exmaples/example.png)
 
 
 See `.env` file for configuration options.

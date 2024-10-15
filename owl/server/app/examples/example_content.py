@@ -94,17 +94,20 @@ STATES = [
 
 BASIC_SCRIPT = dedent(
     """
--- ! If you have multiple statements on the script, you need to select the one to execute.
+-- 👋 Hello there,
+-- This script contains example use cases and related sample queries.
+
+-- 💡 If you have multiple statements on the script, you need to select the one to execute.
 -- You can render the actual script that is going to be executed by using the "cube" button
 -- on top-right
 -- You can download the result-set using the download button on the top-right
--- Check duckdb documentation for the available functions and syntax, https://duckdb.org/docs/
+-- 🦆 Check duckdb documentation for the available functions and syntax, https://duckdb.org/docs/
 
--- Shortcuts
+-- 🪧 Keyboard shortcuts
 -- -----------------------
-- `Command-\`, `CTRL-\`: Render resolved selected statement or entire script if no selection.
-- `Command-Enter`, `CTRL-Enter` : Execute selected statement or entire script if no selection.
-- `Command-S`, `CTRL-S` : Save content
+-- `Command-\`, `CTRL-\`: Render resolved selected statement or entire script if no selection.
+-- `Command-Enter`, `CTRL-Enter` : Execute selected statement or entire script if no selection.
+-- `Command-S`, `CTRL-S` : Save content
 
 
 -- Simple select statement
@@ -116,25 +119,32 @@ select 10 as MY_NUMBER
 -- csv (and friends like tsv etc ...), line delimited json, excel family and parquet files.
 select * from '{{files}}/example-addresses.csv'
 
--- Using macros
+-- 🪧 Using macros
 -- -----------------------
+-- ❗This is different than duckdb macros, there is example for duckdb macros
+--   on the following sections please keep reading/scrolling to see it.
+
+-- Macros are similar to dbt macros, or airflow templates, if you used any of those before
+-- that means you have enough context to use macros in here.
+
 -- You can use the your custom macros as well as the system macros and variables
 -- using {{content}} syntax.
+
 select {{greet('Alice')}} as GREETINGS
 
--- Read NYC taxi data
+-- Read NYC taxi data 🚕
 select * from
     read_parquet('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet')
 limit 10
 
 
--- Extensions
+-- 🪧 Extensions
 -- -----------------------
 -- Check out duckdb documentation for more details on the extensions.
 -- https://duckdb.org/docs/extensions/overview.html
 -- Example usage of postgres extension
 
--- Install "postgres" the extension
+-- 🐘 Install "postgres" the extension
 install postgres
 -- Load the postgres extension
 load postgres
@@ -163,7 +173,7 @@ select * from st_read('{{files}}/example-states.xls',
   open_options = ['HEADERS=FORCE']
 )
 
--- Referencing scripts
+-- 🪧 Referencing scripts
 -- -----------------------
 -- You can also use other scripts in your scripts directory as datasets.
 -- see 'example-model.sql'
@@ -171,7 +181,13 @@ select * from st_read('{{files}}/example-states.xls',
 select * from {{ref('example-model')}}
 
 
--- Using persistent databases
+-- 🪧 Querying logs
+-- -----------------------
+-- You can use `logs()` system macro to query the logs
+-- For the actual location and more about logs see the (.env) and/or settings.py files.
+select * from {{logs()}} limit 10
+
+-- 🪧 Using persistent databases
 -- -- -----------------------
 -- ^^^ Select the "example" database from the dropdown above ^^^
 -- There is already a test table called addresses.
@@ -193,6 +209,15 @@ select * from drop_me
 
 -- drop it
 drop table drop_me
+
+-- 🪧 Duckdb macros
+-- --------------------------------
+-- 💡 Make sure you have selected a database from toolbar 👆
+
+create macro add_default(a, b := 5) AS a + b
+
+select add_default(5) my_column
+
 
 -- ^^^ In-memory ^^^
 -- If you don't select any database you can still execute select statements on external resources.

@@ -40,7 +40,7 @@ class Examples:
 
     def generate_databases(self) -> "Examples":
         logger.info("Generating databases ...")
-        database = Database(name="example", owner_id=self.user_id)
+        database = Database(name="example-db", owner_id=self.user_id)
         database.create().run(
             id=database.id,
             owner_id=self.user_id,

@@ -35,7 +35,6 @@ interface IExecutionStatsProps {
 }
 
 const Stats: FC<IExecutionStatsProps> = ({ stats }) => {
-  console.log(stats);
   if (stats != null) {
     return (
       <Box
