@@ -94,6 +94,8 @@ STATES = [
 
 BASIC_SCRIPT = dedent(
     """
+-- 🪧 Welcome
+-- --------------------------------------------------------------------------------------------
 -- 👋 Hello there,
 -- This script contains example use cases and related sample queries.
 
@@ -103,12 +105,20 @@ BASIC_SCRIPT = dedent(
 -- You can download the result-set using the download button on the top-right
 -- 🦆 Check duckdb documentation for the available functions and syntax, https://duckdb.org/docs/
 
+
+
+
 -- 🪧 Keyboard shortcuts
 -- --------------------------------------------------------------------------------------------
 -- `Command-\`, `CTRL-\`: Render resolved selected statement or entire script if no selection.
 -- `Command-Enter`, `CTRL-Enter` : Execute selected statement or entire script if no selection.
 -- `Command-S`, `CTRL-S` : Save content
 
+
+
+
+-- 🪧 Usage
+-- --------------------------------------------------------------------------------------------
 
 -- Simple select statement
 select 10 as MY_NUMBER
@@ -118,6 +128,9 @@ select 10 as MY_NUMBER
 -- Currently only below file types are supported:
 -- csv (and friends like tsv etc ...), line delimited json, excel family and parquet files.
 select * from '{{files}}/example-addresses.csv'
+
+
+
 
 -- 🪧 Using macros
 -- --------------------------------------------------------------------------------------------
@@ -138,14 +151,19 @@ select * from
 limit 10
 
 
+
+
 -- 🪧 Extensions
 -- --------------------------------------------------------------------------------------------
 -- Check out duckdb documentation for more details on the extensions.
--- https://duckdb.org/docs/extensions/overview.html
+-- 📔 https://duckdb.org/docs/extensions/overview.html
 -- Example usage of postgres extension
 
--- 🐘 Install "postgres" the extension
+-- 🐘 Install the "postgres" extension
+-- 💡 Extensions are installed only once. If you already installed you don't need to call
+-- install command again.
 install postgres
+
 -- Load the postgres extension
 load postgres
 
@@ -187,6 +205,8 @@ group by s.State
 order by 2
 
 
+
+
 -- 🪧 Referencing scripts
 -- --------------------------------------------------------------------------------------------
 -- You can also use other scripts in your scripts directory as datasets.
@@ -195,11 +215,16 @@ order by 2
 select * from {{ref('example-model')}}
 
 
+
+
 -- 🪧 Querying logs
 -- --------------------------------------------------------------------------------------------
 -- You can use `logs()` system macro to query the logs
 -- For the actual location and more about logs see the (.env) and/or settings.py files.
 select * from {{logs()}} limit 10
+
+
+
 
 -- 🪧 Using persistent databases
 -- -- --------------------------------------------------------------------------------------------
@@ -224,6 +249,9 @@ select * from drop_me
 -- drop it
 drop table drop_me
 
+
+
+
 -- 🪧 Duckdb macros
 -- -----------------------------------------------------------------------------------------------------
 -- 💡 Make sure you have selected a database from toolbar 👆
@@ -233,9 +261,13 @@ create macro add_default(a, b := 5) AS a + b
 select add_default(5) my_column
 
 
--- ^^^ In-memory ^^^
--- If you don't select any database you can still execute select statements on external resources.
--- But you **can't** create tables
+
+
+-- 🪧 More tips
+-- -----------------------------------------------------------------------------------------------------
+-- 💡 If no database selected, queries are executed using in-memory database.
+-- 💡 If you don't select any database you can still execute select statements on external resources,
+--    but you **can't** create tables.
 """
 )
 
