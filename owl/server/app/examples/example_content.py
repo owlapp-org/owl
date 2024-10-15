@@ -104,7 +104,7 @@ BASIC_SCRIPT = dedent(
 -- 🦆 Check duckdb documentation for the available functions and syntax, https://duckdb.org/docs/
 
 -- 🪧 Keyboard shortcuts
--- -----------------------
+-- --------------------------------------------------------------------------------------------
 -- `Command-\`, `CTRL-\`: Render resolved selected statement or entire script if no selection.
 -- `Command-Enter`, `CTRL-Enter` : Execute selected statement or entire script if no selection.
 -- `Command-S`, `CTRL-S` : Save content
@@ -120,7 +120,7 @@ select 10 as MY_NUMBER
 select * from '{{files}}/example-addresses.csv'
 
 -- 🪧 Using macros
--- -----------------------
+-- --------------------------------------------------------------------------------------------
 -- ❗This is different than duckdb macros, there is example for duckdb macros
 --   on the following sections please keep reading/scrolling to see it.
 
@@ -139,7 +139,7 @@ limit 10
 
 
 -- 🪧 Extensions
--- -----------------------
+-- --------------------------------------------------------------------------------------------
 -- Check out duckdb documentation for more details on the extensions.
 -- https://duckdb.org/docs/extensions/overview.html
 -- Example usage of postgres extension
@@ -173,8 +173,22 @@ select * from st_read('{{files}}/example-states.xls',
   open_options = ['HEADERS=FORCE']
 )
 
+-- Using different types of data sources
+select
+  s.State as STATE,  count(1) as POPULATION
+from
+  '{{files}}/example-addresses.csv' a
+  left join st_read('{{files}}/example-states.xls',
+              layer = 'states',
+              open_options = ['HEADERS=FORCE']
+            ) s
+    on a.State = s.Abbreviation
+group by s.State
+order by 2
+
+
 -- 🪧 Referencing scripts
--- -----------------------
+-- --------------------------------------------------------------------------------------------
 -- You can also use other scripts in your scripts directory as datasets.
 -- see 'example-model.sql'
 -- 'ref' is a system macro and it accepts the name of the script file without '.sql' extension.
@@ -182,13 +196,13 @@ select * from {{ref('example-model')}}
 
 
 -- 🪧 Querying logs
--- -----------------------
+-- --------------------------------------------------------------------------------------------
 -- You can use `logs()` system macro to query the logs
 -- For the actual location and more about logs see the (.env) and/or settings.py files.
 select * from {{logs()}} limit 10
 
 -- 🪧 Using persistent databases
--- -- -----------------------
+-- -- --------------------------------------------------------------------------------------------
 -- ^^^ Select the "example" database from the dropdown above ^^^
 -- There is already a test table called addresses.
 select * from my_addresses
@@ -211,7 +225,7 @@ select * from drop_me
 drop table drop_me
 
 -- 🪧 Duckdb macros
--- --------------------------------
+-- -----------------------------------------------------------------------------------------------------
 -- 💡 Make sure you have selected a database from toolbar 👆
 
 create macro add_default(a, b := 5) AS a + b
