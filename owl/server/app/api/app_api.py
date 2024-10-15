@@ -1,5 +1,5 @@
 from apiflask import APIBlueprint
-from app.schemas.app_schema import AppConfigOut
+from app.schemas.app_schema import AppAboutOut, AppConfigOut
 
 bp = APIBlueprint("app", __name__, tag="App")
 
@@ -12,3 +12,13 @@ bp = APIBlueprint("app", __name__, tag="App")
 )
 def get_config():
     return AppConfigOut.from_settings()
+
+
+@bp.route("/about")
+@bp.output(
+    AppAboutOut.Schema,
+    status_code=200,
+    description="Application build params",
+)
+def get_about():
+    return AppAboutOut.from_buildinfo()

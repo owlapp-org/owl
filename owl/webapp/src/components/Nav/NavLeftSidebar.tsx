@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from "react";
 
+import { useAppAboutModalStore } from "@components/modals/AppAboutModal/useAppAboutModalStore";
 import UserMenu from "@components/UserMenu";
 import useUserStore from "@hooks/userStore";
 import { Flex } from "@mantine/core";
@@ -15,6 +16,7 @@ const NavLeftSidebar: FC<NavLeftSidebarProps> = ({}) => {
   const [isSettingsView, setIsSettingsView] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { showModal: showAppAboutModal } = useAppAboutModalStore();
 
   useEffect(() => {
     setIsSettingsView(location.pathname.startsWith("/ui/settings"));
@@ -26,7 +28,8 @@ const NavLeftSidebar: FC<NavLeftSidebarProps> = ({}) => {
   };
 
   const handleHelpClick = () => {
-    window.open("https://github.com/owlapp-org/owl", "_blank");
+    // window.open("https://github.com/owlapp-org/owl", "_blank");
+    showAppAboutModal({});
   };
 
   const handleLogoutClick = () => {

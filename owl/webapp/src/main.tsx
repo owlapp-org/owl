@@ -25,6 +25,7 @@ import "@mantine/notifications/styles.css";
 import HandleGoogleCallbackPage from "@pages/auth/HandleGoogleCallbackPage";
 import AccountSettings from "@pages/settings/AccountSettings";
 
+import AppAboutModal from "@components/modals/AppAboutModal/AppAboutModal";
 import useUserStore from "@hooks/userStore";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css"; // This will include the default styles
@@ -110,6 +111,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <Notifications position="top-right" />
         <AlertDialogProvider>
           <RouterProvider router={router} />
+          <AppAboutModal />
         </AlertDialogProvider>
       </MantineProvider>
     </ThemeProvider>

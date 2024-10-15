@@ -37,6 +37,7 @@ rich = ">=13.7.1"
 ruff = ">=0.5.5"
 sqlparse = ">=0.5.1"
 xlsxwriter = "^3.2.0"
+toml = "^0.10.2"
 
 [tool.poetry.group.dev.dependencies]
 bandit = {extras = ["sarif"], version = "^1.7.9"}

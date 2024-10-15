@@ -17,6 +17,12 @@ export interface IAppConfig {
   production: boolean;
 }
 
+export interface IAppAbout {
+  version: string;
+  last_commit_hash: string;
+  last_commit_date: Date;
+}
+
 export interface IDatabase {
   id: number;
   name: string;

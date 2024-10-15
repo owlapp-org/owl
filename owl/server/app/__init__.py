@@ -1,14 +1,10 @@
-import importlib.metadata
-
 from app.app import create_app  # noqa
 from app.constants import APP_NAME
+from app.lib.build import get_version
 from app.logging import setup_logging
 from flask_migrate import Migrate
 
-try:
-    __version__ = importlib.metadata.version(APP_NAME)
-except:  # noqa
-    __version__ = "0.3.20"
+__version__ = get_version()
 
 setup_logging()
 
