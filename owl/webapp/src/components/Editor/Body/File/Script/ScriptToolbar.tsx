@@ -1,7 +1,15 @@
 import { useExportDataModalStore } from "@components/modals/ExportDataModal/useExportDataModalStore";
 import { IEditorScriptTabState } from "@hooks/editorStore";
 import { useDatabaseStore } from "@hooks/hooks";
-import { ActionIcon, Divider, Flex, Select, Tooltip } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Divider,
+  Flex,
+  Select,
+  Text,
+  Tooltip,
+} from "@mantine/core";
 import {
   IconCubeSend,
   IconDownload,
@@ -9,22 +17,53 @@ import {
 } from "@tabler/icons-react";
 import { StatementType } from "@ts/enums";
 import { IScript } from "@ts/interfaces/interfaces";
-import { useState } from "react";
+import { ExecutionStats } from "@ts/models";
+import { FC, useState } from "react";
 import { StoreApi, UseBoundStore, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
-
 interface IScriptToolbarProps {
   isRunLoading: boolean;
   isRenderLoading: boolean;
   store: UseBoundStore<StoreApi<IEditorScriptTabState<IScript>>>;
+  stats: ExecutionStats | null;
   onExecute: () => void;
   onRender: () => void;
 }
 
-const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
+interface IExecutionStatsProps {
+  stats: ExecutionStats | null;
+}
+
+const Stats: FC<IExecutionStatsProps> = ({ stats }) => {
+  console.log(stats);
+  if (stats != null) {
+    return (
+      <Box
+        px={10}
+        display={"flex"}
+        style={{ gap: "4px", alignItems: "center" }}
+      >
+        <div>
+          <Text size="xs" c={stats.statusColor()} display={"block"}>
+            {stats.displayStatus()}
+          </Text>
+        </div>
+        <div>
+          <Text size="xs" c="dimmed" display={"block"}>
+            {stats.prettyDuration()}
+          </Text>
+        </div>
+      </Box>
+    );
+  }
+  return <></>;
+};
+
+const ScriptToolbar: FC<IScriptToolbarProps> = ({
   isRunLoading,
   isRenderLoading,
   store,
+  stats,
   onExecute,
   onRender,
 }) => {
@@ -103,6 +142,7 @@ const ScriptToolbar: React.FC<IScriptToolbarProps> = ({
           </ActionIcon>
         </Tooltip>
         <Divider orientation="vertical" />
+        <Stats stats={stats} />
       </div>
       <div
         style={{

@@ -4,6 +4,7 @@ import { IEditorScriptTabState } from "@hooks/editorStore";
 import { notify } from "@lib/notify";
 import { databaseService, macroFileService } from "@services/services";
 import { IQueryResult, IScript } from "@ts/interfaces/interfaces";
+import { ExecutionStats } from "@ts/models";
 import { useEffect, useRef, useState } from "react";
 import {
   PanelGroup,
@@ -34,6 +35,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
   const [isRenderLoading, setIsRenderLoading] = useState(false);
   const [renderedContent, setRenderedContent] = useState("");
   const [activePanel, setActivePanel] = useState(0);
+  const [stats, setStats] = useState<ExecutionStats | null>(null);
 
   const selectionOrContent = (): string => {
     let text = content || "";
@@ -61,6 +63,8 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
   };
 
   const handleExecute = async () => {
+    setStats(null);
+    let stats = new ExecutionStats(performance.now());
     const query = selectionOrContent();
     if (!query) return;
     setIsRunLoading(true);
@@ -75,11 +79,19 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
         statement_type: result.statement_type,
       });
       setActivePanel(1);
+      setIsRunLoading(false);
+      stats
+        .setSuccess()
+        .setStatementType(result.statement_type)
+        .setAffectedRows(result.affected_rows)
+        .setTotalCount(result.total_count);
     } catch (err: any) {
       notify.error(err["response"]["data"]["message"] || `${err}`);
+      stats.setError();
     } finally {
       setIsRunLoading(false);
     }
+    setStats(stats);
   };
 
   useEffect(() => {
@@ -99,6 +111,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
         store={store}
         onExecute={handleExecute}
         onRender={handleRender}
+        stats={stats}
         isRunLoading={isRunLoading}
         isRenderLoading={isRenderLoading}
       />
