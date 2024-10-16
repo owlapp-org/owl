@@ -144,7 +144,6 @@ limit 10
 
 -- You can use the your custom macros as well as the system macros and variables
 -- using {{content}} syntax.
-
 select {{greet('Alice')}} as GREETINGS
 
 -- 💡 How macros are resolved
