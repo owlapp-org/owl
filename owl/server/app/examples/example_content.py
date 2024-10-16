@@ -94,7 +94,7 @@ STATES = [
 
 BASIC_SCRIPT = dedent(
     """
--- 🪧 Welcome
+-- 🪧 Example script file
 -- --------------------------------------------------------------------------------------------
 -- 👋 Hello there,
 -- This script contains example use cases and related sample queries.
@@ -107,19 +107,16 @@ BASIC_SCRIPT = dedent(
 
 
 
-
 -- 🪧 Keyboard shortcuts
 -- --------------------------------------------------------------------------------------------
--- `Command-\`, `CTRL-\`: Render resolved selected statement or entire script if no selection.
+-- `Command-\\`, `CTRL-\\`: Render resolved selected statement or entire script if no selection.
 -- `Command-Enter`, `CTRL-Enter` : Execute selected statement or entire script if no selection.
 -- `Command-S`, `CTRL-S` : Save content
 
 
 
-
 -- 🪧 Usage
 -- --------------------------------------------------------------------------------------------
-
 -- Simple select statement
 -- 💡 Select the below statement to execute
 select 10 as MY_NUMBER
@@ -130,6 +127,10 @@ select 10 as MY_NUMBER
 -- csv (and friends like tsv etc ...), line delimited json, excel family and parquet files.
 select * from '{{files}}/example-addresses.csv'
 
+-- Read NYC taxi data 🚕
+select * from
+    read_parquet('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet')
+limit 10
 
 
 
@@ -146,12 +147,28 @@ select * from '{{files}}/example-addresses.csv'
 
 select {{greet('Alice')}} as GREETINGS
 
--- Read NYC taxi data 🚕
-select * from
-    read_parquet('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet')
-limit 10
+-- 💡 How macros are resolved
+-- Select the below text and press [Command + \\] or [Ctrl + \\] or click the *cube* button on the top right
+select
+  {{add_five('my_number')}} added_five
+from (select 10 as my_number)
 
+-- This should resolve into something like that
+select my_number + 5 added_five
+from (select 10 as my_number)
 
+-- Now execute the following statement
+select {{sub_ten(21)}} as my_column
+
+-- 🚨 You should see "'sub_ten' is undefined" error message
+-- Now go to the macro file "example.j2" and paste the following macro (without comment characters, --)
+-- to the bottom and come back to here and re-execute the above select statement
+--
+-- {% macro sub_ten(num) %}
+--   {{num}} - 10
+-- {% endmacro %}
+
+-- You can also create another macro file with "j2" or "jinja" extension and add the macro there.
 
 
 -- 🪧 Extensions
@@ -207,7 +224,6 @@ order by 2
 
 
 
-
 -- 🪧 Referencing scripts
 -- --------------------------------------------------------------------------------------------
 -- You can also use other scripts in your scripts directory as datasets.
@@ -217,13 +233,11 @@ select * from {{ref('example-model')}}
 
 
 
-
 -- 🪧 Querying logs
 -- --------------------------------------------------------------------------------------------
 -- You can use `logs()` system macro to query the logs
 -- For the actual location and more about logs see the (.env) and/or settings.py files.
 select * from {{logs()}} limit 10
-
 
 
 
@@ -252,7 +266,6 @@ drop table drop_me
 
 
 
-
 -- 🪧 Duckdb macros
 -- -----------------------------------------------------------------------------------------------------
 -- 💡 Make sure you have selected a database from toolbar 👆
@@ -263,19 +276,24 @@ select add_default(5) my_column
 
 
 
-
 -- 🪧 More tips
 -- -----------------------------------------------------------------------------------------------------
 -- 💡 If no database selected, queries are executed using in-memory database.
 -- 💡 If you don't select any database you can still execute select statements on external resources,
 --    but you can't create tables.
+-- 💡 You can create/upload as many script files as you want.
+-- 💡 Script file names should have ".sql" extension and must be unique.
 """
 )
 
 
 REFERENCE_SCRIPT = dedent(
     """
--- This script will be referenced from example.sql
+-- 🪧 Example script file
+-- -----------------------------------------------------------------------------------------------------
+-- Example script to demonstrate the usage of {{ref}} macro.
+-- This script will be referenced from `example.sql` (see [example.sql/Using macros] section)
+
 select
   City as CITY, count(1) as POPULATION
 from
@@ -287,11 +305,19 @@ order by 2 asc
 
 
 BASIC_MACROS = """
-{# We use jinja to manage macros. #}
-{# See documentation for using jinja https://jinja.palletsprojects.com #}
-{# You can test your macros in this section using the command and render Icon on top right. #}
+-- 🪧 Example macro file
+-- -----------------------------------------------------------------------------------------------------
+{# 💡 We use jinja to manage macros. #}
+{# 💡 Macro files can only have j2 or jinja extension. (example.jinja, another-example.j2) #}
+{# 💡 See documentation for using jinja https://jinja.palletsprojects.com #}
+{# 💡 You can test your macros in this section using the command and render Icon on top right. #}
 
 {% macro greet(name) %}
   'Hello, {{ name }}!'
+{% endmacro %}
+
+{# Adds five to given number #}
+{% macro add_five(num) %}
+  {{num}} + 5
 {% endmacro %}
 """
