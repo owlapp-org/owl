@@ -40,6 +40,8 @@ owl init all
 # Run it
 owl run
 
+# Now open your browser and see the examples.
+
 # `init all` command generates a few example files and database.
 # (use GENERATE_EXAMPLES=false to disable)
 # check out the examples once you login.
