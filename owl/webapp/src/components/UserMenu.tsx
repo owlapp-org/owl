@@ -1,9 +1,13 @@
 import { ActionIcon, Box, Group, Text } from "@mantine/core";
-import { IconChevronRight, IconUser } from "@tabler/icons-react";
+import {
+  IconChevronRight,
+  IconInfoCircle,
+  IconUser,
+} from "@tabler/icons-react";
 import { forwardRef } from "react";
 
 import { Menu } from "@mantine/core";
-import { IconHelp, IconLogout, IconSettings } from "@tabler/icons-react";
+import { IconLogout, IconSettings } from "@tabler/icons-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -101,8 +105,8 @@ const UserMenu: React.FC<IUserMenuProps> = ({
           }}
         >
           <Group>
-            <IconHelp size={18} stroke={1} />
-            <Text fw={300}>Help</Text>
+            <IconInfoCircle size={18} stroke={1} />
+            <Text fw={300}>About</Text>
           </Group>
         </Menu.Item>
         <Menu.Item
