@@ -121,6 +121,7 @@ BASIC_SCRIPT = dedent(
 -- --------------------------------------------------------------------------------------------
 
 -- Simple select statement
+-- 💡⌨️ Select the below statement to execute
 select 10 as MY_NUMBER
 
 -- Querying uploaded files
