@@ -5,6 +5,7 @@ import sys
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
+from app.lib.validations import is_log_path_exists
 from app.settings import settings
 
 
@@ -79,8 +80,9 @@ def add_rotating_json_file_handler(
 ):
     """Add a rotating file handler for logging to a JSON file."""
     root_logger = logging.getLogger()
-
-    os.makedirs(os.path.dirname(settings.LOG_PATH), exist_ok=True)
+    if not is_log_path_exists():
+        print(f"Log path ({settings.LOG_PATH}) does not exits, creating it ...")
+        os.makedirs(settings.LOG_PATH, exist_ok=True)
 
     if not any(
         isinstance(handler, RotatingFileHandler) for handler in root_logger.handlers
