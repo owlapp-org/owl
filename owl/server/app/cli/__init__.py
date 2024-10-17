@@ -3,6 +3,7 @@ from app import __version__, create_app
 from app.cli.app_cmd import cmd as app_cmd
 from app.cli.init_cmd import cmd as init_cmd
 from app.cli.users_cmd import cmd as users_cmd
+from app.lib.validations import validate_setup
 from flask import current_app
 from flask.cli import FlaskGroup, run_command, with_appcontext
 
@@ -64,6 +65,10 @@ def routes():
 def run():
     """Run the Flask application using Gunicorn."""
     import os
+
+    if error := validate_setup():
+        click.echo(error)
+        exit(1)
 
     os.system(
         "gunicorn -b 127.0.0.1:8000 app.wsgi:app -w 1 --threads 12"

@@ -1,10 +1,7 @@
-import importlib
-import os
 import subprocess
 from textwrap import dedent
 
 import toml
-from app.constants import APP_NAME
 
 
 def get_last_commit_date() -> str:

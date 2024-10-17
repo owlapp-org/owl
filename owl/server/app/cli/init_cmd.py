@@ -24,6 +24,10 @@ def init_filesystem(**kwargs):
     if kwargs.get("echo") is not False:
         click.echo(f"- Created {users_path}")
 
+    os.makedirs(settings.LOG_PATH, exist_ok=True)
+    if kwargs.get("echo") is not False:
+        click.echo(f"- Created logs path.")
+
 
 @cmd.command(name="db")
 def init_db() -> None:
