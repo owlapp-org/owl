@@ -9,9 +9,11 @@ import jinja2
 import pydash as _
 import sqlparse
 from app.constants import StatementType
-from app.errors.errors import (ModelNotFoundException,
-                               MultipleStatementsNotAllowedError,
-                               QueryParseError)
+from app.errors.errors import (
+    ModelNotFoundException,
+    MultipleStatementsNotAllowedError,
+    QueryParseError,
+)
 from app.lib.database.registry import registry
 from app.lib.database.validation import validate_query
 from app.lib.sqlparser import statement_starts_with
@@ -24,8 +26,7 @@ from app.schemas.database_schema import RunOut
 from app.settings import settings
 from duckdb import DuckDBPyConnection
 from flask import json
-from sqlalchemy import (JSON, Column, ForeignKey, Integer, String,
-                        UniqueConstraint, and_)
+from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint, and_
 from sqlalchemy.orm import relationship
 from sqlparse.sql import Statement as SqlParseStatement
 
@@ -188,9 +189,10 @@ class Database(TimestampMixin, UserSpaceMixin["Database"], db.Model):
             database = cls(id=None)
 
         if id is None and statement.get_type() != "SELECT":
-            if not statement_starts_with(statement, "install", "load", "attach"):
+            whitelist = ["install", "load", "attach", "show"]
+            if not statement_starts_with(statement, *whitelist):
                 raise Exception(
-                    "Only 'select', 'install', 'load', 'attach' statements are supported for in memory database."
+                    f"Only 'select', {','.join(whitelist)} statements are supported for in memory database."
                 )
 
         # execute using im-memory database

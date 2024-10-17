@@ -72,6 +72,7 @@ const Script: React.FC<IScriptProps> = ({ store }) => {
       const databaseId = getOption("databaseId") as number;
       // todo hardcoded values
       const result = await databaseService.run(databaseId, query, 0, 25);
+      console.log(result);
       setQueryResult(result);
       setLastExecution({
         databaseId,

@@ -98,7 +98,7 @@ def add_rotating_json_file_handler(
 def setup_logging():
     """Set up logging with both stream and file handlers."""
     if settings.LOG_LEVEL != "DEBUG":
-        for name in ["passlib"]:
+        for name in ["passlib", "parso", "asyncio"]:
             logging.getLogger(name).setLevel("ERROR")
 
     logger = logging.getLogger()

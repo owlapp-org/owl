@@ -20,6 +20,9 @@ const AppAboutModal: FC = () => {
   const [about, setAbout] = useState<IAppAbout | null>(null);
 
   useEffect(() => {
+    if (!open) {
+      return;
+    }
     setIsLoading(true);
     AppService.getAbout()
       .then((about) => {

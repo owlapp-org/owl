@@ -193,7 +193,7 @@ ATTACH
 AS pg (TYPE POSTGRES, READ_ONLY);
 
 -- Show a list of all attached databases
-SHOW DATABASES
+select * from (SHOW DATABASES)
 
 -- See available tables on the attached database.
 select * from pg.information_schema.tables limit 10;
@@ -242,8 +242,8 @@ select * from {{logs()}} limit 10
 
 -- 🪧 Using persistent databases
 -- -- --------------------------------------------------------------------------------------------
--- ^^^ Select the "example" database from the dropdown above ^^^
--- There is already a test table called addresses.
+-- 💡❕Select the "example" database from the dropdown above 👆
+-- There is already an empty test table called addresses.
 select * from my_addresses
 
 -- Insert example;
