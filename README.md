@@ -55,7 +55,7 @@ owl --help
 
 ![Example 2](./doc/static/img/exmaples/example.png)
 
-📸 [Screenshots](./doc/static/img/exmaples/)
+📸 [Screenshots](./doc/static/img/exmaples/screenshots/)
 
 See `.env` file for configuration options.
 
