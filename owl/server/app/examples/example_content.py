@@ -304,8 +304,8 @@ order by 2 asc
 
 
 BASIC_MACROS = """
--- 🪧 Example macro file
--- -----------------------------------------------------------------------------------------------------
+{# 🪧 Example macro file #}
+{# -------------------------------------------------------------------------------------------------- #}
 {# 💡 We use jinja to manage macros. #}
 {# 💡 Macro files can only have j2 or jinja extension. (example.jinja, another-example.j2) #}
 {# 💡 See documentation for using jinja https://jinja.palletsprojects.com #}
