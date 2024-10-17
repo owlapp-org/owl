@@ -18,14 +18,7 @@ Currently you can use it to query:
 ```sh
 # Make sure you have python version 3.12
 # probably works with >=3.10, <=3.12 but didn't check all in between
-pip install owlapp
-```
 
-## Quick Start
-
-Start with basic options.
-
-```sh
 # create a directory in your favorite place like ~/projects/owlapp
 mkdir ~/projects/owlapp && cd ~/projects/owlapp
 
@@ -34,7 +27,13 @@ python -m venv .venv && source .venv/bin/activate
 
 # Install owlapp
 pip install owlapp
+```
 
+## Quick Start
+
+Start with basic options.
+
+```sh
 # Initialize it with basic settings
 owl init all
 
