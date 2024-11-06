@@ -34,7 +34,7 @@ const AppAboutModal: FC = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [setIsLoading, setAbout, AppService]);
+  }, [open, setIsLoading, setAbout, AppService]);
 
   return (
     <Modal opened={open} onClose={destroy} withCloseButton={false}>
