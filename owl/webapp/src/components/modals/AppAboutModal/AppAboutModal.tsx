@@ -74,7 +74,7 @@ const AppAboutModal: FC = () => {
               c="dimmed"
               p={0}
               td="underline"
-              href="https://github.com/ceyhunkerti/owl"
+              href="https://github.com/owlapp-org/owl"
               label={about?.last_commit_hash}
               target="_blank"
               rel="noopener noreferrer"
